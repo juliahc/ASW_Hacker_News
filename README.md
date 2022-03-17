@@ -1,4 +1,4 @@
-#ASW Hacker News
+# ASW Hacker News
 
 ## Team Members
 | Name                 | GitHub username   | Taiga username |
