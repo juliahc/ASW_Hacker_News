@@ -1,0 +1,84 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  width: 85%;
+}
+
+#content {
+  width: 100%;
+  background-color: #d4ecdd;
+}
+
+#nav {
+  width: 100%;
+  background-color: #345b63;
+  color: white;
+  padding: 5px;
+}
+#nav a {
+  color: white;
+  text-decoration: none;
+}
+#logo {
+  width: 3%;
+}
+#menu {
+  width: 87%;
+}
+#session {
+  width: 10%;
+  text-align: right;
+}
+
+#space-10px {
+  height: 10px;
+}
+
+.fa-heart {
+  font-weight: 100 !important;
+  width: 20px;
+  font-size: 11px;
+  color: #345b63;
+}
+
+.oderNum {
+  color: #345b63;
+  font-size: 12px;
+}
+.titleText {
+  text-decoration: none;
+  font-size: 12px;
+  color: rgb(24, 24, 24);
+}
+.newLink {
+  text-decoration: none;
+  font-size: 11px;
+  color: #345b63;
+}
+
+.newActions,
+.newActions a {
+  text-decoration: none;
+  font-size: 11px;
+  color: #345b63;
+}
+
+.line {
+  border-top: 3px solid #345b63;
+}
+
+#footerData {
+  text-align: center;
+}
+#footerLinks a {
+  font-size: 12px;
+  color: #345b63;
+  text-decoration: none;
+}
