@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>New Links | Hacker News</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../assets/stylesheets/application.css">
+        <script src="https://kit.fontawesome.com/733e866dde.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">-->
+        <script type="text/javascript" src="../javascript/newest.js"></script>
+    </head>
+    <body>
+        <main>
+            <table id="content" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <!--Menu-->
+                    <tr>
+                        <td>
+                            <table id="nav" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td id="logo">Y</td>
+                                    <td id="menu">
+                                        <b>Submit</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!--Space-->
+                    <tr id="space-10px"></tr>
+                    <!--Form-->
+                    <tr>
+                        <td>
+                            <form method="post" action="/r">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>title</td>
+                                            <td><input type="text" name="title" value="" size="50"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>url</td>
+                                            <td><input type="url" name="url" value="" size="50"></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><b>or</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>text</td>
+                                            <td><textarea name="text" rows="4" cols="49"></textarea></td>
+                                        </tr>
+                                        <tr id="space-10px"></tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><input type="submit" value="submit" class="button"></td>
+                                        </tr>
+                                        <tr id="space-10px"></tr>
+                                        <tr id="space-10px"></tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>
+                                                Leave url blank to submit a question for discussion. If there is no url, the text (if any) will appear at the top of the thread.
+                                                <br><br>
+                                                You can also submit via <a href="#" >bookmarklet</a>.
+                                            </td>
+                                        </tr>
+                                        <tr id="space-10px"></tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </body>
+</html>

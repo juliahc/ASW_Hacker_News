@@ -3,7 +3,7 @@ body {
   justify-content: center;
   align-content: center;
   font-family: Verdana, Geneva, sans-serif;
-  font-size: 13px;
+  font-size: 10pt;
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -47,6 +47,9 @@ main {
   font-size: 11px;
   color: #345b63;
 }
+.fa-heart:hover {
+  font-weight: 900 !important;
+}
 
 .oderNum {
   color: #345b63;
@@ -81,4 +84,16 @@ main {
   font-size: 12px;
   color: #345b63;
   text-decoration: none;
+}
+
+.button {
+  color: white;
+  background-color: #345b63;
+  border: 0px;
+  border-radius: 2px;
+  padding: 3px 6px 3px 6px;
+}
+
+.button:hover {
+  background-color: #5f8f99;
 }
