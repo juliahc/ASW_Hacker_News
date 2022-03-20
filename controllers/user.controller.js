@@ -3,7 +3,7 @@ const responseObj = {};
 const mongodb = require("mongodb");
 const errorCodes = require("../helpers/errorCodes.helper.js");
 
-const userDatalayer = require("./../datalayers/user.datalayer");
+const userDatalayer = require("../datalayers/user.datalayer");
 
 exports.find = async (request, response) => {
     console.log(request);

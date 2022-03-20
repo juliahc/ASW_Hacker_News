@@ -1,9 +1,9 @@
-const UserModel = require('./../models/user.model')
+const AskModel = require('../models/ask.model')
 
-exports.createUser = async (params) => {
+exports.createAsk= async (params) => {
     console.log(params);
     return new Promise((resolve, reject) => {
-        UserModel
+        AskModel
         .create(params)
         .then((data) => { 
             resolve(data) })
@@ -11,10 +11,9 @@ exports.createUser = async (params) => {
     })
 }
 
-
-exports.findUser = async (where = {}) => {
+exports.findAsk = async (where = {}) => {
     return new Promise((resolve, reject) => {
-        UserModel
+        AskModel
         .findOne(where)
         .then((data) => {
             resolve(data)

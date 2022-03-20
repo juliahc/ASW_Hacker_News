@@ -11,12 +11,12 @@ const dotenv = require("dotenv").config({
     path: path.resolve(__dirname, "./.env"),
 }); 
 
-app.use("/public", express.static(__dirname + "/public"));
+app.use(express.static("public"));
 
-function connect() {
+function db_connect() {
     mongoose.connection
         .on("error", console.log)
-        .on("disconnected", connect)
+        .on("disconnected", db_connect)
         .once("open", listen);
     return mongoose.connect(process.env.MONGODB_URL, {
         keepAlive: 1,
@@ -30,7 +30,9 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.set('view engine', 'ejs');
 
-// Default Route
+// Routes related to serving html/css/js public resources
+app.use(require("./routes/views.js"));
+
 app.use("/v1/", function(req, res, next) {
     const contentType = req.headers["content-type"];
     // console.log(contentType);
@@ -47,4 +49,5 @@ function listen() {
     console.log("Express app started on port " + process.env.PORT);
 }
 
-connect();
+listen();
+//db_connect();

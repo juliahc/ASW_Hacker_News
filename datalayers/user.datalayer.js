@@ -1,9 +1,9 @@
-const UrlModel = require('./../models/url.model')
+const UserModel = require('../models/user.model')
 
-exports.createUrl= async (params) => {
+exports.createUser = async (params) => {
     console.log(params);
     return new Promise((resolve, reject) => {
-        UrlModel
+        UserModel
         .create(params)
         .then((data) => { 
             resolve(data) })
@@ -12,9 +12,9 @@ exports.createUrl= async (params) => {
 }
 
 
-exports.findUrl = async (where = {}) => {
+exports.findUser = async (where = {}) => {
     return new Promise((resolve, reject) => {
-        UrlModel
+        UserModel
         .findOne(where)
         .then((data) => {
             resolve(data)

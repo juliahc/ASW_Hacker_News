@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "develop": "node app/express/index.js"
+    "develop": "node index.js"
   },
   "keywords": [],
   "authors": "Herrera Caba, Júlia; Holly Miró, Francesc; Jimeno Ramírez, Iván; València Luque, Pol",
