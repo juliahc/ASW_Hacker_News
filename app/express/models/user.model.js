@@ -1,8 +1,17 @@
 // create users schema
 const UsersSchema = new global.Schema({
-    name: String,
-    password: String,
-    karma: Number,
+    name: {
+        type: String,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    karma: {
+        type: Number,
+        default: 1
+    },
     about: {
         type: String,
         default: null
@@ -19,9 +28,18 @@ const UsersSchema = new global.Schema({
         type:Boolean,
         default: false
     },
-    maxvisit: Number,
-    minaway: Number,
-    delay: Number
+    maxvisit: {
+        type: Number,
+        default: 20
+    },
+    minaway: {
+        type: Number,
+        default: 180
+    },
+    delay: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true
 });

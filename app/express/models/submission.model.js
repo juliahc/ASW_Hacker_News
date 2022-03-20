@@ -1,7 +1,13 @@
 // create submission schema
 const SubmissionSchema = new global.Schema({
-    title: String,
-    ponts: Number,
+    title: { 
+        type: String,
+        required: true
+    },
+    points: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true
 });

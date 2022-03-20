@@ -3,7 +3,8 @@ const AskSchema = new global.Schema({
     submission: {
       type: Schema.Types.ObjectId,
       ref: "Submission"  
-    }
+    },
+    text: String
 }, {
     timestamps: true
 });

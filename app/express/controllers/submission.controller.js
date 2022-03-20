@@ -3,7 +3,7 @@ const responseObj = {};
 const mongodb = require("mongodb");
 const errorCodes = require("../helpers/errorCodes.helper.js");
 
-const submissionDatalayer = require("./../datalayers/submission.datalayer");
+const submissionDatalayer = require("../datalayers/submission.datalayer");
 
 exports.find = async (request, response) => {
     console.log(request);
@@ -48,7 +48,7 @@ exports.find = async (request, response) => {
     return;
 };
 
-exports.create = async (request, response, next) => {
+exports.create = async (request, response) => {
     let params = {};
     if (request.body.params) {
         params = request.body.params;

@@ -4,7 +4,10 @@ const UrlSchema = new global.Schema({
       type: Schema.Types.ObjectId,
       ref: "Submission"  
     },
-    url: String
+    url: {
+      type: String,
+      required: true
+    }
 }, {
     timestamps: true
 });
