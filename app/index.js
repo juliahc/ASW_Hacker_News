@@ -13,6 +13,9 @@ app.set('view engine', 'ejs');
 // Routes related to serving html/css/js public resources
 app.use(require("./routes/views.js"));
 
+// Routes related to rest operations on submissions
+app.use(require("./routes/submissions.js"));
+
 function listen() {
     if (app.get("env") === "test") return;
     app.listen(3000);
@@ -20,4 +23,3 @@ function listen() {
 }
 
 listen();
-//db_connect();
