@@ -97,3 +97,8 @@ main {
 .button:hover {
   background-color: #5f8f99;
 }
+
+.errorMessage {
+  color: #63343a;
+  padding-left: 3px;
+}

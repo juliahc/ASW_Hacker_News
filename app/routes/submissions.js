@@ -22,7 +22,10 @@ router.get('/', async (req, res) => {
 
 router.post("/", async (req, res) => {
     const {title, url, text/*, author*/} = req.body; // TODO: author may not be given as request param, but in token header.
+    
     //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
+    if (title === "") res.render("submit", { message: "You have to introduce a title" });
+    
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
         console.log("submission created with id: " + id); // Do whatever is necessary with id.
@@ -33,6 +36,7 @@ router.post("/", async (req, res) => {
         console.log("submission creation failed with code: " + e.message);
         res.render("submit", { message: e.message });
     }
+    
 });
 
 router.patch("/:id", async (req, res) => {

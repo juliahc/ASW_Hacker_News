@@ -1,4 +1,4 @@
-const Submission = require("./submission");
+const Submission = require("./Submission");
 
 class AskSubmission extends Submission {
     constructor(title, text, author) {
