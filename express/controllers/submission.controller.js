@@ -1,6 +1,13 @@
 // load model
 const responseObj = {};
 const mongodb = require("mongodb");
+const mongoose = require("mongoose");
+const db = mongoose.connect(process.env.MONGODB_URL, {
+    keepAlive: 1,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
 const errorCodes = require("../helpers/errorCodes.helper.js");
 
 const submissionDatalayer = require("../datalayers/submission.datalayer");
@@ -84,8 +91,8 @@ exports.page = async (request, response) => {
             break;
     }
 
-    let aggregateArr = createAggregateArray(match, orderBy);
-    //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc)
+    let aggregateArr = createAggregateArray(((request.query.p - 1) * 2), match, orderBy);
+    //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*2 elements documents, (as we only print 2 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
     .then((submissionData) => {
@@ -94,17 +101,32 @@ exports.page = async (request, response) => {
             typeof submissionData !== "undefined" &&
             submissionData.length
           ) {
-            responseObj.status  = errorCodes.SUCCESS;
-            responseObj.message = "Success";
-            responseObj.data    = submissionData;
-            response.send(responseObj);
+            //Get elements onn bbdd
+            let aggregateQuery = [
+                {
+                  '$match': {}
+                }, {
+                  '$count': "submissionsLeft"
+                }];
+            submissionDatalayer
+            .aggregateSubmission(aggregateQuery)
+            .then((ret => {
+                ret[0].submissionsLeft -= (request.query.p * 2);
+                submissionData.push(ret[0]);
+                responseObj.status  = errorCodes.SUCCESS;
+                responseObj.message = "Success";
+                responseObj.data    = submissionData;
+                response.send(responseObj);
+            }))
+            .catch((err) => {
+                console.log(err);
+            });
           } else {
             responseObj.status  = errorCodes.DATA_NOT_FOUND;
             responseObj.message = "Data not found";
             responseObj.data    = [];
             response.send(responseObj);
           }
-        
     })
     .catch((error) => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -195,7 +217,7 @@ exports.create = async (request, response) => {
     return;
 };
 
-function createAggregateArray (match, orderBy) {
+function createAggregateArray (page, match, orderBy) {
     return [
         {
           '$match': match
@@ -215,6 +237,11 @@ function createAggregateArray (match, orderBy) {
           }
         }, {
           '$sort': orderBy
+        }, {
+            '$skip': page
+        },
+        {
+            '$limit': 2
         }
       ];
 }
