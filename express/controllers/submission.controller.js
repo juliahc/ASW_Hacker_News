@@ -92,8 +92,8 @@ exports.page = async (request, response) => {
             break;
     }
 
-    let aggregateArr = createAggregateArray(((request.query.p - 1) * 2), match, orderBy);
-    //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*2 elements documents, (as we only print 2 elements)
+    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), match, orderBy);
+    //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
     .then((submissionData) => {
@@ -243,7 +243,7 @@ function createAggregateArray (page, match, orderBy) {
             '$skip': page
         },
         {
-            '$limit': 2
+            '$limit': 10
         }
       ];
 }
