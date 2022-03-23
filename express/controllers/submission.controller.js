@@ -4,6 +4,8 @@ const mongodb = require("mongodb");
 const errorCodes = require("../helpers/errorCodes.helper.js");
 
 const submissionDatalayer = require("../datalayers/submission.datalayer");
+const askDatalayer = require("../datalayers/ask.datalayer");
+const urlDatalayer = require("../datalayers/url.datalayer");
 
 exports.find = async (request, response) => {
     console.log(request);
@@ -48,7 +50,7 @@ exports.find = async (request, response) => {
     return;
 };
 
-exports.create = async (request, response) => {
+exports.create = async (request, response, next) => {
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -59,16 +61,63 @@ exports.create = async (request, response) => {
         response.send(responseObj);
         return;
     }
-    submissionDatalayer.createSubmission(params)
+
+    let submissionObject = {
+        title: params.title,
+        points: params.points,
+        type: (params.hasOwnProperty("url")) ? "url" : "ask"
+    }
+    //Creating submission on the database
+    submissionDatalayer.createSubmission(submissionObject)
     .then((submissionData) => {
-        console.log(submissionData);
         if (submissionData !== null && typeof submissionData !== undefined) {
-            responseObj.status  = errorCodes.SUCCESS;
-            responseObj.message = "Success";
-            responseObj.data    = submissionData;
+            let id = submissionData._id;
+            if (params.hasOwnProperty("url")) {
+                let urlObject = {
+                    submission: id,
+                    url: params.url
+                }
+                //Creating url on the database with the id from the submission
+                urlDatalayer
+                .createUrl(urlObject)
+                .then((urlData) => {
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = {id};
+                    response.send(responseObj);
+                })
+                .catch((error) => {
+                    responseObj.status  = errorCodes.SYNTAX_ERROR;
+                    responseObj.message = error;
+                    responseObj.data    = {error};
+                    response.send(responseObj);
+                });
+                return;
+            } else {
+                let askObject = {
+                    submission: id,
+                    text: params.text
+                }
+                //Creating ask on the database with the id from the submission
+                askDatalayer
+                .createAsk(askObject)
+                .then((res) => {
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = id;
+                    response.send(responseObj);
+                })
+                .catch((error) => {
+                    responseObj.status  = errorCodes.SYNTAX_ERROR;
+                    responseObj.message = error;
+                    responseObj.data    = {};
+                    response.send(responseObj);
+                });
+                return;
+            }
         } else {
-            responseObj.status  = errorCodes.DATA_NOT_FOUND;
-            responseObj.message = "No record found";
+            responseObj.status  = errorCodes.SYNTAX_ERROR;
+            responseObj.message = "Syntax Error. Cannot create.";
             responseObj.data    = {};
         }
         response.send(responseObj);
