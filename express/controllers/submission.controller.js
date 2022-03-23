@@ -112,7 +112,7 @@ exports.page = async (request, response) => {
             submissionDatalayer
             .aggregateSubmission(aggregateQuery)
             .then((ret => {
-                ret[0].submissionsLeft -= (request.query.p * 2);
+                ret[0].submissionsLeft -= (request.query.p * 10);
                 submissionData.push(ret[0]);
                 responseObj.status  = errorCodes.SUCCESS;
                 responseObj.message = "Success";
