@@ -63,7 +63,7 @@
                                         <%}
                                             if (locals.submissions) { %>
                                             <% submissions.forEach((submission, idx) => { 
-                                                let pos = idx+(p-1)*2;
+                                                let pos = idx+(p-1)*10;
                                                 if (submission.type === "url") { 
                                             %>
                                                 <tr id="<%= submission._id %>" class="newInfo">
