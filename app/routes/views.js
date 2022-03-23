@@ -43,38 +43,45 @@ const news = [
     }
 ]
 
-
-
 router.get("/", async (_, res) => {
+    res.render("news", { submissions: news, info: "hello_world" }); // FIXME: Hardcoded for testing views.
+    /*
     try {
         let p = req.query.p || 1;
         console.log(p);
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
         res.render("news", { submissions: news, info: "hello_world" }); // FIXME: Hardcoded for testing views.
     } catch (e) {
-        res.render("news", {}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
+        res.render("news", { error: "Hacker News can't connect to his database" }) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
     }
+    */
 });
 
 router.get("/news", async (req, res) => {
+    res.render("news", { submissions: news, info: "hello_world" }); // FIXME: Hardcoded for testing views.
+    /*
     try {
         let p = req.query.p || 1;
         console.log(p);
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
         res.render("news", { submissions: news, info: "hello_world" });
     } catch (e) {
-        res.render("news", {}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
+        res.render("news", {error: "Hacker News can't connect to his database"}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
     }
+    */
 });
 
 router.get("/newest", async (_, res) => {
+    res.render("news", { submissions: news, info: "hello_world" }); // FIXME: Hardcoded for testing views.
+    /*
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new");
-        res.render("newest", { submissions: news, info: "hello_world" });
+        res.render("news", { submissions: news, info: "hello_world" });
     } catch (e) {
-        res.render("newest", {}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
+        res.render("news", {error: "Hacker News can't connect to his database"}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
     }
+    */
 });
 
 router.get("/submit", async (_, res) => {

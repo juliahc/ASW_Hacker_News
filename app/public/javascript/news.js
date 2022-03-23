@@ -101,6 +101,6 @@ const showNews = () => {
 
 window.onload = function() {
     news.sort((a,b) => (a.points > b.points) ? 0 : 1)
-    showNews();
+    //showNews();
     //$("#more").on('click', console.log("click"))
 }

@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
     const {title, url, text/*, author*/} = req.body; // TODO: author may not be given as request param, but in token header.
     
     //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
-    if (title === "") res.render("submit", { message: "You have to introduce a title" });
+    if (title === "") res.render("submit", { error: "You have to introduce a title" });
     
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
         res.render("news", {data: sub_page});
     } catch (e) {
         console.log("submission creation failed with code: " + e.message);
-        res.render("submit", { message: e.message });
+        res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });
     }
     
 });
