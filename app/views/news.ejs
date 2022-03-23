@@ -55,7 +55,35 @@
                         <td>
                             <table id="news">
                                 <tbody id="allNews">
-                                   
+                                    <p> <%= info %> </p>
+                                    <!--<% submissions.forEach((submission, idx) => { %>
+                                        <tr id=<%= submission.id %> class="newInfo">
+                                            <td class="oderNum"><%= idx %>.</td>
+                                            <td class="voteButton"><i id=<%= submission.id %> class="fas fa-heart"></i></td>
+                                            <td class="title">
+                                                <a class="newTitle titleText" href=<%= submission.url %>> <%= submission.title %> </a>
+                                                <a class="newLink" href="#"><%= (new URL(element.link).hostname) %></a>
+                                            </td>
+                                        </tr>
+                                        <tr class="newActions">
+                                            <td colspan="2"></td>
+                                            <td>
+                                                <span id="votes_<%= submission.id %>"><%= submission.points %> points</span>
+                                                by
+                                                <a href="#"><%= submission.author %></a>
+                                                &nbsp
+                                                <span title=<%= submission.published_time %>>
+                                                    <a href="/submissions/"<%= submission.id %>><%= submission.published_time %></a>
+                                                </span>
+                                                &nbsp
+                                                |
+                                                <a href="#">hide</a>
+                                                |
+                                                <a href="#"><%= submission.comments.length === 0 ? "discuss" : "comments" %></a>
+                                            </td>
+                                        </tr>
+                                        <tr class ="space-10px"></tr>
+                                    <% }) %>-->
                                    <!--News go here-->
                                     <tr id="moreButton">
                                         <td colspan="2"></td>
