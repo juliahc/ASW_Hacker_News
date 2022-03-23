@@ -5,8 +5,6 @@ const AskSchema = new global.Schema({
       ref: "Submission"  
     },
     text: String
-}, {
-    timestamps: true
 });
   
   const Ask = global.mongoose.model("Ask", AskSchema);

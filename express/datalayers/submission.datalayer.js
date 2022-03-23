@@ -24,3 +24,12 @@ exports.findSubmission = async (where = {}) => {
         })
     })
 }
+
+exports.aggregateSubmission = async (aggregateArr) => {
+    return new Promise((resolve, reject) => {
+        SubmissionModel
+        .aggregate(aggregateArr)
+        .then((data) => resolve(data))
+        .catch((error) => reject(error))
+    });
+}

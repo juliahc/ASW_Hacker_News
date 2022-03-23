@@ -8,7 +8,6 @@ const askDatalayer = require("../datalayers/ask.datalayer");
 const urlDatalayer = require("../datalayers/url.datalayer");
 
 exports.find = async (request, response) => {
-    console.log(request);
     let id;
     if (request.query._id) {
         id = request.query._id;
@@ -50,7 +49,72 @@ exports.find = async (request, response) => {
     return;
 };
 
-exports.create = async (request, response, next) => {
+exports.page = async (request, response) => {
+    let params = {}
+    if (request.query.hasOwnProperty("p") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
+        params = request.query;
+    } else {
+        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+        responseObj.message = "Required parameters missing";
+        responseObj.data    = {};
+        response.send(responseObj);
+        return;
+    }
+
+    let match = {};
+    let orderBy = {};
+
+    if (request.query.t !== "any") {
+        match = {
+            type: {
+                $eq: request.query.t
+            }
+        }
+    }
+    switch(request.query.o) {
+        case "new":
+            orderBy = {
+                "createdAt": -1
+            };
+            break;
+        default:
+            orderBy = {
+                "points": -1
+            };
+            break;
+    }
+
+    let aggregateArr = createAggregateArray(match, orderBy);
+    //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc)
+    submissionDatalayer
+    .aggregateSubmission(aggregateArr)
+    .then((submissionData) => {
+        if (
+            submissionData !== null &&
+            typeof submissionData !== "undefined" &&
+            submissionData.length
+          ) {
+            responseObj.status  = errorCodes.SUCCESS;
+            responseObj.message = "Success";
+            responseObj.data    = submissionData;
+            response.send(responseObj);
+          } else {
+            responseObj.status  = errorCodes.DATA_NOT_FOUND;
+            responseObj.message = "Data not found";
+            responseObj.data    = [];
+            response.send(responseObj);
+          }
+        
+    })
+    .catch((error) => {
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = error;
+        responseObj.data    = {};
+        response.send(responseObj);
+    });
+}
+
+exports.create = async (request, response) => {
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -130,3 +194,27 @@ exports.create = async (request, response, next) => {
     });
     return;
 };
+
+function createAggregateArray (match, orderBy) {
+    return [
+        {
+          '$match': match
+        }, {
+          '$lookup': {
+            'from': 'urls', 
+            'localField': '_id', 
+            'foreignField': 'submission', 
+            'as': 'url'
+          }
+        }, {
+          '$lookup': {
+            'from': 'asks', 
+            'localField': '_id', 
+            'foreignField': 'submission', 
+            'as': 'ask'
+          }
+        }, {
+          '$sort': orderBy
+        }
+      ];
+}

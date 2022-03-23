@@ -8,8 +8,6 @@ const UrlSchema = new global.Schema({
       type: String,
       required: true
     }
-}, {
-    timestamps: true
 });
   
   const Url = global.mongoose.model("Url", UrlSchema);

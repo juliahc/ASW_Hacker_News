@@ -34,16 +34,38 @@ async function getRequest (url, query) {
     return res;
 }
 
+
+//Creates a task (n) or a url (m)
+/* 
 let n = {
-    title: "Esto es un título de un ask",
-    points: 2,
+    title: "Esto es un título de un ask - 7",
+    points: 49,
     text: "Fino señores"
 }
 
-let result = await  postRequest("/newSubmission", n);
+let m = {
+    title: "Esto es un título de un url - 7",
+    points: 0,
+    url: "http://google.es"
+}
+
+let result = await  postRequest("/newSubmission", m); 
+ */
+
+//Search for type (t) => url || ask, can be ordered by property "pts" => desc
+/* 
+let n = {
+    p: "1",
+    t: "any",
+    o: "pts"
+}
+
+let result = await  getRequest("/submission_page", n);
+ */
 
 /* let n = {
     _id: "623603fa00932e177e437571"
 }
 let result = await getRequest("/user", n); */
+
 console.log(result);

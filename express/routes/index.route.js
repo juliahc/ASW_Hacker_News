@@ -25,6 +25,10 @@ router.get(
     "/submission",
     SubmissionController.find
 );
+router.get(
+    "/submission_page",
+    SubmissionController.page
+);
 router.post(
     "/newSubmission",
     SubmissionController.create
