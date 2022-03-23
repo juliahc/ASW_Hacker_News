@@ -29,9 +29,7 @@ router.post("/", async (req, res) => {
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
         console.log("submission created with id: " + id); // Do whatever is necessary with id.
-        // Recalculate first page of news.
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(1,"any","new");
-        res.render("news", {data: sub_page});
+        res.redirect("/news");
     } catch (e) {
         console.log("submission creation failed with code: " + e.message);
         res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });

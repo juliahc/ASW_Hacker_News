@@ -18,8 +18,8 @@ let SubmissionCtrl;
 
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, author) {
     let submission;
-    if (url.length === 0) submission = new AskSubmission(title, text, author);
-    else submission = new UrlSubmission(title, url, author);
+    if (url.length === 0) submission = new AskSubmission(null, title, 0, null, autor, text);
+    else submission = new UrlSubmission(null, title, 0, null, author, url);
     let id = await this.db.postRequest("/newSubmission", submission);
     return id;
 }
@@ -35,10 +35,15 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
     if (page < 0) throw TypeError("Page must be greater or equal to zero.");
     let data = await this.db.getRequest("/submission_page", {p: page, t: type, o: order});
+    if (data.hasOwnProperty("status") && data.status === 200) {
+        data = data.data;
+    } else {
+        //error
+    }
     let result = [];
     for (let i = 0; i < data.length; i++) {
-        if (data[i].url !== undefined) result.push( new UrlSubmission(data[i].title, data[i].url, data[i].author) );
-        else result.push( new AskSubmission(data[i].title, data[i].text, data[i].author) );
+        if (data[i].url !== undefined) result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url) );
+        else result.push( new AskSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].text) );
     }
     return result;
 }

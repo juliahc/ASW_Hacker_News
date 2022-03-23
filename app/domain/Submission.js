@@ -1,7 +1,11 @@
 class Submission {
-    constructor(title, author) {
+    
+    constructor(id, title, points, createdAt, author) {
+        this.id = id;
         this.title = title;
         this.author = author;
+        this.points = points;
+        this.createdAt = createdAt;
         this.comments = [];
     }
     getTitle() {

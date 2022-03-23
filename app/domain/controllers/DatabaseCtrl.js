@@ -30,7 +30,7 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
       })
     return res;
 }
-
+//getRequest("/submission_page", {p: page, t: type, o: order});
 DatabaseCtrl.prototype.getRequest = async function (endpoint, query) {
     let res = {};
     await axios({

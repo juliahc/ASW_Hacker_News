@@ -51,6 +51,7 @@ exports.find = async (request, response) => {
 
 exports.page = async (request, response) => {
     let params = {}
+    //console.log(request);
     if (request.query.hasOwnProperty("p") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
         params = request.query;
     } else {
@@ -115,6 +116,7 @@ exports.page = async (request, response) => {
 }
 
 exports.create = async (request, response) => {
+    console.log(request)
     let params = {};
     if (request.body.params) {
         params = request.body.params;
