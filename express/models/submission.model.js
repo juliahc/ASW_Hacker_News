@@ -7,6 +7,11 @@ const SubmissionSchema = new global.Schema({
     points: {
         type: Number,
         default: 0
+    },
+    type: {
+        type: String,
+        enum: ["url", "ask"],
+        required: true
     }
 }, {
     timestamps: true
