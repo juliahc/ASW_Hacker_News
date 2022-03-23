@@ -63,10 +63,11 @@
                                         <%}
                                             if (locals.submissions) { %>
                                             <% submissions.forEach((submission, idx) => { 
+                                                let pos = idx+(p-1)*2;
                                                 if (submission.type === "url") { 
                                             %>
                                                 <tr id="<%= submission._id %>" class="newInfo">
-                                                    <td class="oderNum"><%= idx %>.</td>
+                                                    <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton"><i id="<%= submission._id %>" class="fas fa-heart"></i></td>
                                                     <td class="title">
                                                         <a class="newTitle titleText" href="<%= submission.url[0].url %>"> <%= submission.title %> </a>
@@ -95,7 +96,7 @@
                                                 } else {   
                                                 %>
                                                 <tr id="<%= submission._id %>" class="newInfo">
-                                                    <td class="oderNum"><%= idx %>.</td>
+                                                    <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton"><i id="<%= submission._id %>" class="fas fa-heart"></i></td>
                                                     <td class="title">
                                                         <a class="newTitle titleText" href="#"> <%= submission.title %> </a>
@@ -125,6 +126,7 @@
                                         <% } 
                                     }%>
                                    <!--News go here-->
+                                   <% if (more) { %>
                                     <tr id="moreButton">
                                         <td colspan="2"></td>
                                         <td>
@@ -133,6 +135,7 @@
                                                 <input id="moreNews" class="titleText button" type="submit" value="More" class="button">
                                             </form>
                                         </td>
+                                    <% } %>    
                                     </tr>                                    
                                 </tbody>
                             </table>
