@@ -34,22 +34,16 @@ async function getRequest (url, query) {
     return res;
 }
 
-/* let n = {
-    name: "Exemple",
-    password: "12345",
-    karma: 3,
-    about: "assdf",
-    showDead: true,
-    noprocrast: true,
-    maxvisit: 14,
-    minaway: 2,
-    delay: 100,
+let n = {
+    title: "Esto es un título de un ask",
+    points: 2,
+    text: "Fino señores"
 }
 
-let result = await  postRequest("/newUser", n); */
+let result = await  postRequest("/newSubmission", n);
 
-let n = {
+/* let n = {
     _id: "623603fa00932e177e437571"
 }
-let result = await getRequest("/user", n);
+let result = await getRequest("/user", n); */
 console.log(result);
