@@ -7,6 +7,7 @@ const sub_ctrl = new SubmissionCtrl();
 
 router.post("/submission", async (req, res) => {
     const {title, url, text/*, author*/} = req.body; // TODO: author may not be given as request param, but in token header.
+    //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
         console.log("submission created with id: " + id); // Do whatever is necessary with id.
