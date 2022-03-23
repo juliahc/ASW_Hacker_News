@@ -4,6 +4,7 @@ const SubmissionSchema = new global.Schema({
         type: String,
         required: true
     },
+    author: String,
     points: {
         type: Number,
         default: 0

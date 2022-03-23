@@ -33,13 +33,16 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id) {
 SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order) {
     if (!this.types.includes(type)) throw TypeError("Type of submissions is not supported.");
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
-    if (page < 0) throw TypeError("Page must be greater or equal to zero.");
+    if (page <= 0) throw TypeError("Page must be greater than zero.");
     let data = await this.db.getRequest("/submission_page", {p: page, t: type, o: order});
     if (data.hasOwnProperty("status") && data.status === 200) {
-        data = data.data;
+        //Success
+        data = data.data;   //Get the data from the database
     } else {
-        //error
+        //Error
+        console.log("Error");
     }
+
     let result = [];
     for (let i = 0; i < data.length; i++) {
         if (data[i].url !== undefined) result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url) );
