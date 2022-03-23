@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
         console.log(p);
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
-        let more = submissionsLeft != 0;
+        let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page = calcTimeAgoSubmissions(sub_page);
         console.log(more);
@@ -42,7 +42,7 @@ router.get("/news", async (req, res) => {
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
         console.log(sub_page[sub_page.length-1]);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
-        let more = submissionsLeft != 0;
+        let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page = calcTimeAgoSubmissions(sub_page);
         console.log(submissionsLeft+" -> more:"+more);
@@ -60,7 +60,7 @@ router.get("/newest", async (req, res) => {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new");
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
-        let more = submissionsLeft != 0;
+        let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page = calcTimeAgoSubmissions(sub_page);
         console.log(more);
