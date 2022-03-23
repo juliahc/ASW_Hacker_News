@@ -11,10 +11,10 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.set('view engine', 'ejs');
 
 // Routes related to serving html/css/js public resources
-app.use(require("./routes/views.js"));
+app.use(require("./routes/views"));
 
 // Routes related to rest operations on submissions
-app.use(require("./routes/submissions.js"));
+app.use('/submissions', require("./routes/submissions"));
 
 function listen() {
     if (app.get("env") === "test") return;
