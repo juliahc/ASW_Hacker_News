@@ -16,9 +16,11 @@ let SubmissionCtrl;
     };
 }());
 
+// Declare controller methods
+
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, author) {
     let submission;
-    if (url.length === 0) submission = new AskSubmission(null, title, 0, null, autor, text);
+    if (url.length === 0) submission = new AskSubmission(null, title, 0, null, author, text);
     else submission = new UrlSubmission(null, title, 0, null, author, url);
     let id = await this.db.postRequest("/newSubmission", submission);
     return id;
