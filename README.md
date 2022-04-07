@@ -9,7 +9,7 @@
 | València Luque, Pol  | polkp22           | polvalu        |
 
 ## Framework
-Node JS & Express
+Node JS & Express & MongoDB
 
 ## Taiga
 https://tree.taiga.io/project/polvalu-asw_hacker_news
