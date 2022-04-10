@@ -1,6 +1,8 @@
 const User = require("../User");
 const DatabaseCtrl = require("./DatabaseCtrl");
 
+const jwt = require("jsonwebtoken");
+
 let UserCtrl;
 (function() {
     let instance;
@@ -10,59 +12,75 @@ let UserCtrl;
 
         // initialize any properties of the singleton
         this.db = new DatabaseCtrl();
+        this.encrypt = function(id, tokens) {
+            return jwt.sign(
+                {id: id, google_tokens: tokens},
+                process.env.USER_AUTH_SECRET_KEY,
+                {
+                    issuer: "hackernews.user."+id,
+                    expiresIn: "5h"
+                }
+            )
+        };
     };
 }());
 
 // Declare controller methods
 
-UserCtrl.prototype.registerUser = async function(username, password) {
-    
+UserCtrl.prototype.login_or_register = async function(id, username, email, tokens) {
+    // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
+    let user, db_id;
+    try {
+        user = await this.db.getRequest('/users', id);
+        db_id = user.id;
+    }
+    catch (err) {
+        if (err.message == this.db.errors.RESOURCE_NOT_FOUND) {
+            // User didn't exist -> register new user
+            user = new User({id: id, username: username, email: email})
+            db_id = await this.db.postRequest('/users', user);
+        }
+    }
+    // Return user_auth token
+    return this.encrypt(db_id, tokens);
 }
 
-UserCtrl.prototype.login = async function(username, password) {
-    return "this should be a token?";
-}
-
-UserCtrl.prototype.profile = async function(username, hmac) {
-    return new User({username: username, password: "password"})
-}
-
-UserCtrl.prototype.update = async function(username, hmac, about, email, showdead, noprocrast, maxvisit, minaway, delay) {
+UserCtrl.prototype.profile = async function(authId, id) {
 
 }
 
-UserCtrl.prototype.changePassword = async function(old_pw, new_pw) {
+UserCtrl.prototype.update = async function(authId, about, email, showdead, noprocrast, maxvisit, minaway, delay) {
 
 }
 
-UserCtrl.prototype.getUpvotedSubmissionIds = async function(username, hmac) {
+UserCtrl.prototype.getUpvotedSubmissionIds = async function(authId) {
     return [];
 }
 
-UserCtrl.prototype.getUpvotedCommentIds = async function(username, hmac) {
+UserCtrl.prototype.getUpvotedCommentIds = async function(authId) {
     return [];
 }
 
-UserCtrl.prototype.upvoteSubmission = async function(username, hmac) {
+UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
 
 }
 
-UserCtrl.prototype.upvoteComment = async function(username, hmac) {
+UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
 
 }
 
-UserCtrl.prototype.getFavoriteSubmissionIds = async function(username) {
+UserCtrl.prototype.getFavoriteSubmissionIds = async function(authId) {
     return [];
 }
 
-UserCtrl.prototype.getFavoriteCommentIds = async function(username) {
+UserCtrl.prototype.getFavoriteCommentIds = async function(authId) {
     return [];
 }
 
-UserCtrl.prototype.favoriteSubmission = async function(username, hmac) {
+UserCtrl.prototype.favoriteSubmission = async function(authId, submissionId) {
 
 }
 
-UserCtrl.prototype.favoriteComment = async function(username, hmac) {
+UserCtrl.prototype.favoriteComment = async function(authId, commentId) {
 
 }
