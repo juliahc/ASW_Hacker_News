@@ -15,6 +15,7 @@ app.use(require("./routes/views"));
 
 // Routes related to rest operations on submissions
 app.use('/submissions', require("./routes/submissions"));
+app.use('/users', require("./routes/users"));
 
 function listen() {
     if (app.get("env") === "test") return;
