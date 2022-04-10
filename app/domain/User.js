@@ -1,9 +1,9 @@
 class User {
     
     constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.username, params.password) }
+        if (!'createdAt' in params) { return constructDefault(params.id, params.username, params.email) }
+        this.id = params.id;
         this.username = params.username;
-        this.password = params.password;
         this.createdAt = params.createdAt;
         this.karma = params.karma;
         this.about = params.about;
@@ -15,13 +15,13 @@ class User {
         this.delay = params.delay;
     }
 
-    constructDefault(username, password) {
+    constructDefault(id, username, email) {
+        this.id = id;
         this.username = username;
-        this.password = password;
         this.createdAt = Date.now();
         this.karma = 1;
         this.about = "";
-        this.email = "";
+        this.email = email;
         this.showdead = false;
         this.noprocrast = false;
         this.maxvisit = 20;

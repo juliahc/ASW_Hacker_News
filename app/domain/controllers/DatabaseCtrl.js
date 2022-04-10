@@ -1,4 +1,5 @@
 const axios = require("axios");
+const errCodes = require("../../utils/errorCodes.js");
 
 let DatabaseCtrl;
 (function() {
@@ -9,6 +10,7 @@ let DatabaseCtrl;
 
         // initialize any properties of the singleton
         this.DB_URI = "http://localhost:2000/v1";
+        this.errors = errCodes;
     };
 }());
 
