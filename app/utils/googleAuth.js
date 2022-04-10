@@ -56,6 +56,7 @@ function getGoogleAccountFromCode(code) {
   return {
     id: userGoogleId,
     username: userGoogleName,
-    email: userGoogleEmail
+    email: userGoogleEmail,
+    tokens: tokens
   };
 }

@@ -16,7 +16,7 @@ class auth {
         }
         return next();
     }
-    passthrough() {
+    passthrough(req, res, next) {
         const token = req.body.token || req.query.token || req.headers["x-access-token"] || req.signedCookies.user_auth;
 
         if (!token) {

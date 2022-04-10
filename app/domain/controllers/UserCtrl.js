@@ -30,16 +30,13 @@ let UserCtrl;
 UserCtrl.prototype.login_or_register = async function(id, username, email, tokens) {
     // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
     let user, db_id;
-    try {
-        user = await this.db.getRequest('/users', id);
-        db_id = user.id;
-    }
-    catch (err) {
-        if (err.message == this.db.errors.RESOURCE_NOT_FOUND) {
-            // User didn't exist -> register new user
-            user = new User({id: id, username: username, email: email})
-            db_id = await this.db.postRequest('/users', user);
-        }
+    user = await this.db.getRequest('/users', id);
+    if (user.status == this.db.errors.RESOURCE_NOT_FOUND) {
+        // User didn't exist -> register new user
+        user = new User({id: id, username: username, email: email})
+        db_id = await this.db.postRequest('/users', user);
+    } else {
+        db_id = user.data.id;
     }
     // Return user_auth token
     return this.encrypt(db_id, tokens);
