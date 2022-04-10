@@ -71,6 +71,6 @@ router.get("/newest", async (req, res) => {
     }
 });
 
-router.get("/submit", async (req, res) => {
-    res.render("submit", {});
+router.get("/user", async (req, res) => {
+    res.render("user", {});
 });
