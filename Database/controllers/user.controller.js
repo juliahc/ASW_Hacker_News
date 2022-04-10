@@ -49,8 +49,6 @@ exports.find = async (request, response) => {
 };
 
 exports.create = async (request, response, next) => {
-    console.log("Trying to cerate user");
-    console.log(request);
     let params = {};
     if (request.body.params) {
         params = request.body.params;

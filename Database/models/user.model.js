@@ -1,10 +1,10 @@
 // create users schema
 const UsersSchema = new global.Schema({
-    name: {
+    username: {
         type: String,
         required: true
     },
-    password: {
+    googleId: {
         type: String,
         required: true
     },

@@ -3,6 +3,7 @@ const router = express.Router();
 module.exports = router;
 
 //Controllers
+const AuthController = require("../controllers/auth.controller");
 const UserController = require("../controllers/user.controller");
 const SubmissionController = require("../controllers/submission.controller");
 const UrlController = require("../controllers/url.controller");
@@ -15,8 +16,10 @@ router.get(
 );
 
 router.post(
-    "/newUser",
-    UserController.create
+    "/register",
+    AuthController.validate("registerUser"),
+    AuthController.register,
+    AuthController.login
 );
 /* /User */
 
