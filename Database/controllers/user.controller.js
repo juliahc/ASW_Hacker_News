@@ -27,8 +27,8 @@ exports.find = async (request, response) => {
                 responseObj.message = "Success";
                 responseObj.data    = userData;
             } else {
-                responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                responseObj.message = "No record found";
+                responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                responseObj.message = "User not found";
                 responseObj.data    = {};
             }
             response.send(responseObj);
