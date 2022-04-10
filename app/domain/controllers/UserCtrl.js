@@ -69,11 +69,11 @@ UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
 
 }
 
-UserCtrl.prototype.getFavoriteSubmissionIds = async function(authId) {
+UserCtrl.prototype.getFavoriteSubmissionIds = async function(id) {
     return [];
 }
 
-UserCtrl.prototype.getFavoriteCommentIds = async function(authId) {
+UserCtrl.prototype.getFavoriteCommentIds = async function(id) {
     return [];
 }
 
