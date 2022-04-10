@@ -22,6 +22,9 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
         url: this.DB_URI + endpoint,
         data: {
             params
+        },
+        headers: {
+            "x-api-key": process.env.DB_SECRET_KEY
         }
       })
       .then(response => {
@@ -38,7 +41,10 @@ DatabaseCtrl.prototype.getRequest = async function (endpoint, query) {
     await axios({
         method: 'get',
         url: this.DB_URI + endpoint,
-        params: query
+        params: query,
+        headers: {
+            "x-api-key": process.env.DB_SECRET_KEY
+        }
       })
       .then(response => {
           res = response.data;
