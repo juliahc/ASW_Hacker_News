@@ -8,6 +8,7 @@ const userDatalayer = require("../datalayers/user.datalayer");
 exports.find = async (request, response) => {
     console.log(request);
     let id;
+    
     if (request.query._id) {
         id = request.query._id;
     } else {
