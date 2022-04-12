@@ -5,11 +5,11 @@ const errorCodes = require("../helpers/errorCodes.helper.js");
 
 const userDatalayer = require("../datalayers/user.datalayer");
 
+//Search a user by its googleId
 exports.find = async (request, response) => {
-    console.log(request);
     let id;
-    if (request.query._id) {
-        id = request.query._id;
+    if (request.query.googleId) {
+        id = request.query.googleId;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
         responseObj.message = "Required parameters missing";
@@ -17,34 +17,27 @@ exports.find = async (request, response) => {
         response.send(responseObj);
         return;
     }
-    if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
-        const where = {};
-        where._id = mongodb.ObjectId(id);
-        userDatalayer.findUser(where)
-        .then((userData) => {
-            if (userData !== null && typeof userData !== undefined) {
-                responseObj.status  = errorCodes.SUCCESS;
-                responseObj.message = "Success";
-                responseObj.data    = userData;
-            } else {
-                responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
-                responseObj.message = "User not found";
-                responseObj.data    = {};
-            }
-            response.send(responseObj);
-        })
-        .catch(error => {
-            responseObj.status  = errorCodes.SYNTAX_ERROR;
-            responseObj.message = error;
+    const where = {};
+    where.googleId = id;
+    userDatalayer.findUser(where)
+    .then((userData) => {
+        if (userData !== null && typeof userData !== undefined) {
+            responseObj.status  = errorCodes.SUCCESS;
+            responseObj.message = "Success";
+            responseObj.data    = userData;
+        } else {
+            responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+            responseObj.message = "User not found";
             responseObj.data    = {};
-            response.send(responseObj);
-        });
-    } else {
+        }
+        response.send(responseObj);
+    })
+    .catch(error => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
-        responseObj.message = "Invalid id";
+        responseObj.message = error;
         responseObj.data    = {};
         response.send(responseObj);
-    }
+    });
     return;
 };
 
