@@ -26,6 +26,7 @@ router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {
         let userInfo = await google_auth.getGoogleAccountFromCode(req.query.code);
         let token = await user_ctrl.login_or_register(userInfo.id, userInfo.email);
         res.cookie("access_token", token).status(200);
+        res.redirect("/news");
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
