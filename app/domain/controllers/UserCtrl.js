@@ -30,11 +30,11 @@ let UserCtrl;
 UserCtrl.prototype.login_or_register = async function(id, username, email, tokens) {
     // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
     let user, db_id;
-    user = await this.db.getRequest('/users', id);
+    user = await this.db.getRequest('/user', id);
     if (user.status == this.db.errors.RESOURCE_NOT_FOUND) {
         // User didn't exist -> register new user
         user = new User({id: id, username: username, email: email})
-        db_id = await this.db.postRequest('/users', user);
+        db_id = await this.db.postRequest('/register', user);
     } else {
         db_id = user.data.id;
     }
@@ -43,7 +43,19 @@ UserCtrl.prototype.login_or_register = async function(id, username, email, token
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {
-
+    let response = await this.db.getRequest('/user', id);
+    if (response.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('No such user'); }
+    let user = new User(response.data);
+    if (authId != id) {
+        // User is requesting information from a different user, we remove private data.
+        delete user.email;
+        delete user.showdead;
+        delete user.noprocrast;
+        delete user.maxvisit;
+        delete user.minaway;
+        delete user.delay;
+    }
+    return user;
 }
 
 UserCtrl.prototype.update = async function(authId, about, email, showdead, noprocrast, maxvisit, minaway, delay) {
