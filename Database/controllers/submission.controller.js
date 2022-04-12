@@ -26,9 +26,15 @@ exports.find = async (request, response) => {
         return;
     }
     if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
-        const where = {};
-        where._id = mongodb.ObjectId(id);
-        submissionDatalayer.findSubmission(where)
+        const criteria = {};
+        criteria["$and"] = [];
+        criteria["$and"].push({
+            _id: {
+                $eq: mongodb.ObjectId(id)
+            }
+        });
+        let aggregateArr = createAggregateSubmissionArray(criteria);
+        submissionDatalayer.aggregateSubmission(aggregateArr)
         .then((submissionData) => {
             if (submissionData !== null && typeof submissionData !== undefined) {
                 responseObj.status  = errorCodes.SUCCESS;
@@ -218,6 +224,55 @@ exports.create = async (request, response) => {
     });
     return;
 };
+
+function createAggregateSubmissionArray (match) {
+    return [
+        {
+          '$match': match
+        }, {
+          '$lookup': {
+            'from': 'users', 
+            'let': {
+              'gId': '$author'
+            }, 
+            'pipeline': [
+              {
+                '$match': {
+                  '$expr': {
+                    '$and': [
+                      {
+                        '$eq': [
+                          '$googleId', '$$gId'
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }, {
+                '$project': {
+                  '_id': 0, 
+                  'username': 1, 
+                  'googleId': 1
+                }
+              }
+            ], 
+            'as': 'user'
+          }
+        }, {
+          '$unwind': {
+            'path': '$user'
+          }
+        }, {
+          '$project': {
+            'title': 1, 
+            'points': 1, 
+            'type': 1, 
+            'createdAt': 1, 
+            'user': 1
+          }
+        }
+      ]
+}
 
 function createAggregateArray (page, match, orderBy) {
     return [
