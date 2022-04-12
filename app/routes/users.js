@@ -34,8 +34,7 @@ router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {
     }
 });
 
-//router.patch("/:id", auth.strict, async (req, res) => {})
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth.strict, async (req, res) => {
     //Desencriptar token 
     const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
 
