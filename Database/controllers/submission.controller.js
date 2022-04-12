@@ -143,6 +143,71 @@ exports.page = async (request, response) => {
     });
 }
 
+exports.comments = async (request, response) => {
+    let id;
+    if (request.query._id) {
+        id = request.query._id;
+    } else {
+        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+        responseObj.message = "Required parameters missing";
+        responseObj.data    = {};
+        response.send(responseObj);
+        return;
+    }
+    if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
+        const where = {};
+        where._id = mongodb.ObjectId(id);
+
+        submissionDatalayer.find(where)
+        .then((submissionData) => {
+            if (submissionData !== null && typeof submissionData !== undefined) {
+                //The submission exists on the database. Now we need to get the comments
+                const criteria = {};
+                criteria["$and"] = [];
+                criteria["$and"].push({
+                    submission: {
+                        $eq: mongodb.ObjectId(id)
+                    }
+                });
+                //Search all comments relateds to the submission, including comments of comments
+                let aggregateArr = createAggregateCommentArray(criteria);
+                submissionDatalayer.aggregateSubmission(aggregateArr)
+                .then((commentData) => {
+                    if (commentData !== null && typeof commentData !== undefined) {
+                        responseObj.status  = errorCodes.SUCCESS;
+                        responseObj.message = "Success";
+                        responseObj.data    = commentData;
+                    }
+                    response.send(responseObj);
+                })
+                .catch(error => {
+                    responseObj.status  = errorCodes.SYNTAX_ERROR;
+                    responseObj.message = error;
+                    responseObj.data    = {};
+                    response.send(responseObj);
+                });
+            } else {
+                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                responseObj.message = "No record found";
+                responseObj.data    = {};
+            }
+            response.send(responseObj);
+        })
+        .catch(error => {
+            responseObj.status  = errorCodes.SYNTAX_ERROR;
+            responseObj.message = error;
+            responseObj.data    = {};
+            response.send(responseObj);
+        });
+    } else {
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = "Invalid id";
+        responseObj.data    = {};
+        response.send(responseObj);
+    }
+    return;
+}
+
 exports.create = async (request, response) => {
     console.log(request)
     let params = {};
@@ -224,6 +289,10 @@ exports.create = async (request, response) => {
     });
     return;
 };
+
+function createAggregateCommentArray () {
+    return [];                                  //TODO create the return array
+}
 
 function createAggregateSubmissionArray (match) {
     return [
