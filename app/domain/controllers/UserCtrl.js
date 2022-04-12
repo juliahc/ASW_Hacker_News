@@ -43,7 +43,19 @@ UserCtrl.prototype.login_or_register = async function(id, username, email, token
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {
-
+    let response = await this.db.getRequest('/users', id);
+    if (response.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('No such user'); }
+    let user = new User(response.data);
+    if (authId != id) {
+        // User is requesting information from a different user, we remove private data.
+        delete user.email;
+        delete user.showdead;
+        delete user.noprocrast;
+        delete user.maxvisit;
+        delete user.minaway;
+        delete user.delay;
+    }
+    return user;
 }
 
 UserCtrl.prototype.update = async function(authId, about, email, showdead, noprocrast, maxvisit, minaway, delay) {
