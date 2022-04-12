@@ -43,7 +43,7 @@ function urlGoogle() {
 /**
  * Part 2: Take the "code" parameter which Google gives us once when the user logs in, then get the user's email and id.
  */
-function getGoogleAccountFromCode(code) {
+async function getGoogleAccountFromCode(code) {
   const data = await auth.getToken(code);
   const tokens = data.tokens;
   const auth = createConnection();

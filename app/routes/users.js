@@ -1,13 +1,16 @@
 const express = require("express");
 const UserCtrl = require("../domain/controllers/UserCtrl");
+const Auth_middleware = require("./auth_middleware");
+const GoogleAuth = require("../utils/googleAuth");
+
 const router = express.Router();
 module.exports = router;
-//Importar middleware.js per desencriptar el token
 
 const user_ctrl = new UserCtrl();
+const google_auth = new GoogleAuth();
+const auth = new Auth_middleware();
 
-//router.get("/:id", auth.passthrough, async (req, res) => {})
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth.passthrough, async (req, res) => {
     // Get the user info
     try {
         let user = await user_ctrl.profile (req.params.username);
@@ -17,12 +20,15 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {       //login_or_register from google
+router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {
     // Get the user info
     try {
-        
+        let userInfo = await google_auth.getGoogleAccountFromCode(req.query.code);
+        let token = await user_ctrl.login_or_register(userInfo.id, userInfo.email);
+        res.cookie("access_token", token).status(200);
+        res.redirect("/news");
     } catch (e) {
-        
+        res.status(500).json({ message: e.message });
     }
 });
 
