@@ -13,10 +13,12 @@ const auth = new Auth_middleware();
 router.get("/:id", auth.passthrough, async (req, res) => {
     // Get the user info
     try {
-        let user = await user_ctrl.profile (req.params.username);
+        let user = await user_ctrl.profile (req.user_auth.id, req.params.id);
         res.status(200).json(user);
+        res.render("user", { user: user });
     } catch (e) {
         res.status(500).json({ message: e.message });
+        res.render("user", { user: user });
     }
 });
 
@@ -24,7 +26,7 @@ router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {
     // Get the user info
     try {
         let userInfo = await google_auth.getGoogleAccountFromCode(req.query.code);
-        let token = await user_ctrl.login_or_register(userInfo.id, userInfo.email);
+        let token = await user_ctrl.login_or_register(userInfo.id, userInfo.username, userInfo.email, userInfo.tokens);
         res.cookie("access_token", token).status(200);
         res.redirect("/news");
     } catch (e) {
@@ -32,8 +34,7 @@ router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {
     }
 });
 
-//router.patch("/:id", auth.strict, async (req, res) => {})
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", auth.strict, async (req, res) => {
     //Desencriptar token 
     const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
 
