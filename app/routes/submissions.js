@@ -1,9 +1,11 @@
 const express = require("express");
 const SubmissionCtrl = require("../domain/controllers/SubmissionCtrl");
+const AuthMiddleware = require("./auth_middleware");
 const router = express.Router();
 module.exports = router;
 
 const sub_ctrl = new SubmissionCtrl();
+const auth = new AuthMiddleware();
 
 router.get("/:id", async (req, res) => {
     // Get one submission
@@ -20,14 +22,14 @@ router.get('/', async (req, res) => {
     res.send("You should visit /news to get the view of submissions")
 });
 
-router.post("/", async (req, res) => {
-    const {title, url, text/*, author*/} = req.body; // TODO: author may not be given as request param, but in token header.
+router.post("/", auth.strict, async (req, res) => {
+    const {title, url, text} = req.body;
     
     //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
     if (title === "") res.render("submit", { error: "You have to introduce a title" });
     
     try {
-        let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
+        let id = await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
         console.log("submission created with id: " + id); // Do whatever is necessary with id.
         res.redirect("/news");
     } catch (e) {

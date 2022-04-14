@@ -1,8 +1,8 @@
 class User {
     
     constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.id, params.username, params.email) }
-        this.id = params.id;
+        if (!'createdAt' in params) { return constructDefault(params.googleId, params.username, params.email) }
+        this.googleId = params.googleId;
         this.username = params.username;
         this.createdAt = params.createdAt;
         this.karma = params.karma;
@@ -15,8 +15,8 @@ class User {
         this.delay = params.delay;
     }
 
-    constructDefault(id, username, email) {
-        this.id = id;
+    constructDefault(googleId, username, email) {
+        this.googleId = googleId;
         this.username = username;
         this.createdAt = Date.now();
         this.karma = 1;
