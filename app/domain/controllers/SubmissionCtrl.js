@@ -47,10 +47,11 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
 
     let result = [];
     for (let i = 0; i < data.length-1; i++) {
-        if (data[i].url !== undefined) result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url) );
+        if (data[i].type === "url") result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url) );
         else result.push( new AskSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].text) );
     }
     result.push(data[data.length-1]);
+    console.log(result);
     return result;
 }
 

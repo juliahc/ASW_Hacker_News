@@ -15,16 +15,18 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+
 router.get('/', async (req, res) => {
     // Get all submissions
     res.send("You should visit /news to get the view of submissions")
 });
 
+
 router.post("/", async (req, res) => {
     const {title, url, text/*, author*/} = req.body; // TODO: author may not be given as request param, but in token header.
-    
-    //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
+
     if (title === "") res.render("submit", { error: "You have to introduce a title" });
+    if (url != "" && text != "") res.render("submit", { error: "Not" });
     
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
