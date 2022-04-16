@@ -1,3 +1,5 @@
+const Comment = require("./Comment");
+
 class Submission {
     constructor(params) {
         if (!'createdAt' in params) { return constructDefault(params.title, params.googleId, params.username) }
@@ -9,7 +11,7 @@ class Submission {
         this.createdAt = params.createdAt;
         if (Array.isArray(params.comments)) {
             this.comments = [];
-            params.comments.forEach(comment => this.replies.push(new Comment(comment)));
+            params.comments.forEach(comment => this.comments.push(new Comment(comment)));
         } else {
             this.comments = params.comments;
         }

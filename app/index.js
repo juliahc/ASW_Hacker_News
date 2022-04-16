@@ -13,7 +13,7 @@ app.set('view engine', 'ejs');
 // Routes related to serving html/css/js public resources
 app.use(require("./routes/views"));
 
-// Routes related to rest operations on submissions
+// Routes related to rest operations on submissions, users, etc.
 app.use('/submissions', require("./routes/submissions"));
 app.use('/users', require("./routes/users"));
 
