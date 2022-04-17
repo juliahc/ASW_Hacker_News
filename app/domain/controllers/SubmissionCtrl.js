@@ -19,10 +19,13 @@ let SubmissionCtrl;
 // Declare controller methods
 
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, author) {
+    console.log("\n\n\nAbans de crarla sbmission");
+    console.log("\n\n\Parametres: ", title, url, text, author);
     let submission;
     if (url.length === 0) submission = new AskSubmission(null, title, 0, null, author, text);
     else submission = new UrlSubmission(null, title, 0, null, author, url);
     let id = await this.db.postRequest("/newSubmission", submission);
+    console.log("\n\n\nDesprés de crear la submission")
     return id;
 }
 
@@ -47,11 +50,10 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
 
     let result = [];
     for (let i = 0; i < data.length-1; i++) {
-        if (data[i].type === "url") result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url) );
-        else result.push( new AskSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].text) );
+        if (data[i].type === "url") result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url[0].url) );
+        else result.push( new AskSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].ask[0].text) );
     }
     result.push(data[data.length-1]);
-    console.log(result);
     return result;
 }
 

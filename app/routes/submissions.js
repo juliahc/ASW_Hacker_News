@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
     const {title, url, text/*, author*/} = req.body; // TODO: author may not be given as request param, but in token header.
 
     if (title === "") res.render("submit", { error: "You have to introduce a title" });
-    if (url != "" && text != "") res.render("submit", { error: "Not" });
+    if (url != "" && text != "") res.render("submit", { error: "Not implemented yet" });
     
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, "my_hardcoded_author");
