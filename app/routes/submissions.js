@@ -17,16 +17,19 @@ router.get("/:id", async (req, res) => {
     }
 });
 
+
 router.get('/', async (req, res) => {
     // Get all submissions
     res.send("You should visit /news to get the view of submissions")
 });
+
 
 router.post("/", auth.strict, async (req, res) => {
     const {title, url, text} = req.body;
     
     //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
     if (title === "") res.render("submit", { error: "You have to introduce a title" });
+    if (url != "" && text != "") res.render("submit", { error: "Not implemented yet" });
     
     try {
         let id = await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);

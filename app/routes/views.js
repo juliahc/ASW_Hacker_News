@@ -18,6 +18,7 @@ router.get("/", async (req, res) => {
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
+        console.log(sub_page);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -60,4 +61,8 @@ router.get("/newest", async (req, res) => {
 
 router.get("/user", async (req, res) => {
     res.render("user", {});
+});
+
+router.get("/submit", async (req, res) => {
+    res.render("submit", {});
 });
