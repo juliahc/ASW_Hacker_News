@@ -19,13 +19,10 @@ let SubmissionCtrl;
 // Declare controller methods
 
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, author) {
-    console.log("\n\n\nAbans de crarla sbmission");
-    console.log("\n\n\Parametres: ", title, url, text, author);
     let submission;
     if (url.length === 0) submission = new AskSubmission(null, title, 0, null, author, text);
     else submission = new UrlSubmission(null, title, 0, null, author, url);
     let id = await this.db.postRequest("/newSubmission", submission);
-    console.log("\n\n\nDesprés de crear la submission")
     return id;
 }
 
