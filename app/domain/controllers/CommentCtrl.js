@@ -15,7 +15,7 @@ let CommentCtrl;
 
 // Declare controller methods
 
-Comment.prototype.postComment = async function(parent, type, text, googleId, username) {
+CommentCtrl.prototype.postComment = async function(parent, type, text, googleId, username) {
     if (!type in this.types) throw Error("Comment parent type [" + type + "] not supported");
     let comment = new Comment({parent: parent, text: text, googleId: googleId, username: username});
     comment.type = type;
@@ -29,7 +29,7 @@ CommentCtrl.prototype.fetchComment = async function(id) {
     return new Comment(resp.data);
 }
 
-Comment.prototype.fetchCommentsOfUser = async function(id) {
+CommentCtrl.prototype.fetchCommentsOfUser = async function(id) {
     let resp = await this.db.getRequest("/comment/user", id);
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let result = [];
