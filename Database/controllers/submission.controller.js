@@ -75,16 +75,25 @@ exports.page = async (request, response) => {
         return;
     }
 
-    let match = {};
     let orderBy = {};
 
+    let criteria = {};
+    criteria["$and"] = [];
     if (request.query.t !== "any") {
-        match = {
+        criteria["$and"].push({
             type: {
-                $eq: request.query.t
-            }
-        }
+                $eq: params.t
+            } 
+        });
     }
+    if (request.query.usr !== undefined && request.query.usr !== "") {
+      criteria["$and"].push({
+            author: {
+                $eq: params.usr
+            }
+        });
+    }
+
     switch(request.query.o) {
         case "new":
             orderBy = {
@@ -98,7 +107,12 @@ exports.page = async (request, response) => {
             break;
     }
 
-    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), match, orderBy);
+    if (criteria['$and'].length === 0) {
+        delete criteria['$and'];
+    }
+
+
+    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
