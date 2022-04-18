@@ -25,6 +25,19 @@ exports.findSubmission = async (where = {}) => {
     })
 }
 
+exports.updateSubmission = async (where = {}, updateParams) => {
+    return new Promise((resolve, reject) => {
+        SubmissionModel.
+        updateMany(where, updateParams)
+        .then((data) => {
+            resolve(data);
+        })
+        .catch((error) => {
+            reject(error);
+        });
+    });
+}
+
 exports.aggregateSubmission = async (aggregateArr) => {
     return new Promise((resolve, reject) => {
         SubmissionModel

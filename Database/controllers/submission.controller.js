@@ -158,27 +158,35 @@ exports.comments = async (request, response) => {
         const where = {};
         where._id = mongodb.ObjectId(id);
 
-        submissionDatalayer.find(where)
+        submissionDatalayer.findSubmission(where)
         .then((submissionData) => {
             if (submissionData !== null && typeof submissionData !== undefined) {
                 //The submission exists on the database. Now we need to get the comments
+                console.log(submissionData);
                 const criteria = {};
                 criteria["$and"] = [];
                 criteria["$and"].push({
-                    submission: {
+                    _id: {
                         $eq: mongodb.ObjectId(id)
                     }
                 });
                 //Search all comments relateds to the submission, including comments of comments
                 let aggregateArr = createAggregateCommentArray(criteria);
+                console.log("Aggregate Array: ", JSON.stringify(aggregateArr));
                 submissionDatalayer.aggregateSubmission(aggregateArr)
                 .then((commentData) => {
                     if (commentData !== null && typeof commentData !== undefined) {
                         responseObj.status  = errorCodes.SUCCESS;
                         responseObj.message = "Success";
                         responseObj.data    = commentData;
+                        response.send(responseObj);
                     }
-                    response.send(responseObj);
+                    else {
+                        responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                        responseObj.message = "No record found";
+                        responseObj.data    = {};
+                        response.send(responseObj);
+                    }
                 })
                 .catch(error => {
                     responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -190,8 +198,8 @@ exports.comments = async (request, response) => {
                 responseObj.status  = errorCodes.DATA_NOT_FOUND;
                 responseObj.message = "No record found";
                 responseObj.data    = {};
+                response.send(responseObj);
             }
-            response.send(responseObj);
         })
         .catch(error => {
             responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -291,8 +299,45 @@ exports.create = async (request, response) => {
     return;
 };
 
-function createAggregateCommentArray () {
-    return [];                                  //TODO create the return array
+function createAggregateCommentArray (match) {
+    return [
+      {
+        '$match': match
+      }, {
+        '$lookup': {
+          'from': 'comments', 
+          'let': {
+            'comments': '$comments'
+          }, 
+          'pipeline': [
+            {
+              '$match': {
+                '$expr': {
+                  '$in': [
+                    '$_id', '$$comments'
+                  ]
+                }
+              }
+            }, {
+              '$project': {
+                'text': 1, 
+                'author': 1, 
+                'createdAt': 1, 
+                'points': 1, 
+                'parent': 1, 
+                'replies': 1
+              }
+            }
+          ], 
+          'as': 'comments'
+        }
+      }, {
+        '$project': {
+          '__v': 0, 
+          'updatedAt': 0
+        }
+      }
+    ];
 }
 
 function createAggregateSubmissionArray (match) {

@@ -22,3 +22,16 @@ exports.findComment = async (where = {}) => {
         })
     })
 }
+
+exports.updateComment = async (where = {}, updateParams) => {
+    return new Promise((resolve, reject) => {
+        CommentModel.
+        updateMany(where, updateParams)
+        .then((data) => {
+            resolve(data);
+        })
+        .catch((error) => {
+            reject(error);
+        });
+      });
+}

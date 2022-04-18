@@ -9,18 +9,21 @@ const CommentSchema = new global.Schema({
         type: String,
         required: true
     },
+    authorName: {
+        type: String,
+        required: true
+    },
     points: {
         type: Number,
         default: 0
     },
-    submit: {
-        ref: "Submission",
-        type: Schema.Types.ObjectId,
-        required: true
-    },
-    comments: [{
+    parent: {
         ref: "Comment",
-        type: String,
+        type: Schema.Types.ObjectId,
+    },
+    replies: [{
+        ref: "Comment",
+        type: Schema.Types.ObjectId,
         default: []
     }]
 }, {
