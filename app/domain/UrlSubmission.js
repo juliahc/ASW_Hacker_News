@@ -2,9 +2,9 @@ const Submission = require("./Submission");
 
 class UrlSubmission extends Submission {
     
-    constructor(params) {
-        super(params);
-        this.url = params.url;
+    constructor(id, title, points, createdAt, author, url) {
+        super(id, title, points, createdAt, author);
+        this.url = url;
         this.type = "url";
     }
 }

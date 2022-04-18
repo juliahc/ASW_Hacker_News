@@ -41,6 +41,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     if (data.hasOwnProperty("status") && data.status === this.db.errors.SUCCESS) {
         //Success -> get data object from db
         data = data.data;
+        console.log("success")
     } else {
         //Error
         console.log("Error");

@@ -1,23 +1,23 @@
 class Submission {
-    constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.title, params.author, params.username) }
-        this.id = params.id;
-        this.title = params.title;
-        this.author = params.author;
-        this.username = params.username;
-        this.points = params.points;
-        this.createdAt = params.createdAt;
-        this.comments = params.comments;
+    constructor(id, title, points, createdAt, author) {
+        //if (!'createdAt' in params) { return constructDefault(title, author/*, username*/) }
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        //this.username = username;
+        this.points = points;
+        this.createdAt = createdAt;
+        //this.comments = comments;
     }
 
-    constructDefault(title, author, username) {
+    constructDefault(title, author/*, username*/) {
         this.id = null;
         this.title = title;
         this.author = author;
-        this.username = username;
+        //this.username = username;
         this.points = 0;
         this.createdAt = Date.now();
-        this.comments = [];
+        //this.comments = [];
     }
 
     getTitle() {
