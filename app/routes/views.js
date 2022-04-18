@@ -75,7 +75,7 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
     }
     try {
         let p = req.query.p || 1;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"usr","new",req.query.id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();

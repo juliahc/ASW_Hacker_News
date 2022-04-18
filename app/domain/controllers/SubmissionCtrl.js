@@ -10,7 +10,7 @@ let SubmissionCtrl;
         instance = this;
 
         // initialize any properties of the singleton
-        this.types = ["any", "url", "ask", "usr"];
+        this.types = ["any", "url", "ask"];
         this.orders = ["pts", "new"];
         this.db = new DatabaseCtrl();
         this.fromDbSubToDomainSub = function(submission) {
@@ -50,7 +50,9 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     if (!this.types.includes(type)) throw TypeError("Type of submissions is not supported.");
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
     if (page <= 0) throw TypeError("Page must be greater than zero.");
-    let resp = await this.db.getRequest("/submission_page", {p: page, t: type, o: order, id: googleId});
+    let params = {p: page, t: type, o: order};
+    if (googleId !== null) params["usr"] = googleId;
+    let resp = await this.db.getRequest("/submission_page", params);
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];
