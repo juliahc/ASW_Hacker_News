@@ -388,7 +388,7 @@ function createAggregateArray (page, match, orderBy) {
                   '$match': {
                     '$expr': {
                       '$eq': [
-                        '$submission', '$$sId'
+                        '$submission', '$$sId' 
                       ]
                     }
                   }
