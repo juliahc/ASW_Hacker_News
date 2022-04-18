@@ -15,10 +15,10 @@ app.use(require("./routes/views"));
 
 // Routes related to rest operations on submissions, users, etc.
 app.use('/submissions', require("./routes/submissions"));
+app.use('/comments', require("./routes/comments"));
 app.use('/users', require("./routes/users"));
 
 function listen() {
-    if (app.get("env") === "test") return;
     app.listen(3000);
     console.log("Express app started on port " + 3000);
 }
