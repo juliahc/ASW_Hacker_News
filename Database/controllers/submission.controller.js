@@ -224,7 +224,8 @@ exports.create = async (request, response) => {
     let submissionObject = {
         title: params.title,
         points: params.points,
-        type: (params.hasOwnProperty("url")) ? "url" : "ask"
+        type: (params.hasOwnProperty("url")) ? "url" : "ask",
+        author: params.googleId
     }
     //Creating submission on the database
     submissionDatalayer.createSubmission(submissionObject)
@@ -348,20 +349,64 @@ function createAggregateArray (page, match, orderBy) {
         {
           '$match': match
         }, {
-          '$lookup': {
-            'from': 'urls', 
-            'localField': '_id', 
-            'foreignField': 'submission', 
-            'as': 'url'
-          }
-        }, {
-          '$lookup': {
-            'from': 'asks', 
-            'localField': '_id', 
-            'foreignField': 'submission', 
-            'as': 'ask'
-          }
-        }, {
+            '$lookup': {
+              'from': 'urls', 
+              'let': {
+                'sId': '$_id'
+              }, 
+              'pipeline': [
+                {
+                  '$match': {
+                    '$expr': {
+                      '$eq': [
+                        '$submission', '$$sId'
+                      ]
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'url': 1
+                  }
+                }
+              ], 
+              'as': 'url'
+            }
+          }, {
+            '$unwind': {
+              'path': '$url', 
+              'includeArrayIndex': 'string', 
+              'preserveNullAndEmptyArrays': true
+            }
+          }, {
+            '$lookup': {
+              'from': 'asks', 
+              'let': {
+                'sId': '$_id'
+              }, 
+              'pipeline': [
+                {
+                  '$match': {
+                    '$expr': {
+                      '$eq': [
+                        '$submission', '$$sId'
+                      ]
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'text': 1
+                  }
+                }
+              ], 
+              'as': 'ask'
+            }
+          }, {
+            '$unwind': {
+              'path': '$ask', 
+              'includeArrayIndex': 'string', 
+              'preserveNullAndEmptyArrays': true
+            }
+          }, {
           '$sort': orderBy
         }, {
             '$skip': page
