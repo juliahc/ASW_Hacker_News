@@ -15,7 +15,6 @@ router.get("/", async (req, res) => {
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
-        console.log(sub_page);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -79,3 +78,16 @@ router.get("/submit", async (req, res) => {
     res.render("submit", {});
 });
 
+router.get("/ask", async (req, res) => {
+    try {
+        let p = req.query.p || 1;
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts");
+        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let more = submissionsLeft > 0;
+        sub_page.pop();
+        sub_page = calcTimeAgoSubmissions(sub_page);
+        res.render("ask", { submissions: sub_page, p: p, more: more });
+    } catch (e) {
+        res.render("ask", {error: "Hacker News can't connect to his database"});
+    }
+});

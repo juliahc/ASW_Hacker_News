@@ -13,6 +13,19 @@ let SubmissionCtrl;
         this.types = ["any", "url", "ask"];
         this.orders = ["pts", "new"];
         this.db = new DatabaseCtrl();
+        this.fromDbSubToDomainSub = function(submission) {
+            submission.id = submission._id;
+            delete submission._id;
+            if (submission.type === "url") {
+                submission.url = submission.url[0].url;
+                return new UrlSubmission(submission);
+            }
+            else {
+                submission.text = submission.ask[0].text;
+                delete submission.ask;
+                return new AskSubmission(submission);
+            }
+        }
     };
 }());
 
@@ -38,20 +51,11 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
     if (page <= 0) throw TypeError("Page must be greater than zero.");
     let resp = await this.db.getRequest("/submission_page", {p: page, t: type, o: order});
-    if (resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];
     for (let i = 0; i < data.length-1; i++) {
-        if (data[i].type === "url") result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url[0].url) );
-        else result.push( new AskSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].ask[0].text) );
-        /* wait until database changes
-        // For each object do the necessary transformation to its attributes
-        let submission = data[i];
-        submission.id = submission._id;
-        delete submission._id;
-        if (data[i].url !== undefined) result.push(new UrlSubmission(submission));
-        else result.push(new AskSubmission(submission));
-        */
+        result.push(this.fromDbSubToDomainSub(data[i]));
     }
     result.push(data[data.length-1]); // The last element of data list is the number of pages left.
     return result;
