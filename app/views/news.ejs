@@ -70,8 +70,8 @@
                                                     <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton"><i id="<%= submission._id %>" class="fas fa-heart"></i></td>
                                                     <td class="title">
-                                                        <a class="newTitle titleText" href="<%= submission.url[0].url %>"> <%= submission.title %> </a>
-                                                        <a class="newLink" href="<%= submission.url[0].url %>"><%= (new URL(submission.url[0].url).hostname) %></a>
+                                                        <a class="newTitle titleText" href="<%= submission.url %>"> <%= submission.title %> </a>
+                                                        <a class="newLink" href="<%= submission.url %>"><%= (new URL(submission.url).hostname) %></a>
                                                     </td>
                                                 </tr>
                                                 <tr class="newActions">
@@ -88,7 +88,12 @@
                                                         |
                                                         <a href="#">hide</a>
                                                         |
-                                                        <a href="#">0 comments</a>
+                                                        <a href="#">
+                                                        <% if(submission.comments != 0)  { %> 
+                                                            <%= submission.comments %> comments
+                                                        <% } else { %>
+                                                            discuss
+                                                        <% } %></a>
                                                     </td>
                                                 </tr>
                                                 <tr class ="space-10px"></tr>
@@ -120,13 +125,14 @@
                                                     </td>
                                                 </tr>
                                                 <tr class ="space-10px"></tr>
-                                            <%           
-                                                }
+
+                                                <tr class ="space-10px"></tr>
+                                            <% }
                                             }) %>
                                         <% } 
                                     }%>
                                    <!--News go here-->
-                                   <% if (more) { %>
+                                   <% if (locals.more) { %>
                                     <tr id="moreButton">
                                         <td colspan="2"></td>
                                         <td>

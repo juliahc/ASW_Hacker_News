@@ -42,12 +42,16 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     let data = resp.data;
     let result = [];
     for (let i = 0; i < data.length-1; i++) {
+        if (data[i].type === "url") result.push( new UrlSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].url[0].url) );
+        else result.push( new AskSubmission(data[i]._id, data[i].title, data[i].points, data[i].createdAt, data[i].author, data[i].ask[0].text) );
+        /* wait until database changes
         // For each object do the necessary transformation to its attributes
         let submission = data[i];
         submission.id = submission._id;
         delete submission._id;
         if (data[i].url !== undefined) result.push(new UrlSubmission(submission));
         else result.push(new AskSubmission(submission));
+        */
     }
     result.push(data[data.length-1]); // The last element of data list is the number of pages left.
     return result;
