@@ -111,7 +111,6 @@ exports.page = async (request, response) => {
         delete criteria['$and'];
     }
 
-
     let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
