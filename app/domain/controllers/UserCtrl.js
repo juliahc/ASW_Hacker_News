@@ -97,3 +97,5 @@ UserCtrl.prototype.favoriteSubmission = async function(authId, submissionId) {
 UserCtrl.prototype.favoriteComment = async function(authId, commentId) {
 
 }
+
+module.exports = UserCtrl;

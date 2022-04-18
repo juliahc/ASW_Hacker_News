@@ -2,14 +2,40 @@
 const express = require("express");
 const UserCtrl = require("../domain/controllers/UserCtrl");
 const AuthMiddleware = require("./auth_middleware");
-const GoogleAuth = require("../utils/googleAuth");
+const googleAuth = require("../utils/googleAuth.js");
+const url = require('url');
 
 const router = express.Router();
 module.exports = router;
 
 const user_ctrl = new UserCtrl();
-const google_auth = new GoogleAuth();
 const auth = new AuthMiddleware();
+
+router.get("/login", async (req, res) => {
+    // Get the user info
+    try {
+        
+        res.redirect(googleAuth.googleLoginUrl);
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+});
+
+router.get("/google/auth", async (req, res) => {
+    // Get the user info
+    try {
+        const queryObject = url.parse(req.url,true).query;
+
+        let token = await googleAuth.getAccessTokenFromCode(queryObject.code);
+        let userInfo = await googleAuth.getGoogleUserInfo(token);
+        // console.log(userInfo);
+        // let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email, token);
+        // res.cookie("access_token", token).status(200);
+        res.redirect('/user?user='+userInfo.name);
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+});
 
 router.get("/:id", auth.passthrough, async (req, res) => {
     // Get the user info
@@ -23,24 +49,12 @@ router.get("/:id", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/"+process.env.GOOGLE_REDIRECT_URL, async (req, res) => {
-    // Get the user info
-    try {
-        let userInfo = await google_auth.getGoogleAccountFromCode(req.query.code);
-        let token = await user_ctrl.login_or_register(userInfo.id, userInfo.username, userInfo.email, userInfo.tokens);
-        res.cookie("access_token", token).status(200);
-        res.redirect("/news");
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-});
-
 router.patch("/:id", auth.strict, async (req, res) => {
     const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
     const authId = req.user_auth.id;
     try {
         let user = await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);
-        res.redirect("/:authId"); // FIXME: Això no funcionarà, potser un redirect a ("/users/"+authId)
+        res.redirect("/users/"+authId);
     } catch (e) {
         console.log("user update failed with code: " + e.message);
         res.render("update", { error: "Hacker News can't connect to its database", message: e.message });
