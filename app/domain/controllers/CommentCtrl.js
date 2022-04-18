@@ -29,4 +29,14 @@ CommentCtrl.prototype.fetchComment = async function(id) {
     return new Comment(resp.data);
 }
 
+Comment.prototype.fetchCommentsOfUser = async function(id) {
+    let resp = await this.db.getRequest("/comment/user", id);
+    if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
+    let result = [];
+    resp.data.forEach(comment => {
+        result.push(new Comment(comment));
+    });
+    return result;
+}
+
 module.exports = CommentCtrl;
