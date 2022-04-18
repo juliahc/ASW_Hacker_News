@@ -1,3 +1,4 @@
+const calcTimeAgo = require("../utils/timeAgo");
 class Comment {
     constructor(params) {
         if (!'createdAt' in params) { return constructDefault(params.googleId, params.username, params.parent, params.text) }
@@ -21,6 +22,12 @@ class Comment {
         this.createdAt = Date.now();
         this.parent = parent;
         this.replies = [];
+    }
+
+    formatCreatedAtAsTimeAgo() {
+        let timeAgo = calcTimeAgo(this.createdAt);
+        this.createdAt = timeAgo;
+        this.replies.forEach(comment => comment.formatCreatedAtAsTimeAgo());
     }
 }
 

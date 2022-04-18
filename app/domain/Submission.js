@@ -26,6 +26,11 @@ class Submission {
         this.createdAt = Date.now();
         this.comments = [];
     }
+
+    formatCreatedAtAsTimeAgo() {
+        let timeAgo = calcTimeAgo(this.createdAt);
+        this.createdAt = timeAgo;
+    }
 }
 
 module.exports = Submission;
