@@ -1,3 +1,4 @@
+/*
 const express = require("express");
 const UserCtrl = require("../domain/controllers/UserCtrl");
 const AuthMiddleware = require("./auth_middleware");
@@ -60,3 +61,4 @@ router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, 
 router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {});       //favoriteComment
 
 router.delete("/:id", auth.strict, async (req, res) => {});      //deleteUser??
+*/

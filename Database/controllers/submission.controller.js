@@ -75,16 +75,25 @@ exports.page = async (request, response) => {
         return;
     }
 
-    let match = {};
     let orderBy = {};
 
+    let criteria = {};
+    criteria["$and"] = [];
     if (request.query.t !== "any") {
-        match = {
+        criteria["$and"].push({
             type: {
-                $eq: request.query.t
-            }
-        }
+                $eq: params.t
+            } 
+        });
     }
+    if (request.query.usr !== undefined && request.query.usr !== "") {
+      criteria["$and"].push({
+            author: {
+                $eq: params.usr
+            }
+        });
+    }
+
     switch(request.query.o) {
         case "new":
             orderBy = {
@@ -98,7 +107,12 @@ exports.page = async (request, response) => {
             break;
     }
 
-    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), match, orderBy);
+    if (criteria['$and'].length === 0) {
+        delete criteria['$and'];
+    }
+
+
+    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
@@ -143,6 +157,79 @@ exports.page = async (request, response) => {
     });
 }
 
+exports.comments = async (request, response) => {
+    let id;
+    if (request.query._id) {
+        id = request.query._id;
+    } else {
+        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+        responseObj.message = "Required parameters missing";
+        responseObj.data    = {};
+        response.send(responseObj);
+        return;
+    }
+    if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
+        const where = {};
+        where._id = mongodb.ObjectId(id);
+
+        submissionDatalayer.findSubmission(where)
+        .then((submissionData) => {
+            if (submissionData !== null && typeof submissionData !== undefined) {
+                //The submission exists on the database. Now we need to get the comments
+                console.log(submissionData);
+                const criteria = {};
+                criteria["$and"] = [];
+                criteria["$and"].push({
+                    _id: {
+                        $eq: mongodb.ObjectId(id)
+                    }
+                });
+                //Search all comments relateds to the submission, including comments of comments
+                let aggregateArr = createAggregateCommentArray(criteria);
+                console.log("Aggregate Array: ", JSON.stringify(aggregateArr));
+                submissionDatalayer.aggregateSubmission(aggregateArr)
+                .then((commentData) => {
+                    if (commentData !== null && typeof commentData !== undefined) {
+                        responseObj.status  = errorCodes.SUCCESS;
+                        responseObj.message = "Success";
+                        responseObj.data    = commentData;
+                        response.send(responseObj);
+                    }
+                    else {
+                        responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                        responseObj.message = "No record found";
+                        responseObj.data    = {};
+                        response.send(responseObj);
+                    }
+                })
+                .catch(error => {
+                    responseObj.status  = errorCodes.SYNTAX_ERROR;
+                    responseObj.message = error;
+                    responseObj.data    = {};
+                    response.send(responseObj);
+                });
+            } else {
+                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                responseObj.message = "No record found";
+                responseObj.data    = {};
+                response.send(responseObj);
+            }
+        })
+        .catch(error => {
+            responseObj.status  = errorCodes.SYNTAX_ERROR;
+            responseObj.message = error;
+            responseObj.data    = {};
+            response.send(responseObj);
+        });
+    } else {
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = "Invalid id";
+        responseObj.data    = {};
+        response.send(responseObj);
+    }
+    return;
+}
+
 exports.create = async (request, response) => {
     console.log(request)
     let params = {};
@@ -159,7 +246,8 @@ exports.create = async (request, response) => {
     let submissionObject = {
         title: params.title,
         points: params.points,
-        type: (params.hasOwnProperty("url")) ? "url" : "ask"
+        type: (params.hasOwnProperty("url")) ? "url" : "ask",
+        author: params.googleId
     }
     //Creating submission on the database
     submissionDatalayer.createSubmission(submissionObject)
@@ -225,6 +313,47 @@ exports.create = async (request, response) => {
     return;
 };
 
+function createAggregateCommentArray (match) {
+    return [
+      {
+        '$match': match
+      }, {
+        '$lookup': {
+          'from': 'comments', 
+          'let': {
+            'comments': '$comments'
+          }, 
+          'pipeline': [
+            {
+              '$match': {
+                '$expr': {
+                  '$in': [
+                    '$_id', '$$comments'
+                  ]
+                }
+              }
+            }, {
+              '$project': {
+                'text': 1, 
+                'author': 1, 
+                'createdAt': 1, 
+                'points': 1, 
+                'parent': 1, 
+                'replies': 1
+              }
+            }
+          ], 
+          'as': 'comments'
+        }
+      }, {
+        '$project': {
+          '__v': 0, 
+          'updatedAt': 0
+        }
+      }
+    ];
+}
+
 function createAggregateSubmissionArray (match) {
     return [
         {
@@ -279,20 +408,64 @@ function createAggregateArray (page, match, orderBy) {
         {
           '$match': match
         }, {
-          '$lookup': {
-            'from': 'urls', 
-            'localField': '_id', 
-            'foreignField': 'submission', 
-            'as': 'url'
-          }
-        }, {
-          '$lookup': {
-            'from': 'asks', 
-            'localField': '_id', 
-            'foreignField': 'submission', 
-            'as': 'ask'
-          }
-        }, {
+            '$lookup': {
+              'from': 'urls', 
+              'let': {
+                'sId': '$_id'
+              }, 
+              'pipeline': [
+                {
+                  '$match': {
+                    '$expr': {
+                      '$eq': [
+                        '$submission', '$$sId'
+                      ]
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'url': 1
+                  }
+                }
+              ], 
+              'as': 'url'
+            }
+          }, {
+            '$unwind': {
+              'path': '$url', 
+              'includeArrayIndex': 'string', 
+              'preserveNullAndEmptyArrays': true
+            }
+          }, {
+            '$lookup': {
+              'from': 'asks', 
+              'let': {
+                'sId': '$_id'
+              }, 
+              'pipeline': [
+                {
+                  '$match': {
+                    '$expr': {
+                      '$eq': [
+                        '$submission', '$$sId' 
+                      ]
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'text': 1
+                  }
+                }
+              ], 
+              'as': 'ask'
+            }
+          }, {
+            '$unwind': {
+              'path': '$ask', 
+              'includeArrayIndex': 'string', 
+              'preserveNullAndEmptyArrays': true
+            }
+          }, {
           '$sort': orderBy
         }, {
             '$skip': page

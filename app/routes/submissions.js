@@ -1,10 +1,12 @@
 const express = require("express");
 const SubmissionCtrl = require("../domain/controllers/SubmissionCtrl");
+const CommentCtrl = require("../domain/controllers/CommentCtrl");
 const AuthMiddleware = require("./auth_middleware");
 const router = express.Router();
 module.exports = router;
 
 const sub_ctrl = new SubmissionCtrl();
+const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
 router.get("/:id", async (req, res) => {
@@ -32,14 +34,24 @@ router.post("/", auth.strict, async (req, res) => {
     if (url != "" && text != "") res.render("submit", { error: "Not implemented yet" });
     
     try {
-        let id = await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
-        console.log("submission created with id: " + id); // Do whatever is necessary with id.
-        res.redirect("/news");
+        await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
+        res.redirect("/newest");
     } catch (e) {
-        console.log("submission creation failed with code: " + e.message);
         res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });
     }
-    
+});
+
+router.post("/:id/comments", auth.strict, async (req, res) => {
+    const {text} = req.body;
+
+    if (text === "") { res.send("Error: text is empty."); }
+
+    try {
+        await comm_ctrl.postComment(id, "sub", text, req.user_auth.id, req.user_auth.username);
+        res.redirect("/newest"); //redirect to render context of comment (parent submission)
+    } catch (e) {
+        res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });
+    }
 });
 
 router.patch("/:id", async (req, res) => {
