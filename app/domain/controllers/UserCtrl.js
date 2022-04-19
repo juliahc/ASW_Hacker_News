@@ -1,5 +1,6 @@
 const User = require("../User");
 const DatabaseCtrl = require("./DatabaseCtrl");
+require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
 
@@ -43,7 +44,7 @@ UserCtrl.prototype.login_or_register = async function(id, username, email, token
         db_karma = resp.data.karma;
     }
     // Return user_auth token
-    return this.encrypt(db_id, username, karma, tokens);
+    return this.encrypt(db_id, username, db_karma, tokens);
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {

@@ -1,9 +1,12 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const nodeCookie = require('node-cookie');
 
 class auth {
     constructor() { }
     strict(req, res, next) {
-        const token = req.cookies.access_token;
+        // const token = req.cookies.access_token;
+        const token = nodeCookie.get(req, 'access_token');
 
         if (!token) {
             return res.status(403).send("A token is required for authentication");
@@ -17,7 +20,8 @@ class auth {
         return next();
     }
     passthrough(req, res, next) {
-        const token = req.cookies.access_token;
+        // const token = req.cookies.access_token;
+        const token = nodeCookie.get(req, 'access_token');
 
         if (!token) {
             req.user_auth = {id: null, google_tokens: null};
