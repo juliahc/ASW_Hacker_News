@@ -4,12 +4,12 @@ const CommentSchema = new global.Schema({
       type: String,
       required: true
     },
-    author: {
+    googleId: {
         ref: "User",
         type: String,
         required: true
     },
-    authorName: {
+    username: {
         type: String,
         required: true
     },

@@ -346,11 +346,11 @@ function createAggregateCommentArray (match) {
           'text': {
             '$first': '$text'
           }, 
-          'author': {
-            '$first': '$author'
+          'googleId': {
+            '$first': '$googleId'
           }, 
-          'authorName': {
-            '$first': '$authorName'
+          'username': {
+            '$first': '$username'
           }, 
           'points': {
             '$first': '$points'
