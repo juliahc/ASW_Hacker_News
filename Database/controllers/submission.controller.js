@@ -89,7 +89,7 @@ exports.page = async (request, response) => {
     }
     if (request.query.usr !== undefined && request.query.usr !== "") {
       criteria["$and"].push({
-            author: {
+            googleId: {
                 $eq: params.usr
             }
         });
@@ -347,11 +347,11 @@ function createAggregateCommentArray (match) {
           'text': {
             '$first': '$text'
           }, 
-          'author': {
-            '$first': '$author'
+          'googleId': {
+            '$first': '$googleId'
           }, 
-          'authorName': {
-            '$first': '$authorName'
+          'username': {
+            '$first': '$username'
           }, 
           'points': {
             '$first': '$points'
@@ -449,7 +449,7 @@ function createAggregateSubmissionArray (match) {
           '$lookup': {
             'from': 'users', 
             'let': {
-              'gId': '$author'
+              'gId': '$googleId'
             }, 
             'pipeline': [
               {
