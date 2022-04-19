@@ -63,8 +63,8 @@ exports.create = async (request, response, next) => {
     params.submission = mongodb.ObjectId(params.submission);
     let commentObject = {
         text: params.text,
-        author: params.author,
-        authorName: params.authorName,
+        googleId: params.googleId,
+        username: params.username,
         submission: mongodb.ObjectId(params.submission),
     }
     // In case of reply, add the parent comment to the comment object
