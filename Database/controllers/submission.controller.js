@@ -123,9 +123,17 @@ exports.page = async (request, response) => {
             submissionData.length
           ) {
             //Get elements onn bbdd
+            let match = {};
+            if (params.hasOwnProperty("usr")) {
+              match = {
+                googleId: {
+                  $eq: params.usr
+                }
+              };
+            }
             let aggregateQuery = [
                 {
-                  '$match': {}
+                  '$match': match
                 }, {
                   '$count': "submissionsLeft"
                 }];
