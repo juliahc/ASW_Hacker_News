@@ -11,6 +11,7 @@ const UserController = require("../controllers/user.controller");
 const SubmissionController = require("../controllers/submission.controller");
 const UrlController = require("../controllers/url.controller");
 const AskController = require("../controllers/ask.controller");
+const CommentController = require("../controllers/comment.controller");
 
 /*  User */
 router.get(
@@ -37,6 +38,11 @@ router.get(
     "/submission_page",
     validateMiddleware.validate,
     SubmissionController.page
+);
+router.get(
+    "/submissionComments",
+    validateMiddleware.validate,    
+    SubmissionController.comments
 );
 router.post(
     "/newSubmission",
@@ -70,3 +76,19 @@ router.post(
     AskController.create
 )
 /*  /ask  */
+
+/*  comment    */
+
+router.get(
+    "/comment",
+    validateMiddleware.validate,
+    CommentController.find
+);
+
+router.post(
+    "/newComment",
+    validateMiddleware.validate,
+    CommentController.create
+)
+
+/*  /comment    */

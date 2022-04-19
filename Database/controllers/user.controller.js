@@ -17,6 +17,8 @@ exports.find = async (request, response) => {
         response.send(responseObj);
         return;
     }
+    let owner = request.query.owner;
+    console.log("Owner: ", owner);
     const where = {};
     where.googleId = id;
     userDatalayer.findUser(where)
@@ -24,7 +26,18 @@ exports.find = async (request, response) => {
         if (userData !== null && typeof userData !== undefined) {
             responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Success";
-            responseObj.data    = userData;
+            if (!owner || owner === "false" ||owner === "False" || owner === false || owner === "0") {
+                let retData = {
+                    _id: userData._id,
+                    username: userData.username,
+                    createdAt: userData.createdAt,
+                    karma: userData.karma,
+                    about: userData.about,
+                }
+                responseObj.data    = retData;
+            } else {
+                responseObj.data    = userData;
+            }
         } else {
             responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "User not found";
@@ -41,7 +54,7 @@ exports.find = async (request, response) => {
     return;
 };
 
-exports.create = async (request, response, next) => {
+/* exports.create = async (request, response, next) => {
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -73,4 +86,4 @@ exports.create = async (request, response, next) => {
         response.send(responseObj);
     });
     return;
-};
+}; */

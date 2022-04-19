@@ -21,7 +21,7 @@ const UsersSchema = new global.Schema({
         /* required: true */
         default: null
     },
-    showDead: {
+    showdead: {
         type: Boolean,
         default: false
     },
