@@ -247,9 +247,9 @@ exports.create = async (request, response) => {
 
     let submissionObject = {
         title: params.title,
-        points: params.points,
+        username: params.username,
         type: (params.hasOwnProperty("url")) ? "url" : "ask",
-        author: params.googleId
+        googleId: params.googleId
     }
     //Creating submission on the database
     submissionDatalayer.createSubmission(submissionObject)
