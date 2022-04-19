@@ -65,6 +65,7 @@ exports.create = async (request, response, next) => {
         text: params.text,
         author: params.author,
         authorName: params.authorName,
+        submission: mongodb.ObjectId(params.submission),
     }
     // In case of reply, add the parent comment to the comment object
     let reply = false;

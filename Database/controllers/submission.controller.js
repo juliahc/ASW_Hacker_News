@@ -13,6 +13,7 @@ const errorCodes = require("../helpers/errorCodes.helper.js");
 const submissionDatalayer = require("../datalayers/submission.datalayer");
 const askDatalayer = require("../datalayers/ask.datalayer");
 const urlDatalayer = require("../datalayers/url.datalayer");
+const commentDatalayer = require("../datalayers/comment.datalayer");
 
 exports.find = async (request, response) => {
     let id;
@@ -180,27 +181,29 @@ exports.comments = async (request, response) => {
                 const criteria = {};
                 criteria["$and"] = [];
                 criteria["$and"].push({
-                    _id: {
-                        $eq: mongodb.ObjectId(id)
+                    parent: {
+                        $eq: null
+                    }
+                });
+                criteria["$and"].push({
+                    submission: {
+                        $eq: submissionData._id
                     }
                 });
                 //Search all comments relateds to the submission, including comments of comments
                 let aggregateArr = createAggregateCommentArray(criteria);
-                console.log("Aggregate Array: ", JSON.stringify(aggregateArr));
-                submissionDatalayer.aggregateSubmission(aggregateArr)
+                commentDatalayer.aggregateComment(aggregateArr)
                 .then((commentData) => {
                     if (commentData !== null && typeof commentData !== undefined) {
                         responseObj.status  = errorCodes.SUCCESS;
                         responseObj.message = "Success";
                         responseObj.data    = commentData;
-                        response.send(responseObj);
-                    }
-                    else {
+                    } else {
                         responseObj.status  = errorCodes.DATA_NOT_FOUND;
                         responseObj.message = "No record found";
                         responseObj.data    = {};
-                        response.send(responseObj);
                     }
+                    response.send(responseObj);
                 })
                 .catch(error => {
                     responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -318,40 +321,124 @@ function createAggregateCommentArray (match) {
       {
         '$match': match
       }, {
-        '$lookup': {
+        '$graphLookup': {
           'from': 'comments', 
-          'let': {
-            'comments': '$comments'
-          }, 
-          'pipeline': [
-            {
-              '$match': {
-                '$expr': {
-                  '$in': [
-                    '$_id', '$$comments'
-                  ]
-                }
-              }
-            }, {
-              '$project': {
-                'text': 1, 
-                'author': 1, 
-                'createdAt': 1, 
-                'points': 1, 
-                'parent': 1, 
-                'replies': 1
-              }
-            }
-          ], 
-          'as': 'comments'
+          'startWith': '$_id', 
+          'connectFromField': '_id', 
+          'connectToField': 'parent', 
+          'as': 'children', 
+          'depthField': 'level'
         }
       }, {
-        '$project': {
-          '__v': 0, 
-          'updatedAt': 0
+        '$unwind': {
+          'path': '$children', 
+          'preserveNullAndEmptyArrays': true
+        }
+      }, {
+        '$sort': {
+          'children.level': -1
+        }
+      }, {
+        '$group': {
+          '_id': '$_id', 
+          'parent': {
+            '$first': '$parent'
+          }, 
+          'text': {
+            '$first': '$text'
+          }, 
+          'author': {
+            '$first': '$author'
+          }, 
+          'authorName': {
+            '$first': '$authorName'
+          }, 
+          'points': {
+            '$first': '$points'
+          }, 
+          'submission': {
+            '$first': '$submission'
+          }, 
+          'createdAt': {
+            '$first': '$createdAt'
+          }, 
+          'replies': {
+            '$first': '$replies'
+          }, 
+          'children': {
+            '$push': '$children'
+          }
+        }
+      }, {
+        '$addFields': {
+          'children': {
+            '$reduce': {
+              'input': '$children', 
+              'initialValue': {
+                'level': -1, 
+                'presentChild': [], 
+                'prevChild': []
+              }, 
+              'in': {
+                '$let': {
+                  'vars': {
+                    'prev': {
+                      '$cond': [
+                        {
+                          '$eq': [
+                            '$$value.level', '$$this.level'
+                          ]
+                        }, '$$value.prevChild', '$$value.presentChild'
+                      ]
+                    }, 
+                    'current': {
+                      '$cond': [
+                        {
+                          '$eq': [
+                            '$$value.level', '$$this.level'
+                          ]
+                        }, '$$value.presentChild', []
+                      ]
+                    }
+                  }, 
+                  'in': {
+                    'level': '$$this.level', 
+                    'prevChild': '$$prev', 
+                    'presentChild': {
+                      '$concatArrays': [
+                        '$$current', [
+                          {
+                            '$mergeObjects': [
+                              '$$this', {
+                                'children': {
+                                  '$filter': {
+                                    'input': '$$prev', 
+                                    'as': 'e', 
+                                    'cond': {
+                                      '$eq': [
+                                        '$$e.parent_id', '$$this.id'
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }, {
+        '$addFields': {
+          'children': '$children.presentChild'
         }
       }
-    ];
+    ]
 }
 
 function createAggregateSubmissionArray (match) {
