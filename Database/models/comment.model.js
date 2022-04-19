@@ -25,6 +25,7 @@ const CommentSchema = new global.Schema({
     parent: {
         ref: "Comment",
         type: Schema.Types.ObjectId,
+        default: null
     },
     replies: [{
         ref: "Comment",
