@@ -17,8 +17,6 @@ exports.find = async (request, response) => {
         response.send(responseObj);
         return;
     }
-    let owner = request.query.owner;
-    console.log("Owner: ", owner);
     const where = {};
     where.googleId = id;
     userDatalayer.findUser(where)
@@ -26,18 +24,7 @@ exports.find = async (request, response) => {
         if (userData !== null && typeof userData !== undefined) {
             responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Success";
-            if (!owner || owner === "false" ||owner === "False" || owner === false || owner === "0") {
-                let retData = {
-                    _id: userData._id,
-                    username: userData.username,
-                    createdAt: userData.createdAt,
-                    karma: userData.karma,
-                    about: userData.about,
-                }
-                responseObj.data    = retData;
-            } else {
-                responseObj.data    = userData;
-            }
+            responseObj.data    = userData;
         } else {
             responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "User not found";
@@ -54,7 +41,7 @@ exports.find = async (request, response) => {
     return;
 };
 
-/* exports.create = async (request, response, next) => {
+exports.create = async (request, response, next) => {
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -86,4 +73,98 @@ exports.find = async (request, response) => {
         response.send(responseObj);
     });
     return;
-}; */
+};
+
+exports.update = async (request, response, next) => {
+    let params = {};
+    if (request.body.params) {
+        params = request.body.params;
+    } else {
+        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+        responseObj.message = "Required parameters missing";
+        responseObj.data    = {};
+        response.send(responseObj);
+        return;
+    }
+    
+    userDatalayer.findUser({googleId: params.googleId})
+    .then((userData) => {
+        if (userData !== null && typeof userData !== undefined) {
+            let updateType = params.type;
+            let updateData = {};
+            switch (updateType) {
+                case "upvoteSubmission":
+                    updateData = {
+                        googleId: params.googleId,
+                        upvotedSubmissions: userData.upvotedSubmissions.push(mongodb.ObjectId(params.submission))
+                    }
+                    //TODO update the upvotes to the submission
+                    break;
+                case "downvoteSubmission":
+                    updateData = {
+                    }
+                    break;
+                case "upvoteComment":
+                    updateData = {
+                    }
+                    break;
+                case "downvoteComment":
+                    updateData = {
+                    }
+                    break;
+                case "favouriteSubmission":
+                    updateData = {
+                    }
+                    break;
+                case "favouriteComment":
+                    updateData = {
+                    }
+                    break;
+                case "unfavouriteSubmission":
+                    updateData = {
+                    }
+                    break;
+                case "unfavouriteComment":
+                    updateData = {
+                    }
+                    break;
+                default:
+                    updateData = params;
+                    delete updateData.type;
+                    break;
+            }
+
+            userDatalayer.updateUser(params.googleId, updateData)
+            .then((userData) => {
+                if (userData !== null && typeof userData !== undefined) {
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = userData;
+                } else {
+                    responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                    responseObj.message = "No record found";
+                    responseObj.data    = {};
+                }
+                response.send(responseObj);
+            })
+            .catch(error => {
+                responseObj.status  = errorCodes.SYNTAX_ERROR;
+                responseObj.message = error;
+                responseObj.data    = {};
+                response.send(responseObj);
+            });
+        } else {
+            responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+            responseObj.message = "User not found";
+            responseObj.data    = {};
+            response.send(responseObj);
+        }
+    })
+    .catch(error => {
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = error;
+        responseObj.data    = {};
+        response.send(responseObj);
+    });
+    return;
+};
