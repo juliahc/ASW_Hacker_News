@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 class auth {
     constructor() { }
     strict(req, res, next) {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"] || req.signedCookies.user_auth;
+        const token = req.cookies.access_token;
 
         if (!token) {
             return res.status(403).send("A token is required for authentication");
@@ -17,7 +17,7 @@ class auth {
         return next();
     }
     passthrough(req, res, next) {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"] || req.signedCookies.user_auth;
+        const token = req.cookies.access_token;
 
         if (!token) {
             req.user_auth = {id: null, google_tokens: null};

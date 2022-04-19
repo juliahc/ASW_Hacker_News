@@ -1,36 +1,27 @@
 const express = require("express");
 const SubmissionCtrl = require("../domain/controllers/SubmissionCtrl");
+const CommentCtrl = require("../domain/controllers/CommentCtrl");
 const router = express.Router();
-const calcTimeAgo = require("../utils/timeAgo")
+const calcTimeAgo = require("../utils/timeAgo");
 module.exports = router;
 
 const sub_ctrl = new SubmissionCtrl();
+const comm_ctrl = new CommentCtrl();
 
-function calcTimeAgoSubmissions(submissions) {
-    for(let submission of submissions) {
-        let timeAgo = calcTimeAgo(submission.createdAt);
-        submission.createdAt = timeAgo;
-    }
-    return submissions;
-}
+const AuthMiddleware = require("./auth_middleware");
+const auth = new AuthMiddleware();
 
 router.get("/", async (req, res) => {
-    //let p = req.query.p || 1;
-    //res.render("news", { submissions: news, info: "hello_world", p: p+1 }); // FIXME: Hardcoded for testing views.
-    
     try {
         let p = req.query.p || 1;
-        console.log(p);
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
-        sub_page = calcTimeAgoSubmissions(sub_page);
-        console.log(more);
-        res.render("news", { submissions: sub_page, p: p, view: "news", more: more }); // FIXME: Hardcoded for testing views.
+        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
+        res.render("news", { submissions: sub_page, p: p, view: "news", more: more });
     } catch (e) {
-        console.log(e.message);
-        res.render("news", { error: "Hacker News can't connect to his database" }) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
+        res.render("news", { error: "Hacker News can't connect to his database" });
     }
     
 });
@@ -38,39 +29,65 @@ router.get("/", async (req, res) => {
 router.get("/news", async (req, res) => {
     try {
         let p = req.query.p || 1;
-        console.log(p);
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts");
-        console.log(sub_page[sub_page.length-1]);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
-        sub_page = calcTimeAgoSubmissions(sub_page);
-        console.log(submissionsLeft+" -> more:"+more);
+        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { submissions: sub_page, p: p, view: "news", more: more });
     } catch (e) {
-        console.log(e.message);
-        res.render("news", {error: "Hacker News can't connect to his database"}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
+        res.render("news", {error: "Hacker News can't connect to his database"});
     }
     
 });
 
 router.get("/newest", async (req, res) => {
-    //res.render("news", { submissions: news, info: "hello_world" }); // FIXME: Hardcoded for testing views.
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new");
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
-        sub_page = calcTimeAgoSubmissions(sub_page);
-        console.log(more);
+        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { submissions: sub_page, p: p, view: "newest", more: more });
     } catch (e) {
-        
-        res.render("news", {error: "Hacker News can't connect to his database"}) // TODO: Segurament cal mostrar algun missatge d'error (tipus no connecta a bd).
+        res.render("news", {error: "Hacker News can't connect to his database"});
     }
 });
 
 router.get("/user", async (req, res) => {
     res.render("user", {});
+});
+
+router.get("/threads", auth.passthrough, async (req, res) => {
+    if (!req.query.id) {
+        if (req.user_auth.id !== null) res.redirect("/threads?id=" + req.user_auth.id);
+        else res.send("No such user");
+    }
+    try {
+        let id = req.query.id;
+        let comment_list = await comm_ctrl.fetchCommentsOfUser(id);
+        comment_list.forEach(comment => comment.formatCreatedAtAsTimeAgo());
+        res.render("threads", {comments: comment_list});
+    } catch {
+        res.send("No such user");
+    }
+});
+
+router.get("/submit", async (req, res) => {
+    res.render("submit", {});
+});
+
+router.get("/ask", async (req, res) => {
+    try {
+        let p = req.query.p || 1;
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts");
+        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let more = submissionsLeft > 0;
+        sub_page.pop();
+        sub_page = calcTimeAgoSubmissions(sub_page);
+        res.render("ask", { submissions: sub_page, p: p, more: more });
+    } catch (e) {
+        res.render("ask", {error: "Hacker News can't connect to his database"});
+    }
 });
