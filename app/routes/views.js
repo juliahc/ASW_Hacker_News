@@ -2,6 +2,10 @@ const express = require("express");
 const SubmissionCtrl = require("../domain/controllers/SubmissionCtrl");
 const CommentCtrl = require("../domain/controllers/CommentCtrl");
 const router = express.Router();
+
+const AuthMiddleware = require("./auth_middleware");
+const auth = new AuthMiddleware();
+
 module.exports = router;
 
 const sub_ctrl = new SubmissionCtrl();
@@ -101,8 +105,18 @@ router.get("/threads", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/user", async (req, res) => {
-    res.render("user", {});
+router.get("/user", auth.passthrough, async (req, res) => {
+    if (!req.query.id) {
+        if (req.user_auth.id !== null) res.redirect("/user?id=" + req.user_auth.id);
+        else res.send("No such user");
+    }
+    try {
+        let user = await user_ctrl.profile(req.user_auth.id, req.query.id);
+        res.status(200).json(user);
+        res.render("user", { user: user });
+    } catch {
+        res.send("No such user");
+    }
 });
 
 router.get("/submit", async (req, res) => {

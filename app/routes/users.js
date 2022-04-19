@@ -5,6 +5,7 @@ const AuthMiddleware = require("./auth_middleware");
 const googleAuth = require("../utils/googleAuth.js");
 const url = require('url');
 
+const nodeCookie = require('node-cookie');
 const router = express.Router();
 module.exports = router;
 
@@ -14,7 +15,6 @@ const auth = new AuthMiddleware();
 router.get("/login", async (req, res) => {
     // Get the user info
     try {
-        
         res.redirect(googleAuth.googleLoginUrl);
     } catch (e) {
         res.status(500).json({ message: e.message });
@@ -28,24 +28,11 @@ router.get("/google/auth", async (req, res) => {
 
         let token = await googleAuth.getAccessTokenFromCode(queryObject.code);
         let userInfo = await googleAuth.getGoogleUserInfo(token);
-        // console.log(userInfo);
-        // let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email, token);
-        // res.cookie("access_token", token).status(200);
-        res.redirect('/user?user='+userInfo.name);
+        let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email, token);
+        nodeCookie.create(res, 'access_token', user_auth);
+        res.redirect('/user?id='+userInfo.id);
     } catch (e) {
         res.status(500).json({ message: e.message });
-    }
-});
-
-router.get("/:id", auth.passthrough, async (req, res) => {
-    // Get the user info
-    try {
-        let user = await user_ctrl.profile (req.user_auth.id, req.params.id);
-        res.status(200).json(user);
-        res.render("user", { user: user });
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-        res.render("user", { user: user });
     }
 });
 
@@ -54,9 +41,8 @@ router.patch("/:id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     try {
         let user = await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);
-        res.redirect("/users/"+authId);
+        res.redirect("/user?id="+authId);
     } catch (e) {
-        console.log("user update failed with code: " + e.message);
         res.render("update", { error: "Hacker News can't connect to its database", message: e.message });
     }
 
