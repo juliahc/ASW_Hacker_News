@@ -88,7 +88,7 @@ exports.page = async (request, response) => {
     }
     if (request.query.usr !== undefined && request.query.usr !== "") {
       criteria["$and"].push({
-            author: {
+            googleId: {
                 $eq: params.usr
             }
         });
@@ -246,7 +246,7 @@ function createAggregateSubmissionArray (match) {
           '$lookup': {
             'from': 'users', 
             'let': {
-              'gId': '$author'
+              'gId': '$googleId'
             }, 
             'pipeline': [
               {
