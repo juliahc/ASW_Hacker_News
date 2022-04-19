@@ -12,9 +12,9 @@ let UserCtrl;
 
         // initialize any properties of the singleton
         this.db = new DatabaseCtrl();
-        this.encrypt = function(id, tokens) {
+        this.encrypt = function(id, username, karma, tokens) {
             return jwt.sign(
-                {id: id, google_tokens: tokens},
+                {id: id, username: username, karma: karma, google_tokens: tokens},
                 process.env.USER_AUTH_SECRET_KEY,
                 {
                     issuer: "hackernews.user."+id,
@@ -29,24 +29,40 @@ let UserCtrl;
 
 UserCtrl.prototype.login_or_register = async function(id, username, email, tokens) {
     // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
-    let user, db_id;
-    user = await this.db.getRequest('/users', id);
-    if (user.status == this.db.errors.RESOURCE_NOT_FOUND) {
+    let resp, db_id, db_username, db_karma;
+    resp = await this.db.getRequest('/user', id);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) {
         // User didn't exist -> register new user
-        user = new User({id: id, username: username, email: email})
-        db_id = await this.db.postRequest('/users', user);
+        let user = new User({googleId: id, username: username, email: email})
+        db_id = await this.db.postRequest('/register', user);
+        db_username = user.username;
+        db_karma = user.karma;
     } else {
-        db_id = user.data.id;
+        db_id = resp.data.id;
+        db_username = resp.data.username;
+        db_karma = resp.data.karma;
     }
     // Return user_auth token
-    return this.encrypt(db_id, tokens);
+    return this.encrypt(db_id, username, karma, tokens);
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {
-
+    let resp = await this.db.getRequest('/user', id);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('No such user'); }
+    let user = new User(resp.data);
+    if (authId != id) {
+        // User is requesting information from a different user, we remove private data.
+        delete user.email;
+        delete user.showdead;
+        delete user.noprocrast;
+        delete user.maxvisit;
+        delete user.minaway;
+        delete user.delay;
+    }
+    return user;
 }
 
-UserCtrl.prototype.update = async function(authId, about, email, showdead, noprocrast, maxvisit, minaway, delay) {
+UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, maxvisit, minaway, delay) {
 
 }
 
@@ -81,3 +97,5 @@ UserCtrl.prototype.favoriteSubmission = async function(authId, submissionId) {
 UserCtrl.prototype.favoriteComment = async function(authId, commentId) {
 
 }
+
+module.exports = UserCtrl;
