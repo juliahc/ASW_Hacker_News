@@ -26,6 +26,12 @@ router.post(
     AuthController.validate("registerUser"),
     AuthController.register
 );
+
+router.post(
+    "/updateUser",
+    validateMiddleware.validate,
+    UserController.update
+);
 /* /User */
 
 /*  Submission  */
