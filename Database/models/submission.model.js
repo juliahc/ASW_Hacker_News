@@ -18,11 +18,10 @@ const SubmissionSchema = new global.Schema({
         enum: ["url", "ask"],
         required: true
     },
-    comments: [{
-        ref: "Comment",
-        type: Schema.Types.ObjectId,
-        default: []
-    }]
+    comments: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true
 });
