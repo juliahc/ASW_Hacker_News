@@ -52,7 +52,7 @@ router.get("/:id/upvotedComments", auth.strict, async (req, res) => {});
 
 router.post("/:id/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const submissionId = req.submissionId;
+    const submissionId = req.params.submission_id;
     try {
         user_ctrl.upvoteSubmission(authId, submissionId);
     } catch (e) {
@@ -62,7 +62,7 @@ router.post("/:id/upvoteSubmisison/:submission_id", auth.strict, async (req, res
 
 router.post("/:id/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const submissionId = req.submissionId;
+    const submissionId = req.params.submission_id;
     try {
         user_ctrl.downvoteSubmission(authId, submissionId);
     } catch (e) {
@@ -82,7 +82,7 @@ router.post("/:id/upvoteComment/:comment_id", auth.strict, async (req, res) => {
 
 router.post("/:id/downvoteComment/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const commentId = req.commentId;
+    const commentId = req.params.comment_id;
     try {
         user_ctrl.downvoteComment(authId, commentId);
     } catch (e) {
@@ -90,9 +90,12 @@ router.post("/:id/downvoteComment/:comment_id", auth.strict, async (req, res) =>
     }
 });
 
-router.get("/:id/favoriteSubmisisons", async (req, res) => {
+router.get("/:id/favoriteSubmisisons", async (req, res) => {});
+router.get("/:id/favoriteComments", async (req, res) => {});
+
+router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const submissionId = req.submissionId;
+    const submissionId = req.params.submission_id;
     try {
         user_ctrl.favoriteSubmission(authId, submissionId);
     } catch (e) {
@@ -100,9 +103,9 @@ router.get("/:id/favoriteSubmisisons", async (req, res) => {
     }
 });
 
-router.get("/:id/unfavoriteSubmisisons", async (req, res) => {
+router.post("/:id/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const submissionId = req.submissionId;
+    const submissionId = req.params.submission_id;
     try {
         user_ctrl.unfavoriteSubmisisons(authId, submissionId);
     } catch (e) {
@@ -110,9 +113,9 @@ router.get("/:id/unfavoriteSubmisisons", async (req, res) => {
     }
 });
 
-router.get("/:id/favoriteComments", async (req, res) => {
+router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const commentId = req.commentId;
+    const commentId = req.params.comment_id;
     try {
         user_ctrl.favoriteSubmission(authId, commentId);
     } catch (e) {
@@ -120,17 +123,14 @@ router.get("/:id/favoriteComments", async (req, res) => {
     }
 });
 
-router.get("/:id/unfavoriteComments", async (req, res) => {
+router.post("/:id/unfavoriteComments/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const commentId = req.commentId;
+    const commentId = req.params.comment_id;
     try {
         user_ctrl.unfavoriteComments(authId, commentId);
     } catch (e) {
         res.render("unfavoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
     }
 });
-
-router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {}); //favoriteSubmission
-router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {});       //favoriteComment
 
 router.delete("/:id", auth.strict, async (req, res) => {});      //deleteUser??
