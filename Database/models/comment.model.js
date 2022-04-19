@@ -19,7 +19,7 @@ const CommentSchema = new global.Schema({
     },
     submission: {
         ref: "Submission",
-        type: String,
+        type: Schema.Types.ObjectId,
         required: true
     },
     parent: {
