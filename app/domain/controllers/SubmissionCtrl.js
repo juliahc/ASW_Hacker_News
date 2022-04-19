@@ -46,11 +46,13 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id) {
     else return new AskSubmission(resp.data);
 }
 
-SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order) {
+SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order, googleId) {
     if (!this.types.includes(type)) throw TypeError("Type of submissions is not supported.");
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
     if (page <= 0) throw TypeError("Page must be greater than zero.");
-    let resp = await this.db.getRequest("/submission_page", {p: page, t: type, o: order});
+    let params = {p: page, t: type, o: order};
+    if (googleId !== null) params["usr"] = googleId;
+    let resp = await this.db.getRequest("/submission_page", params);
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];
