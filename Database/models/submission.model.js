@@ -4,9 +4,13 @@ const SubmissionSchema = new global.Schema({
         type: String,
         required: true
     },
-    author: {
+    googleId: {
         type: String,
         ref: "User",
+        required: true
+    },
+    username: {
+        type: String,
         required: true
     },
     points: {

@@ -89,7 +89,7 @@ exports.page = async (request, response) => {
     }
     if (request.query.usr !== undefined && request.query.usr !== "") {
       criteria["$and"].push({
-            author: {
+            googleId: {
                 $eq: params.usr
             }
         });
@@ -111,7 +111,6 @@ exports.page = async (request, response) => {
     if (criteria['$and'].length === 0) {
         delete criteria['$and'];
     }
-
 
     let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
@@ -449,7 +448,7 @@ function createAggregateSubmissionArray (match) {
           '$lookup': {
             'from': 'users', 
             'let': {
-              'gId': '$author'
+              'gId': '$googleId'
             }, 
             'pipeline': [
               {
