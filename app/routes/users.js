@@ -50,11 +50,85 @@ router.patch("/:id", auth.strict, async (req, res) => {
 router.get("/:id/upvotedSubmisisons", auth.strict, async (req, res) => {});
 router.get("/:id/upvotedComments", auth.strict, async (req, res) => {});
 
-router.post("/:id/upvotedSubmisisons/:submission_id", auth.strict, async (req, res) => {});  //upvoteSubmission
-router.post("/:id/upvotedComments/:comment_id", auth.strict, async (req, res) => {});        //upvoteComment
+router.post("/:id/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.submissionId;
+    try {
+        user_ctrl.upvoteSubmission(authId, submissionId);
+    } catch (e) {
+        res.render("upvoteSubmisison", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
 
-router.get("/:id/favoriteSubmisisons", async (req, res) => {});
-router.get("/:id/favoriteComments", async (req, res) => {});
+router.post("/:id/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.submissionId;
+    try {
+        user_ctrl.downvoteSubmission(authId, submissionId);
+    } catch (e) {
+        res.render("downvoteSubmisison", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.post("/:id/upvoteComment/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.commentId;
+    try {
+        user_ctrl.upvoteComment(authId, commentId);
+    } catch (e) {
+        res.render("upvoteComment", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.post("/:id/downvoteComment/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.commentId;
+    try {
+        user_ctrl.downvoteComment(authId, commentId);
+    } catch (e) {
+        res.render("downvoteComment", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.get("/:id/favoriteSubmisisons", async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.submissionId;
+    try {
+        user_ctrl.favoriteSubmission(authId, submissionId);
+    } catch (e) {
+        res.render("favoriteSubmisisons", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.get("/:id/unfavoriteSubmisisons", async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.submissionId;
+    try {
+        user_ctrl.unfavoriteSubmisisons(authId, submissionId);
+    } catch (e) {
+        res.render("unfavoriteSubmisisons", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.get("/:id/favoriteComments", async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.commentId;
+    try {
+        user_ctrl.favoriteSubmission(authId, commentId);
+    } catch (e) {
+        res.render("favoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.get("/:id/unfavoriteComments", async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.commentId;
+    try {
+        user_ctrl.unfavoriteComments(authId, commentId);
+    } catch (e) {
+        res.render("unfavoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
 
 router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {}); //favoriteSubmission
 router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {});       //favoriteComment

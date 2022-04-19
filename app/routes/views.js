@@ -11,9 +11,6 @@ module.exports = router;
 const sub_ctrl = new SubmissionCtrl();
 const comm_ctrl = new CommentCtrl();
 
-const AuthMiddleware = require("./auth_middleware");
-const auth = new AuthMiddleware();
-
 router.get("/", async (req, res) => {
     try {
         let p = req.query.p || 1;
