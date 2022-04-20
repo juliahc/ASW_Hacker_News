@@ -1,4 +1,5 @@
 const Comment = require("./Comment");
+const time_ago = require("../utils/timeAgo");
 
 class Submission {
     constructor(params) {
@@ -28,7 +29,7 @@ class Submission {
     }
 
     formatCreatedAtAsTimeAgo() {
-        let timeAgo = calcTimeAgo(this.createdAt);
+        let timeAgo = time_ago(this.createdAt);
         this.createdAt = timeAgo;
     }
 }

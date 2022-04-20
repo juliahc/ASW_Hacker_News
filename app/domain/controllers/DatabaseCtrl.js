@@ -1,5 +1,6 @@
 const axios = require("axios");
 const errCodes = require("../../utils/errorCodes.js");
+require("dotenv").config();
 
 let DatabaseCtrl;
 (function() {
@@ -25,7 +26,7 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
             params
         },
         headers: {
-            "x-api-key": "f4jaFD2jd8faASdn1h23jvsbhm43gssfASfaSDFqkj2hslkjfHDSFGji5yfdSFGhergkjsdmrew232huiaswdfuhi18bf"/* process.env.DB_SECRET_KEY */
+            "x-api-key": process.env.DB_SECRET_KEY
         }
       })
       .then(response => {
@@ -45,7 +46,7 @@ DatabaseCtrl.prototype.getRequest = async function (endpoint, query) {
         url: this.DB_URI + endpoint,
         params: query,
         headers: {
-            "x-api-key": "f4jaFD2jd8faASdn1h23jvsbhm43gssfASfaSDFqkj2hslkjfHDSFGji5yfdSFGhergkjsdmrew232huiaswdfuhi18bfw"/* process.env.DB_SECRET_KEY */
+            "x-api-key": process.env.DB_SECRET_KEY
         }
       })
       .then(response => {
