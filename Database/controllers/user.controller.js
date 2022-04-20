@@ -56,7 +56,6 @@ exports.create = async (request, response, next) => {
     }
     userDatalayer.createUser(params)
     .then((userData) => {
-        console.log(userData);
         if (userData !== null && typeof userData !== undefined) {
             responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Success";
@@ -108,7 +107,6 @@ exports.update = async (request, response, next) => {
                         return;
                     }
                     userData.upvotedSubmissions.push(mongodb.ObjectId(params.submission));
-                    console.log("userdata: ", userData);
                     updateData = {
                         googleId: params.googleId,
                         upvotedSubmissions: userData.upvotedSubmissions
@@ -139,7 +137,6 @@ exports.update = async (request, response, next) => {
                         googleId: params.googleId,
                         upvotedSubmissions: userData.upvotedSubmissions
                     }
-                    console.log("updateData: ", updateData);
                     updateSubmission = true;
                     updateSubmissionQuery = {
                         $inc: {
@@ -343,7 +340,6 @@ exports.update = async (request, response, next) => {
 };
 
 exports.comments = async (request, response) => {
-    console.log("Hola jeje");
     let googleId;
     if (request.query.googleId) {
         googleId = request.query.googleId;
@@ -359,7 +355,6 @@ exports.comments = async (request, response) => {
 
     userDatalayer.findUser(where)
     .then((userData) => {
-        console.log("User data: ", userData);
         if (userData !== null && typeof userData !== undefined) {
             //The user exists on the database. Now we need to get the comments
             const criteria = {};
@@ -378,7 +373,6 @@ exports.comments = async (request, response) => {
             let aggregateArr = createAggregateCommentArray(criteria);
             commentDatalayer.aggregateComment(aggregateArr)
             .then((commentData) => {
-                console.log("Comment data: ", commentData);
                 if (commentData !== null && typeof commentData !== undefined) {
                     responseObj.status  = errorCodes.SUCCESS;
                     responseObj.message = "Success";
@@ -413,126 +407,126 @@ exports.comments = async (request, response) => {
 };
 
 function createAggregateCommentArray (match) {
-    return [
-      {
-        '$match': match
-      }, {
-        '$graphLookup': {
-          'from': 'comments', 
-          'startWith': '$_id', 
-          'connectFromField': '_id', 
-          'connectToField': 'parent', 
-          'as': 'children', 
-          'depthField': 'level'
+  return [
+    {
+      '$match': match
+    }, {
+      '$graphLookup': {
+        'from': 'comments', 
+        'startWith': '$_id', 
+        'connectFromField': '_id', 
+        'connectToField': 'parent', 
+        'as': 'children', 
+        'depthField': 'level'
+      }
+    }, {
+      '$unwind': {
+        'path': '$children', 
+        'preserveNullAndEmptyArrays': true
+      }
+    }, {
+      '$sort': {
+        'children.level': -1
+      }
+    }, {
+      '$group': {
+        '_id': '$_id', 
+        'parent': {
+          '$first': '$parent'
+        }, 
+        'text': {
+          '$first': '$text'
+        }, 
+        'googleId': {
+          '$first': '$googleId'
+        }, 
+        'username': {
+          '$first': '$username'
+        }, 
+        'points': {
+          '$first': '$points'
+        }, 
+        'submission': {
+          '$first': '$submission'
+        }, 
+        'createdAt': {
+          '$first': '$createdAt'
+        }, 
+        'replies': {
+          '$first': '$replies'
+        }, 
+        'children': {
+          '$push': '$children'
         }
-      }, {
-        '$unwind': {
-          'path': '$children', 
-          'preserveNullAndEmptyArrays': true
-        }
-      }, {
-        '$sort': {
-          'children.level': -1
-        }
-      }, {
-        '$group': {
-          '_id': '$_id', 
-          'parent': {
-            '$first': '$parent'
-          }, 
-          'text': {
-            '$first': '$text'
-          }, 
-          'googleId': {
-            '$first': '$googleId'
-          }, 
-          'username': {
-            '$first': '$username'
-          }, 
-          'points': {
-            '$first': '$points'
-          }, 
-          'submission': {
-            '$first': '$submission'
-          }, 
-          'createdAt': {
-            '$first': '$createdAt'
-          }, 
-          'replies': {
-            '$first': '$replies'
-          }, 
-          'children': {
-            '$push': '$children'
-          }
-        }
-      }, {
-        '$addFields': {
-          'children': {
-            '$reduce': {
-              'input': '$children', 
-              'initialValue': {
-                'level': -1, 
-                'presentChild': [], 
-                'prevChild': []
-              }, 
-              'in': {
-                '$let': {
-                  'vars': {
-                    'prev': {
-                      '$cond': [
-                        {
-                          '$eq': [
-                            '$$value.level', '$$this.level'
-                          ]
-                        }, '$$value.prevChild', '$$value.presentChild'
-                      ]
-                    }, 
-                    'current': {
-                      '$cond': [
-                        {
-                          '$eq': [
-                            '$$value.level', '$$this.level'
-                          ]
-                        }, '$$value.presentChild', []
-                      ]
-                    }
+      }
+    }, {
+      '$addFields': {
+        'children': {
+          '$reduce': {
+            'input': '$children', 
+            'initialValue': {
+              'level': -1, 
+              'presentChild': [], 
+              'prevChild': []
+            }, 
+            'in': {
+              '$let': {
+                'vars': {
+                  'prev': {
+                    '$cond': [
+                      {
+                        '$eq': [
+                          '$$value.level', '$$this.level'
+                        ]
+                      }, '$$value.prevChild', '$$value.presentChild'
+                    ]
                   }, 
-                  'in': {
-                    'level': '$$this.level', 
-                    'prevChild': '$$prev', 
-                    'presentChild': {
-                      '$concatArrays': [
-                        '$$current', [
-                          {
-                            '$mergeObjects': [
-                              '$$this', {
-                                'children': {
-                                  '$filter': {
-                                    'input': '$$prev', 
-                                    'as': 'e', 
-                                    'cond': {
-                                      '$eq': [
-                                        '$$e.parent_id', '$$this.id'
-                                      ]
-                                    }
+                  'current': {
+                    '$cond': [
+                      {
+                        '$eq': [
+                          '$$value.level', '$$this.level'
+                        ]
+                      }, '$$value.presentChild', []
+                    ]
+                  }
+                }, 
+                'in': {
+                  'level': '$$this.level', 
+                  'prevChild': '$$prev', 
+                  'presentChild': {
+                    '$concatArrays': [
+                      '$$current', [
+                        {
+                          '$mergeObjects': [
+                            '$$this', {
+                              'children': {
+                                '$filter': {
+                                  'input': '$$prev', 
+                                  'as': 'e', 
+                                  'cond': {
+                                    '$eq': [
+                                      '$$e.parent_id', '$$this.id'
+                                    ]
                                   }
                                 }
                               }
-                            ]
-                          }
-                        ]
+                            }
+                          ]
+                        }
                       ]
-                    }
+                    ]
                   }
                 }
               }
             }
           }
         }
-      }, {
-        '$addFields': {
-          'children': '$children.presentChild'
-        }
       }
-    ]
-};
+    }, {
+      '$addFields': {
+        'children': '$children.presentChild'
+      }
+    }
+  ]
+}
