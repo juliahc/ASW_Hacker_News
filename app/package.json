@@ -10,6 +10,7 @@
   "authors": "Herrera Caba, Júlia; Holly Miró, Francesc; Jimeno Ramírez, Iván; València Luque, Pol",
   "dependencies": {
     "axios": "^0.26.1",
+    "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.3",

@@ -4,12 +4,14 @@ const CommentCtrl = require("../domain/controllers/CommentCtrl");
 const router = express.Router();
 
 const AuthMiddleware = require("./auth_middleware");
+const UserCtrl = require("../domain/controllers/UserCtrl");
 const auth = new AuthMiddleware();
 
 module.exports = router;
 
 const sub_ctrl = new SubmissionCtrl();
 const comm_ctrl = new CommentCtrl();
+const user_ctrl = new UserCtrl();
 
 router.get("/", auth.passthrough, async (req, res) => {
     try {
@@ -70,9 +72,10 @@ router.get("/ask", auth.passthrough, async (req, res) => {
 });
 
 router.get("/submitted", auth.passthrough, async (req, res) => {
-    if (!req.query.id) {
+    if (!req.query || !req.query.id) {
         if (req.user_auth !== null) res.redirect("/submitted?id=" + req.user_auth.id);
         else res.send("No such user");
+        return;
     }
     try {
         let p = req.query.p || 1;
@@ -87,10 +90,26 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
     }
 });
 
+router.get("/submission", async (req, res) => {
+
+    if (!req.query || !req.query.id) {
+        res.send("No such submission");
+        return;
+    }
+    // Get one submission
+    try {
+        let submission = await sub_ctrl.fetchSubmission(req.query.id);
+        res.status(200).json(submission); //fer render
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+});
+
 router.get("/threads", auth.passthrough, async (req, res) => {
-    if (!req.query.id) {
+    if (!req.query || !req.query.id) {
         if (req.user_auth !== null) res.redirect("/threads?id=" + req.user_auth.id);
         else res.send("No such user");
+        return;
     }
     try {
         let comment_list = await comm_ctrl.fetchCommentsOfUser(req.query.id);
@@ -102,14 +121,17 @@ router.get("/threads", auth.passthrough, async (req, res) => {
 });
 
 router.get("/user", auth.passthrough, async (req, res) => {
-    if (!req.query.id) {
+
+    if (!req.query || !req.query.id) {
         if (req.user_auth !== null) res.redirect("/user?id=" + req.user_auth.id);
         else res.send("No such user");
+        return;
     }
     try {
+        
         let auth_id = req.user_auth !== null ? req.user_auth.id : '';
         let user = await user_ctrl.profile(auth_id, req.query.id);
-        res.status(200).json(user);
+        console.log("user:",user)
         res.render("user", { user_auth: req.user_auth, user: user,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");

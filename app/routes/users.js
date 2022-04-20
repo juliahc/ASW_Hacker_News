@@ -4,7 +4,7 @@ const AuthMiddleware = require("./auth_middleware");
 const googleAuth = require("../utils/googleAuth.js");
 const url = require('url');
 
-const nodeCookie = require('node-cookie');
+//const nodeCookie = require('node-cookie');
 const router = express.Router();
 module.exports = router;
 
@@ -22,7 +22,8 @@ router.get("/login", async (req, res) => {
 
 router.get("/logout", async (req, res) => {
     let goto = req.query.goto || '/';
-    nodeCookie.clear(res, 'access_token');
+    clearCookie("access_token");
+    //nodeCookie.clear(res, 'access_token');
     res.redirect(goto);
 });
 
@@ -33,8 +34,9 @@ router.get("/google/auth", async (req, res) => {
 
         let token = await googleAuth.getAccessTokenFromCode(queryObject.code);
         let userInfo = await googleAuth.getGoogleUserInfo(token);
-        let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email);
-        nodeCookie.create(res, 'access_token', user_auth);
+        let access_token = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email);
+        //nodeCookie.create(res, 'access_token', user_auth);
+        res.cookie('access_token' , access_token);
         res.redirect('/user?id='+userInfo.id);
     } catch (e) {
         res.status(500).json({ message: e.message });
