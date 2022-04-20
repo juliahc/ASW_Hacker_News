@@ -21,7 +21,7 @@ router.get("/", auth.passthrough, async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "news", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/news", more: more });
     } catch (e) {
         res.render("news", { error: "Hacker News can't connect to his database" });
     }
@@ -36,7 +36,7 @@ router.get("/news", auth.passthrough, async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "news", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/news", more: more });
     } catch (e) {
         res.render("news", {error: "Hacker News can't connect to his database"});
     }
@@ -51,7 +51,7 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "newest", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/newest", more: more });
     } catch (e) {
         res.render("news", {error: "Hacker News can't connect to his database"});
     }
@@ -65,9 +65,9 @@ router.get("/ask", auth.passthrough, async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("ask", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/ask", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/ask", more: more });
     } catch (e) {
-        res.render("ask", {error: "Hacker News can't connect to his database"});
+        res.render("news", {error: "Hacker News can't connect to his database"});
     }
 });
 
