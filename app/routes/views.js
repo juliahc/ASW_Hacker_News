@@ -145,7 +145,10 @@ router.get("/user", auth.passthrough, async (req, res) => {
 });
 
 router.get("/submit", async (req, res) => {
-    res.render("submit", {});
+    let submitData = {};
+    if (req.query && req.query.err === "badtitle") submitData.error = "That's not a valid title."
+    if (req.query && req.query.err === "unknown") submitData.error = "Something went wrong, most likely connecting to the DB."
+    res.render("submit", submitData);
 });
 
 router.get("/upvotedSubmissions", auth.strict, async (req, res) => {

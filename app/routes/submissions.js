@@ -12,15 +12,15 @@ const auth = new AuthMiddleware();
 router.post("/", auth.strict, async (req, res) => {
     const {title, url, text} = req.body;
     
-    //Mirar si title està buit i enviar un error indicant-ho es fa aqui???
-    if (title === "") res.render("submit", { error: "You have to introduce a title" });
-    if (url != "" && text != "") res.render("submit", { error: "Not implemented yet" });
-    
+    if (title === "") {
+        res.redirect("/submit?err=badtitle");
+        return;
+    }
     try {
         await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
         res.redirect("/newest");
     } catch (e) {
-        res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });
+        res.redirect("/submit?err=unknown");
     }
 });
 
