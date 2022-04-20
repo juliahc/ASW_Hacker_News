@@ -52,6 +52,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     if (page <= 0) throw TypeError("Page must be greater than zero.");
     // Get logged user upvoted submissions
     let upvSubIds = [];
+    /*
     if (authId !== null) {
         let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
         if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
@@ -59,6 +60,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
             upvSubIds.push(submission._id);
         });
     }
+    */
     // Get submissions list
     let params = {p: page, t: type, o: order};
     if (googleId !== null) params["usr"] = googleId;

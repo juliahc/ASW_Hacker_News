@@ -7,8 +7,13 @@
                 <td>showdead:</td>
                 <td>
                     <select name="showdead">
-                        <option value="no">no</option>
-                        <option value="yes">yes</option>
+                        <% if (user.howdead) { %>
+                            <option value="no" >no</option>
+                            <option value="yes" selected>yes</option>
+                        <% } else { %>
+                            <option value="no" selected>no</option>
+                            <option value="yes">yes</option>
+                        <% } %>
                     </select>
                 </td>
             </tr>
@@ -16,21 +21,26 @@
                 <td>noprocrast:</td>
                 <td>
                     <select name="noprocrast">
-                        <option value="no">no</option>
-                        <option value="yes">yes</option>
+                        <% if (user.noprocrast) { %>
+                            <option value="no" >no</option>
+                            <option value="yes" selected>yes</option>
+                        <% } else { %>
+                            <option value="no" selected>no</option>
+                            <option value="yes">yes</option>
+                        <% } %>
                     </select>
                 </td>
             </tr>
             <tr>
                 <td>maxvist:</td>
-                <td><input type="text" name="maxvist" value="20" size="20"></td>
+                <td><input type="text" name="maxvist" value="<%= user.maxvisit %>" size="20"></td>
             </tr>
             <tr>
                 <td>minway:</td>
-                <td><input type="text" name="minway" value="180" size="20"></td>
+                <td><input type="text" name="minway" value="<%= user.minaway %>" size="20"></td>
             </tr>
             <tr>
                 <td>dealy:</td>
-                <td><input type="text" name="dealy" value="0" size="20"></td>
+                <td><input type="text" name="dealy" value="<%= user.delay %>" size="20"></td>
             </tr>
 </form>

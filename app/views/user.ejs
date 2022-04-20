@@ -27,68 +27,71 @@
                         <td>
                             <table id="user">
                                 <tbody>
-                                    <tr>
-                                        <td>user:</td>
-                                        <td>username</td>
-                                    </tr>
-                                    <tr>
-                                        <td>created:</td>
-                                        <td>24 days ago</td>
-                                    </tr>                 
-                                    <tr>
-                                        <td>karma:</td>
-                                        <td>5</td>
-                                    </tr>
+                                    <% if (locals.user) { %> 
+                                        <tr>
+                                            <td>user:</td>
+                                            <td><%= user.username %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>created:</td>
+                                            <td><%= user.createdAt %></td>
+                                        </tr>                 
+                                        <tr>
+                                            <td>karma:</td>
+                                            <td><%= user.karma %></td>
+                                        </tr>
 
-                                    <!--remove--><tr><td>--Logged user--</td></tr>
-                                    <tr>
-                                        <td>
-                                            email:
-                                        </td>
-                                        <td>
-                                            paquito.chocolatero@estudiantat.upc.edu
-                                        </td>
-                                    </tr>
-                                    <!--form-->
-                                    <%- include("./userForm.ejs") %>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">submissions</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">comments</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">hidden</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">upvoted submissions</a>/ <a href="#">comments</a> <u>(private)</u></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">favorite submissions</a>/ <a href="#">comments</a> <u>(public)</u></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="submit" value="update" class="button"></td>
-                                    </tr>
+                                            <% if(loggedProfile) { %>
+                                            <tr>
+                                                <td>
+                                                    email:
+                                                </td>
+                                                <td>
+                                                    <%= user.email %>
+                                                </td>
+                                            </tr>
+                                            <!--form-->
+                                            <%- include("./userForm.ejs", {user: user}) %>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">submissions</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">comments</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">hidden</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">upvoted submissions</a>/ <a href="#">comments</a> <u>(private)</u></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">favorite submissions</a>/ <a href="#">comments</a> <u>(public)</u></td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="submit" value="update" class="button"></td>
+                                            </tr>
+                                        <% } else { %>
 
-                                    <!--remove--><tr><td>--Another user--</td></tr>
-                                    
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">submissions</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">comments</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">favorites</a></td>
-                                    </tr>
+                                            
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">submissions</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">comments</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">favorites</a></td>
+                                            </tr>
+                                        <% } 
+                                    } %>
                                 </tbody>
                             </table>
                         </td>
