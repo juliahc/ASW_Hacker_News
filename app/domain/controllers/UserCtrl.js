@@ -14,7 +14,6 @@ let UserCtrl;
         // initialize any properties of the singleton
         this.db = new DatabaseCtrl();
         this.encrypt = function(id, username, karma) {
-            console.log("----------------id: ", id)
             return jwt.sign(
                 {id: id, username: username, karma: karma},
                 process.env.USER_AUTH_SECRET_KEY,
@@ -32,8 +31,7 @@ let UserCtrl;
 UserCtrl.prototype.login_or_register = async function(id, username, email) {
     // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
     let resp, db_id, db_username, db_karma;
-    let params = {"googleId" : id};
-    resp = await this.db.getRequest('/user', params);
+    resp = await this.db.getRequest('/user', {"googleId" : id});
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) {
         // User didn't exist -> register new user
         let user = new User({googleId: id, username: username, email: email})
@@ -50,7 +48,7 @@ UserCtrl.prototype.login_or_register = async function(id, username, email) {
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {
-    let resp = await this.db.getRequest('/user', id);
+    let resp = await this.db.getRequest('/user', {"googleId": id});
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('No such user'); }
     let user = new User(resp.data);
     if (authId != id) {
@@ -69,24 +67,23 @@ UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, 
 
 }
 
-UserCtrl.prototype.getUpvotedSubmissionIds = async function(authId) {
+UserCtrl.prototype.getUpvotedSubmissions = async function(authId) {
     return [];
 }
 
-UserCtrl.prototype.getUpvotedCommentIds = async function(authId) {
+UserCtrl.prototype.getUpvotedComments = async function(authId) {
     return [];
 }
 
 UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
+
     let postObject = { 
         "googleId": authId, 
         "submission": submissionId,
         "type": "upvoteSubmission" };
-    console.log("UserCtrl.upvot")
     let resp = await this.db.postRequest('/updateUser', postObject);
     
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    console.log("hello in userCtrl after bd")
     return;
 }
 
@@ -120,11 +117,11 @@ UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
     return;
 }
 
-UserCtrl.prototype.getFavoriteSubmissionIds = async function(id) {
+UserCtrl.prototype.getFavoriteSubmissions = async function(id) {
     return [];
 }
 
-UserCtrl.prototype.getFavoriteCommentIds = async function(id) {
+UserCtrl.prototype.getFavoriteComments = async function(id) {
     return [];
 }
 
