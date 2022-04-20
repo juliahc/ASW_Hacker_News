@@ -126,7 +126,6 @@ router.get("/threads", auth.passthrough, async (req, res) => {
 });
 
 router.get("/user", auth.passthrough, async (req, res) => {
-
     if (!req.query || !req.query.id) {
         if (req.user_auth !== null) res.redirect("/user?id=" + req.user_auth.id);
         else res.send("No such user");
@@ -145,8 +144,39 @@ router.get("/submit", async (req, res) => {
     res.render("submit", {});
 });
 
-router.get("/upvotedSubmisisons", auth.strict, async (req, res) => {});
+router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
+    try {
+        let auth_id = req.user_auth.id;
+        let p = req.query.p || 1;
+        let sub_page = await user_ctrl.getUpvotedSubmissions(p, auth_id);
+        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let more = submissionsLeft > 0;
+        sub_page.pop();
+        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/upvotedSubmissions", more: more });
+    } catch {
+        res.send("Something went wrong");
+    }
+});
 router.get("/upvotedComments", auth.strict, async (req, res) => {});
 
-router.get("/favoriteSubmisisons", async (req, res) => {});
+router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
+    if (!req.query || !req.query.id) {
+        if (req.user_auth !== null) res.redirect("/favoriteSubmissions?id=" + req.user_auth.id);
+        else res.send("No such user");
+        return;
+    }
+    try {
+        let p = req.query.p || 1;
+        let sub_page = await user_ctrl.getFavoriteSubmissions(p, req.query.id);
+        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let more = submissionsLeft > 0;
+        sub_page.pop();
+        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/favoriteSubmissions?id=" + req.query.id, more: more });
+    } catch {
+        res.send("Something went wrong");
+    }
+});
 router.get("/favoriteComments", async (req, res) => {});
+

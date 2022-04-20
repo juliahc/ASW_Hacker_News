@@ -40,7 +40,7 @@ SubmissionCtrl.prototype.createSubmission = async function(title, url, text, goo
 }
 
 SubmissionCtrl.prototype.fetchSubmission = async function(id) {
-    let resp = await this.db.getRequest("/submission", id);
+    let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
     if (!'url' in resp.data) return new UrlSubmission(resp.data);
     else return new AskSubmission(resp.data);
@@ -53,7 +53,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     // Get logged user upvoted submissions
     let upvSubIds = [];
     if (authId !== null) {
-        let usrUpvRsp = await this.db.getRequest("/userUpvotedSubmissions", authId);
+        let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
         if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
         usrUpvRsp.data.forEach(submission => {
             upvSubIds.push(submission._id);
