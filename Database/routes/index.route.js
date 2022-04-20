@@ -43,6 +43,16 @@ router.get(
     validateMiddleware.validate,
     UserController.comments
 );
+router.get(
+    "/upvotedSubmissions",
+    validateMiddleware.validate,
+    UserController.likedSubmissions
+);
+router.get(
+    "/favoriteSubmissions",
+    validateMiddleware.validate,
+    UserController.likedSubmissions
+);
 /* /User */
 
 /*  Submission  */

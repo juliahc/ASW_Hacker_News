@@ -369,7 +369,6 @@ exports.userSubmissions = (request, response) => {
             }
             //search submissions by aggregation
             let page = (params.hasOwnProperty("p")) ? { "$skip": (params.p - 1) * 10 } : "";
-            console.log("Aqui 2");
             let criteria = {};
             criteria["$and"] = [];
             criteria["$and"].push({
@@ -381,9 +380,7 @@ exports.userSubmissions = (request, response) => {
                 "createdAt": -1
             };
             let limit = (params.hasOwnProperty("p")) ? { "$limit": 10 } : "";
-            console.log("Abans de aggregateArr");
             let aggregateArr = createAggregateArray(page, criteria, orderBy, limit);
-            console.log("aggregateArr", aggregateArr);
             submissionDatalayer
             .aggregateSubmission(aggregateArr)
             .then((submissionData) => {
@@ -405,8 +402,6 @@ exports.userSubmissions = (request, response) => {
                         submissionDatalayer
                         .aggregateSubmission(aggregateQuery)
                         .then((ret => {
-                            console.log("REturnnnn: ", ret);
-                            
                             ret[0].submissionsLeft -= (params.p * 10);
                             submissionData.push(ret[0]);
                             responseObj.status  = errorCodes.SUCCESS;
@@ -517,6 +512,67 @@ exports.comments = async (request, response) => {
         response.send(responseObj);
     });
     return;
+};
+
+exports.likedSubmissions = async (request, response) => {
+  let params = {};
+  if (request.query.googleId) {
+      params = request.query;
+  } else {
+      responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+      responseObj.message = "Required parameters missing";
+      responseObj.data    = {};
+      response.send(responseObj);
+      return;
+  }
+  
+  userDatalayer.findUser({googleId: params.googleId})
+  .then((userData) => {
+      if (userData !== null && typeof userData !== undefined) {
+        let criteria = {};
+        criteria["$and"] = [];
+        criteria["$and"].push({
+          _id: {
+            $in: (params.type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
+          }
+        });
+        let orderBy = {
+          "createdAt": -1
+        };
+        let aggregateArr = createAggregateArray("", criteria, orderBy, "");
+        submissionDatalayer
+        .aggregateSubmission(aggregateArr)
+        .then((submissionData) => {
+            if (submissionData !== null && typeof submissionData !== undefined) {
+                responseObj.status  = errorCodes.SUCCESS;
+                responseObj.message = "Success";
+                responseObj.data    = submissionData;
+            } else {
+                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                responseObj.message = "No record found";
+                responseObj.data    = {};
+            }
+            response.send(responseObj);
+        })
+        .catch(error => {
+            responseObj.status  = errorCodes.SYNTAX_ERROR;
+            responseObj.message = error;
+            responseObj.data    = {};
+            response.send(responseObj);
+        });
+      } else {
+        responseObj.status  = errorCodes.DATA_NOT_FOUND;
+        responseObj.message = "No record found";
+        responseObj.data    = {};
+        response.send(responseObj);
+      }
+  })
+  .catch(error => {
+      responseObj.status  = errorCodes.SYNTAX_ERROR;
+      responseObj.message = error;
+      responseObj.data    = {};
+      response.send(responseObj);
+  });
 };
 
 function createAggregateCommentArray (match) {
