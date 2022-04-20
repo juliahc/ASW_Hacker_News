@@ -13,7 +13,7 @@ exports.createComment= async (params) => {
 exports.findComment = async (where = {}) => {
     return new Promise((resolve, reject) => {
         CommentModel
-        .findOne(where)
+        .find(where)
         .then((data) => {
             resolve(data)
         })
