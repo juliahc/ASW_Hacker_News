@@ -33,7 +33,11 @@ CommentCtrl.prototype.postReply = async function(parent, text, googleId, usernam
 CommentCtrl.prototype.fetchComment = async function(id) {
     let resp = await this.db.getRequest("/comment", id);
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
-    return new Comment(resp.data);
+    let comment = new Comment(resp.data);
+    resp = await this.db.getRequest("/submission", {"_id": comment.submission});
+    if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("Comment does not have a submission!"); }
+    comment.submissionTitle = resp.data.title;
+    return comment;
 }
 
 CommentCtrl.prototype.fetchCommentsOfUser = async function(id) {
