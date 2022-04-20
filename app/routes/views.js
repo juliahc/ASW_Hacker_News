@@ -144,7 +144,11 @@ router.get("/user", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/submit", async (req, res) => {
+router.get("/submit", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     let submitData = {};
     if (req.query && req.query.err === "badtitle") submitData.error = "That's not a valid title."
     if (req.query && req.query.err === "unknown") submitData.error = "Something went wrong, most likely connecting to the DB."
