@@ -14,6 +14,7 @@ let UserCtrl;
         // initialize any properties of the singleton
         this.db = new DatabaseCtrl();
         this.encrypt = function(id, username, karma) {
+            console.log("----------------id: ", id)
             return jwt.sign(
                 {id: id, username: username, karma: karma},
                 process.env.USER_AUTH_SECRET_KEY,
@@ -40,7 +41,7 @@ UserCtrl.prototype.login_or_register = async function(id, username, email) {
         db_username = user.username;
         db_karma = user.karma;
     } else {
-        db_id = resp.data.id;
+        db_id = resp.data.googleId;
         db_username = resp.data.username;
         db_karma = resp.data.karma;
     }
@@ -81,6 +82,7 @@ UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
         "googleId": authId, 
         "submission": submissionId,
         "type": "upvoteSubmission" };
+    console.log("UserCtrl.upvot")
     let resp = await this.db.postRequest('/update', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
     return;

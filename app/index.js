@@ -2,8 +2,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
+const cookieParser = require('cookie-parser');
 
 app.use(express.static("public"));
+app.use(cookieParser());
 
 app.use(bodyParser.json({ type: "application/json", limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
