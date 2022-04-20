@@ -1,0 +1,25 @@
+<div class="comment" id="">
+    <div class="commentData">
+        <div><i id="id" class="fas fa-heart"></i></div>
+        <div>
+            <div class="newActions">
+                <a href="#">pepe</a>
+                <a href="#">20 min ago</a>
+                |
+                <a href="2">next</a>
+                <button class="textButton" type="button">[-]</button>
+            
+            </div>
+            <div>
+                <p>
+                    <%= info.title %> <%= pos %>
+                </p>
+                <a class="reply" href="#">reply</a>
+            </div>
+        </div>
+    </div>   
+    <% info.replies.map(r => { %>
+        <%- include("./comment.ejs", {info: r, pos: pos+1}) %>
+    <%}) %>
+
+</div>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Hacker News</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="stylesheets/application.css">
+        <script src="https://kit.fontawesome.com/733e866dde.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">-->
+        <script type="text/javascript" src="javascript/news.js"></script>
+    </head>
+    <body>
+        <main>
+            <table id="content" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <!--Menu-->
+                    <tr>
+                        <td>
+                            <%- include("./nav.ejs") %>
+                        </td>
+                    </tr>
+                    <!--Space-->
+                    <tr id="space-10px"></tr>
+                    <!--Item info-->
+                    <tr>
+                        <td>
+                            <table>
+                                <!--Title-->
+                                <tr id="id" class="newInfo">
+                                    <td class="voteButton"><i id="#" class="fas fa-heart"></i></td>
+                                    <td class="title">
+                                        <a class="newTitle titleText" href="#"> Item title </a>
+                                        <a class="newLink" href="#">(itemlink.com)</a>
+                                    </td>
+                                </tr>
+                                <!--Actions-->
+                                <tr class="newActions">
+                                    <td colspan="1"></td>
+                                    <td>
+                                        30 points
+                                        &nbsp
+                                        by
+                                        <a href="#">pepe</a>
+                                        &nbsp
+                                        <a href="#">20 min ago</a>
+                                        |
+                                        <a href="#">past</a>
+                                        |
+                                        <a href="#">hide</a>
+                                        |
+                                        <a href="#">favorite</a>
+                                        |
+                                        <a href="#">20 comments</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <p>
+                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur felis lectus, hendrerit cursus iaculis cursus, malesuada a nunc. Aliquam pulvinar diam eget lectus condimentum egestas. Curabitur laoreet lacinia magna, sit amet porttitor elit ornare in. Quisque placerat mauris est, at sagittis nisl congue ac. Mauris pharetra, justo nec posuere fringilla, leo ipsum sagittis turpis, at placerat ligula arcu at nisi. Morbi vitae velit et elit bibendum luctus. Sed a vehicula turpis.
+                                            <br><br>
+                                            Mauris sagittis ex et urna lacinia, a malesuada enim porta. Sed nec dignissim lorem. Donec id purus nulla. Nam varius, mauris fringilla tristique pretium, mi justo vestibulum augue, sed consectetur nisi diam ac neque. Curabitur at urna malesuada, laoreet nulla sit amet, eleifend massa. Praesent eu nibh a lectus commodo hendrerit finibus vitae magna. Curabitur tincidunt metus lectus, in bibendum sapien accumsan vitae. Vestibulum vel dolor eu augue pellentesque interdum. Ut mattis sagittis tellus vestibulum tempor. 
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <form method="post" action="#">
+                                            <textarea name="text" rows="6" cols="100" value=""></textarea>
+                                            <br><br>
+                                            <input type="submit" value="add comment" class="button">
+                                        </form>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!--Space-->
+                    <tr id="space-10px"></tr>
+                    <!--Comments-->
+                    <tr>
+                        <td>
+                            <% if (locals.comments) {
+                                comments.forEach((c) => { %>
+                                    <%- include("./comment.ejs", {info: c, pos: 0}) %>
+                            <% }) } %>
+
+
+
+
+                            <!--
+
+                                <tr id="11">
+                                    <td>
+                                        <table >
+                                            <td style="padding:12px"></td>
+                                            <td valign="top"><i id="id" class="fas fa-heart"></i></td>
+                                            <td>
+                                                <div class="newActions">
+                                                    <a href="#">pepe</a>
+                                                    <a href="#">20 min ago</a>
+                                                    |
+                                                    <a href="#">parent</a>
+                                                    |
+                                                    <a href="2">next</a>
+                                                    <button class="textButton" type="button">[-]</button>
+                                                
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        Nulla facilisi. Mauris sit amet fringilla sapien, vitae scelerisque sapien. Duis ullamcorper orci et semper euismod. Praesent interdum eget eros ut pharetra. Etiam ullamcorper maximus maximus. Sed aliquam sem ut eros imperdiet, feugiat porta diam pharetra. In fringilla libero quis odio pretium scelerisque. Ut pellentesque dui at dolor gravida, et feugiat urna accumsan. 
+                                                    </p>
+                                                    <a href="#">reply</a>
+                                                </div>
+                                            </td>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr id="111">
+                                    <td>
+                                        <table >
+                                            <td style="padding:24px"></td>
+                                            <td valign="top"><i id="id" class="fas fa-heart"></i></td>
+                                            <td>
+                                                <div class="newActions">
+                                                    <a href="#">pepe</a>
+                                                    <a href="#">20 min ago</a>
+                                                    |
+                                                    <a href="#">root</a>
+                                                    |
+                                                    <a href="#">parent</a>
+                                                    |
+                                                    <a href="2">next</a>
+                                                    <button class="textButton" type="button">[-]</button>
+                                                
+                                                </div>
+                                                <div>
+                                                    <p>
+                                                        Nulla facilisi. Mauris sit amet fringilla sapien, vitae scelerisque sapien. Duis ullamcorper orci et semper euismod. Praesent interdum eget eros ut pharetra. Etiam ullamcorper maximus maximus. Sed aliquam sem ut eros imperdiet, feugiat porta diam pharetra. In fringilla libero quis odio pretium scelerisque. Ut pellentesque dui at dolor gravida, et feugiat urna accumsan. 
+                                                    </p>
+                                                    <a href="#">reply</a>
+                                                </div>
+                                            </td>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        -->
+                        </td>
+                    </tr>
+                    <!--Line-->
+                    <tr>
+                        <td><br><div class="line"></div></td>
+                    </tr>
+                    <!--Footer-->
+                    <tr>
+                        <td>
+                            <div id="footerData">
+                                <br>
+                                <a class="titleText" href="#">Applications are open for YC Summer 2022</a>
+                                <br><br>
+                                <span id="footerLinks">
+                                    <a href="#">Guidelines</a>
+                                    |
+                                    <a href="#">FAQ</a>
+                                    |
+                                    <a href="#">Lists</a>
+                                    |
+                                    <a href="#">API</a>
+                                    |
+                                    <a href="#">Security</a>
+                                    |
+                                    <a href="#">Legal</a>
+                                    |
+                                    <a href="#">Apply to YC</a>
+                                    |
+                                    <a href="#">Contact</a>
+                                </span>
+                                <br><br>
+                                <form method="get" action="#">
+                                    <span class="titleText">Search:</span>
+                                    <input type="text" name="searchQuery" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="none" autocomplete="false">
+                                </form>
+                                <br><br>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </body>
+</html>
