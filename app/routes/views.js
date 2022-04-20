@@ -11,7 +11,7 @@ module.exports = router;
 const sub_ctrl = new SubmissionCtrl();
 const comm_ctrl = new CommentCtrl();
 
-router.get("/", async (req, res) => {
+router.get("/", auth.passthrough, async (req, res) => {
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null);
@@ -19,14 +19,14 @@ router.get("/", async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { submissions: sub_page, p: p, view: "news", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "news", more: more });
     } catch (e) {
         res.render("news", { error: "Hacker News can't connect to his database" });
     }
     
 });
 
-router.get("/news", async (req, res) => {
+router.get("/news", auth.passthrough, async (req, res) => {
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null);
@@ -34,14 +34,14 @@ router.get("/news", async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { submissions: sub_page, p: p, view: "news", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "news", more: more });
     } catch (e) {
         res.render("news", {error: "Hacker News can't connect to his database"});
     }
     
 });
 
-router.get("/newest", async (req, res) => {
+router.get("/newest", auth.passthrough, async (req, res) => {
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null);
@@ -49,13 +49,13 @@ router.get("/newest", async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { submissions: sub_page, p: p, view: "newest", more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "newest", more: more });
     } catch (e) {
         res.render("news", {error: "Hacker News can't connect to his database"});
     }
 });
 
-router.get("/ask", async (req, res) => {
+router.get("/ask", auth.passthrough, async (req, res) => {
     try {
         let p = req.query.p || 1;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null);
@@ -63,7 +63,7 @@ router.get("/ask", async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("ask", { submissions: sub_page, p: p, more: more });
+        res.render("ask", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/ask", more: more });
     } catch (e) {
         res.render("ask", {error: "Hacker News can't connect to his database"});
     }
@@ -71,7 +71,7 @@ router.get("/ask", async (req, res) => {
 
 router.get("/submitted", auth.passthrough, async (req, res) => {
     if (!req.query.id) {
-        if (req.user_auth.id !== null) res.redirect("/submitted?id=" + req.user_auth.id);
+        if (req.user_auth !== null) res.redirect("/submitted?id=" + req.user_auth.id);
         else res.send("No such user");
     }
     try {
@@ -81,7 +81,7 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
-        res.render("news", { submissions: sub_page, p: p, view: "/submitted?id=" + req.user_auth.id, more: more });
+        res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/submitted?id=" + req.query.id, more: more });
     } catch {
         res.send("No such user");
     }
@@ -89,14 +89,13 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
 
 router.get("/threads", auth.passthrough, async (req, res) => {
     if (!req.query.id) {
-        if (req.user_auth.id !== null) res.redirect("/threads?id=" + req.user_auth.id);
+        if (req.user_auth !== null) res.redirect("/threads?id=" + req.user_auth.id);
         else res.send("No such user");
     }
     try {
-        let id = req.query.id;
-        let comment_list = await comm_ctrl.fetchCommentsOfUser(id);
+        let comment_list = await comm_ctrl.fetchCommentsOfUser(req.query.id);
         comment_list.forEach(comment => comment.formatCreatedAtAsTimeAgo());
-        res.render("threads", {comments: comment_list});
+        res.render("threads", { user_auth: req.user_auth, comments: comment_list, view: "/threads?id=" + req.query.id });
     } catch {
         res.send("No such user");
     }
@@ -104,13 +103,14 @@ router.get("/threads", auth.passthrough, async (req, res) => {
 
 router.get("/user", auth.passthrough, async (req, res) => {
     if (!req.query.id) {
-        if (req.user_auth.id !== null) res.redirect("/user?id=" + req.user_auth.id);
+        if (req.user_auth !== null) res.redirect("/user?id=" + req.user_auth.id);
         else res.send("No such user");
     }
     try {
-        let user = await user_ctrl.profile(req.user_auth.id, req.query.id);
+        let auth_id = req.user_auth !== null ? req.user_auth.id : '';
+        let user = await user_ctrl.profile(auth_id, req.query.id);
         res.status(200).json(user);
-        res.render("user", { user: user });
+        res.render("user", { user_auth: req.user_auth, user: user,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");
     }
@@ -119,3 +119,9 @@ router.get("/user", auth.passthrough, async (req, res) => {
 router.get("/submit", async (req, res) => {
     res.render("submit", {});
 });
+
+router.get("/upvotedSubmisisons", auth.strict, async (req, res) => {});
+router.get("/upvotedComments", auth.strict, async (req, res) => {});
+
+router.get("/favoriteSubmisisons", async (req, res) => {});
+router.get("/favoriteComments", async (req, res) => {});

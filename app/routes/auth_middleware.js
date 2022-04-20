@@ -24,13 +24,13 @@ class auth {
         const token = nodeCookie.get(req, 'access_token');
 
         if (!token) {
-            req.user_auth = {id: null, google_tokens: null};
+            req.user_auth = null;
         }
         try {
             const decoded = jwt.verify(token, process.env.USER_AUTH_SECRET_KEY);
             req.user_auth = decoded;
         } catch (err) {
-            req.user_auth = {id: null, google_tokens: null};
+            req.user_auth = null;
         }
         return next();
     }

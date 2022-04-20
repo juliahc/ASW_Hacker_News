@@ -13,9 +13,9 @@ let UserCtrl;
 
         // initialize any properties of the singleton
         this.db = new DatabaseCtrl();
-        this.encrypt = function(id, username, karma, tokens) {
+        this.encrypt = function(id, username, karma) {
             return jwt.sign(
-                {id: id, username: username, karma: karma, google_tokens: tokens},
+                {id: id, username: username, karma: karma},
                 process.env.USER_AUTH_SECRET_KEY,
                 {
                     issuer: "hackernews.user."+id,
@@ -28,7 +28,7 @@ let UserCtrl;
 
 // Declare controller methods
 
-UserCtrl.prototype.login_or_register = async function(id, username, email, tokens) {
+UserCtrl.prototype.login_or_register = async function(id, username, email) {
     // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
     let resp, db_id, db_username, db_karma;
     resp = await this.db.getRequest('/user', id);
@@ -44,7 +44,7 @@ UserCtrl.prototype.login_or_register = async function(id, username, email, token
         db_karma = resp.data.karma;
     }
     // Return user_auth token
-    return this.encrypt(db_id, username, db_karma, tokens);
+    return this.encrypt(db_id, db_username, db_karma);
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {

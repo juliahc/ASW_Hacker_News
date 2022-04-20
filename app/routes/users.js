@@ -20,6 +20,12 @@ router.get("/login", async (req, res) => {
     }
 });
 
+router.get("/logout", async (req, res) => {
+    let goto = req.query.goto || '/';
+    nodeCookie.clear(res, 'access_token');
+    res.redirect(goto);
+});
+
 router.get("/google/auth", async (req, res) => {
     // Get the user info
     try {
@@ -27,7 +33,7 @@ router.get("/google/auth", async (req, res) => {
 
         let token = await googleAuth.getAccessTokenFromCode(queryObject.code);
         let userInfo = await googleAuth.getGoogleUserInfo(token);
-        let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email, token);
+        let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email);
         nodeCookie.create(res, 'access_token', user_auth);
         res.redirect('/user?id='+userInfo.id);
     } catch (e) {
@@ -35,20 +41,17 @@ router.get("/google/auth", async (req, res) => {
     }
 });
 
-router.patch("/:id", auth.strict, async (req, res) => {
+router.put("/", auth.strict, async (req, res) => {
     const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
     const authId = req.user_auth.id;
     try {
-        let user = await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);
+        await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);
         res.redirect("/user?id="+authId);
     } catch (e) {
         res.render("update", { error: "Hacker News can't connect to its database", message: e.message });
     }
 
 });
-
-router.get("/upvotedSubmisisons", auth.strict, async (req, res) => {});
-router.get("/upvotedComments", auth.strict, async (req, res) => {});
 
 router.post("/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
@@ -90,14 +93,12 @@ router.post("/downvoteComment/:comment_id", auth.strict, async (req, res) => {
     }
 });
 
-router.get("/favoriteSubmisisons", async (req, res) => {});
-router.get("/favoriteComments", async (req, res) => {});
-
 router.post("/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
         user_ctrl.favoriteSubmission(authId, submissionId);
+        res.redirect("/favoriteSubmisisons?id="+auth_id);
     } catch (e) {
         res.render("favoriteSubmisisons", { error: "Hacker News can't connect to its database", message: e.message });
     }
@@ -108,6 +109,7 @@ router.post("/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, re
     const submissionId = req.params.submission_id;
     try {
         user_ctrl.unfavoriteSubmisisons(authId, submissionId);
+        res.redirect("/favoriteSubmisisons?id="+auth_id);
     } catch (e) {
         res.render("unfavoriteSubmisisons", { error: "Hacker News can't connect to its database", message: e.message });
     }
@@ -118,6 +120,7 @@ router.post("/favoriteComments/:comment_id", auth.strict, async (req, res) => {
     const commentId = req.params.comment_id;
     try {
         user_ctrl.favoriteSubmission(authId, commentId);
+        res.redirect("/favoriteComments?id="+auth_id);
     } catch (e) {
         res.render("favoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
     }
@@ -128,6 +131,7 @@ router.post("/unfavoriteComments/:comment_id", auth.strict, async (req, res) => 
     const commentId = req.params.comment_id;
     try {
         user_ctrl.unfavoriteComments(authId, commentId);
+        res.redirect("/favoriteComments?id="+auth_id);
     } catch (e) {
         res.render("unfavoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
     }
