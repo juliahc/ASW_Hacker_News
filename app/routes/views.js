@@ -15,8 +15,9 @@ const user_ctrl = new UserCtrl();
 
 router.get("/", auth.passthrough, async (req, res) => {
     try {
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = req.query.p || 1;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -30,8 +31,9 @@ router.get("/", auth.passthrough, async (req, res) => {
 
 router.get("/news", auth.passthrough, async (req, res) => {
     try {
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = req.query.p || 1;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -45,8 +47,9 @@ router.get("/news", auth.passthrough, async (req, res) => {
 
 router.get("/newest", auth.passthrough, async (req, res) => {
     try {
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = req.query.p || 1;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -59,8 +62,9 @@ router.get("/newest", auth.passthrough, async (req, res) => {
 
 router.get("/ask", auth.passthrough, async (req, res) => {
     try {
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = req.query.p || 1;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -78,8 +82,9 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
         return;
     }
     try {
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = req.query.p || 1;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -91,7 +96,6 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
 });
 
 router.get("/submission", async (req, res) => {
-
     if (!req.query || !req.query.id) {
         res.send("No such submission");
         return;
@@ -99,7 +103,8 @@ router.get("/submission", async (req, res) => {
     // Get one submission
     try {
         let submission = await sub_ctrl.fetchSubmission(req.query.id);
-        res.status(200).json(submission); //fer render
+        submission.comments.forEach(comment => comment.addNavigationalIdentifiers(null, 0));
+        res.render("submission", { user_auth: req.user_auth, submission: submission });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -128,10 +133,8 @@ router.get("/user", auth.passthrough, async (req, res) => {
         return;
     }
     try {
-        
-        let auth_id = req.user_auth !== null ? req.user_auth.id : '';
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let user = await user_ctrl.profile(auth_id, req.query.id);
-        console.log("user:",user)
         res.render("user", { user_auth: req.user_auth, user: user,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");

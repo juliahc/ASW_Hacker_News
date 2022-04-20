@@ -55,7 +55,11 @@ router.put("/", auth.strict, async (req, res) => {
 
 });
 
-router.post("/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+router.post("/upvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -70,7 +74,11 @@ router.post("/upvoteSubmisison/:submission_id", auth.strict, async (req, res) =>
     return;
 });
 
-router.post("/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+router.post("/downvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -81,7 +89,11 @@ router.post("/downvoteSubmisison/:submission_id", auth.strict, async (req, res) 
     }
 });
 
-router.post("/upvoteComment/:comment_id", auth.strict, async (req, res) => {
+router.post("/upvoteComment/:comment_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -92,7 +104,11 @@ router.post("/upvoteComment/:comment_id", auth.strict, async (req, res) => {
     }
 });
 
-router.post("/downvoteComment/:comment_id", auth.strict, async (req, res) => {
+router.post("/downvoteComment/:comment_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -103,7 +119,11 @@ router.post("/downvoteComment/:comment_id", auth.strict, async (req, res) => {
     }
 });
 
-router.post("/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+router.post("/favoriteSubmisisons/:submission_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -115,7 +135,11 @@ router.post("/favoriteSubmisisons/:submission_id", auth.strict, async (req, res)
     }
 });
 
-router.post("/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+router.post("/unfavoriteSubmisisons/:submission_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -127,7 +151,11 @@ router.post("/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, re
     }
 });
 
-router.post("/favoriteComments/:comment_id", auth.strict, async (req, res) => {
+router.post("/favoriteComments/:comment_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -139,7 +167,11 @@ router.post("/favoriteComments/:comment_id", auth.strict, async (req, res) => {
     }
 });
 
-router.post("/unfavoriteComments/:comment_id", auth.strict, async (req, res) => {
+router.post("/unfavoriteComments/:comment_id", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -151,4 +183,4 @@ router.post("/unfavoriteComments/:comment_id", auth.strict, async (req, res) => 
     }
 });
 
-router.delete("/:id", auth.strict, async (req, res) => {});      //deleteUser??
+router.delete("/:id", auth.strict, async (req, res) => { res.send("Can't delete users yet ;)"); });      //deleteUser??
