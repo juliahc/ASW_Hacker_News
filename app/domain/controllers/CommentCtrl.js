@@ -23,7 +23,7 @@ CommentCtrl.prototype.postComment = async function(submission, text, googleId, u
 }
 CommentCtrl.prototype.postReply = async function(parent, text, googleId, username) {
     // Obtain submission from parent comment.
-    let resp = await this.db.getRequest("/comment", id);
+    let resp = await this.db.getRequest("/comment", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let comment = new Comment({parent: parent, submission: resp.data.submission, text: text, googleId: googleId, username: username});
     let id = await this.db.postRequest("/newComment", comment);
@@ -31,13 +31,13 @@ CommentCtrl.prototype.postReply = async function(parent, text, googleId, usernam
 }
 
 CommentCtrl.prototype.fetchComment = async function(id) {
-    let resp = await this.db.getRequest("/comment", id);
+    let resp = await this.db.getRequest("/comment", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     return new Comment(resp.data);
 }
 
 CommentCtrl.prototype.fetchCommentsOfUser = async function(id) {
-    let resp = await this.db.getRequest("/comment/user", id);
+    let resp = await this.db.getRequest("/userComments", {"googleId": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let result = [];
     resp.data.forEach(comment => {
