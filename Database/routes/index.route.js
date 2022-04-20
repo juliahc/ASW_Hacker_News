@@ -26,6 +26,12 @@ router.post(
     AuthController.validate("registerUser"),
     AuthController.register
 );
+
+router.get(
+    "/userComments",
+    validateMiddleware.validate,
+    UserController.comments
+)
 /* /User */
 
 /*  Submission  */
