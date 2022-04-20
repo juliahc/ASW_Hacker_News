@@ -44,14 +44,9 @@ router.get(
     UserController.comments
 );
 router.get(
-    "/upvotedSubmissions",
+    "/likedComments",
     validateMiddleware.validate,
-    UserController.likedSubmissions
-);
-router.get(
-    "/favoriteSubmissions",
-    validateMiddleware.validate,
-    UserController.likedSubmissions
+    UserController.likedComments
 );
 /* /User */
 

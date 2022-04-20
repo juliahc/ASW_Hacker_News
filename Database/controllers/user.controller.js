@@ -514,7 +514,7 @@ exports.comments = async (request, response) => {
     return;
 };
 
-exports.likedSubmissions = async (request, response) => {
+exports.likedComments = async (request, response) => {
   let params = {};
   if (request.query.googleId) {
       params = request.query;
@@ -533,20 +533,15 @@ exports.likedSubmissions = async (request, response) => {
         criteria["$and"] = [];
         criteria["$and"].push({
           _id: {
-            $in: (params.type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
+            $in: (params.type === "up") ? userData.upvotedComments : userData.favouriteComments
           }
         });
-        let orderBy = {
-          "createdAt": -1
-        };
-        let aggregateArr = createAggregateArray("", criteria, orderBy, "");
-        submissionDatalayer
-        .aggregateSubmission(aggregateArr)
-        .then((submissionData) => {
-            if (submissionData !== null && typeof submissionData !== undefined) {
+        commentDatalayer.findComment(criteria)
+        .then((commentData) => {
+            if (commentData !== null && typeof commentData !== undefined) {
                 responseObj.status  = errorCodes.SUCCESS;
                 responseObj.message = "Success";
-                responseObj.data    = submissionData;
+                responseObj.data    = commentData;
             } else {
                 responseObj.status  = errorCodes.DATA_NOT_FOUND;
                 responseObj.message = "No record found";
@@ -567,12 +562,13 @@ exports.likedSubmissions = async (request, response) => {
         response.send(responseObj);
       }
   })
-  .catch(error => {
-      responseObj.status  = errorCodes.SYNTAX_ERROR;
-      responseObj.message = error;
-      responseObj.data    = {};
-      response.send(responseObj);
-  });
+   .catch(error => {
+       responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = error;
+        responseObj.data    = {};
+        response.send(responseObj);
+    });
+  return;
 };
 
 function createAggregateCommentArray (match) {
