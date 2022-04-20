@@ -32,6 +32,12 @@ router.post(
     validateMiddleware.validate,
     UserController.update
 );
+
+router.get(
+    "/userSubmissions",
+    validateMiddleware.validate,
+    UserController.userSubmissions
+);
 /* /User */
 
 /*  Submission  */

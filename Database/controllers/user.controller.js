@@ -341,3 +341,188 @@ exports.update = async (request, response, next) => {
     });
     return;
 };
+
+exports.userSubmissions = (request, response) => {
+    let params = {};
+    if (request.query.googleId) {
+        params = request.query;
+    } else {
+        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+        responseObj.message = "Required parameters missing";
+        responseObj.data    = {};
+        response.send(responseObj);
+        return;
+    }
+
+    let type = params.type; //up => upvoted submissions / fav=> favourite submissions
+
+    userDatalayer.findUser({googleId: params.googleId})
+    .then((userData) => {
+        console.log("userData", userData);
+        if (userData !== null && typeof userData !== undefined) {
+            if ((type === "up" && userData.upvotedSubmissions.length === 0) || (type === "fav" && userData.favouriteSubmissions.length === 0)) {
+                responseObj.status  = errorCodes.BAD_REQUEST;
+                responseObj.message = "Bad request";
+                responseObj.data    = {};
+                response.send(responseObj);
+                return;
+            }
+            //search submissions by aggregation
+            let page = (params.hasOwnProperty("p")) ? { "$skip": (params.p - 1) * 10 } : "";
+            console.log("Aqui 2");
+            let criteria = {};
+            criteria["$and"] = [];
+            criteria["$and"].push({
+                _id: {
+                    $in: (type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
+                }
+            });
+            let orderBy = {
+                "createdAt": -1
+            };
+            let limit = (params.hasOwnProperty("p")) ? { "$limit": 10 } : "";
+            console.log("Abans de aggregateArr");
+            let aggregateArr = createAggregateArray(page, criteria, orderBy, limit);
+            console.log("aggregateArr", aggregateArr);
+            submissionDatalayer
+            .aggregateSubmission(aggregateArr)
+            .then((submissionData) => {
+                if (submissionData !== null && typeof submissionData !== undefined) {
+                    if (params.hasOwnProperty("p")) {
+                        //Get elements on bbdd
+                        let match = {};
+                        match = {
+                            _id: {
+                                $in: (type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
+                            }
+                        };
+                        let aggregateQuery = [
+                            {
+                            '$match': match
+                            }, {
+                            '$count': "submissionsLeft"
+                        }];
+                        submissionDatalayer
+                        .aggregateSubmission(aggregateQuery)
+                        .then((ret => {
+                            console.log("REturnnnn: ", ret);
+                            
+                            ret[0].submissionsLeft -= (params.p * 10);
+                            submissionData.push(ret[0]);
+                            responseObj.status  = errorCodes.SUCCESS;
+                            responseObj.message = "Success";
+                            responseObj.data    = submissionData;
+                            response.send(responseObj);
+                        }))
+                        .catch(error => {
+                            console.log(error);
+                        });
+                    } else {
+                        responseObj.status  = errorCodes.SUCCESS;
+                        responseObj.message = "Success";
+                        responseObj.data    = submissionData;
+                        response.send(responseObj);
+                    }
+                } else {
+                    responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                    responseObj.message = "No record found";
+                    responseObj.data    = {};
+                    response.send(responseObj);
+                }
+            })
+            .catch(error => {
+                responseObj.status  = errorCodes.SYNTAX_ERROR;
+                responseObj.message = error;
+                responseObj.data    = {};
+                response.send(responseObj);
+            });
+        } else {
+            responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+            responseObj.message = "User not found";
+            responseObj.data    = {};
+            response.send(responseObj);
+        }
+    })
+    .catch(error => {
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = error;
+        responseObj.data    = {};
+        response.send(responseObj);
+    });
+    return;
+};
+
+function createAggregateArray (page, match, orderBy, limit) {
+    let aggregateArr = [
+        {
+          '$match': match
+        }, {
+            '$lookup': {
+              'from': 'urls', 
+              'let': {
+                'sId': '$_id'
+              }, 
+              'pipeline': [
+                {
+                  '$match': {
+                    '$expr': {
+                      '$eq': [
+                        '$submission', '$$sId'
+                      ]
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'url': 1
+                  }
+                }
+              ], 
+              'as': 'url'
+            }
+          }, {
+            '$unwind': {
+              'path': '$url', 
+              'includeArrayIndex': 'string', 
+              'preserveNullAndEmptyArrays': true
+            }
+          }, {
+            '$lookup': {
+              'from': 'asks', 
+              'let': {
+                'sId': '$_id'
+              }, 
+              'pipeline': [
+                {
+                  '$match': {
+                    '$expr': {
+                      '$eq': [
+                        '$submission', '$$sId' 
+                      ]
+                    }
+                  }
+                }, {
+                  '$project': {
+                    'text': 1
+                  }
+                }
+              ], 
+              'as': 'ask'
+            }
+          }, {
+            '$unwind': {
+              'path': '$ask', 
+              'includeArrayIndex': 'string', 
+              'preserveNullAndEmptyArrays': true
+            }
+          }, {
+          '$sort': orderBy
+        }
+      ];
+    if (page !== "") {
+        aggregateArr.push(page);
+    }
+    if (limit !== "") {
+        aggregateArr.push(limit);
+    }
+    return aggregateArr;
+}
