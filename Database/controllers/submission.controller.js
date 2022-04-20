@@ -16,51 +16,80 @@ const urlDatalayer = require("../datalayers/url.datalayer");
 const commentDatalayer = require("../datalayers/comment.datalayer");
 
 exports.find = async (request, response) => {
-    let id;
-    if (request.query._id) {
-        id = request.query._id;
-    } else {
-        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
-        responseObj.message = "Required parameters missing";
-        responseObj.data    = {};
-        response.send(responseObj);
-        return;
-    }
-    if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
-        const criteria = {};
-        criteria["$and"] = [];
-        criteria["$and"].push({
-            _id: {
-                $eq: mongodb.ObjectId(id)
-            }
-        });
-        let aggregateArr = createAggregateSubmissionArray(criteria);
-        submissionDatalayer.aggregateSubmission(aggregateArr)
-        .then((submissionData) => {
-            if (submissionData !== null && typeof submissionData !== undefined) {
-                responseObj.status  = errorCodes.SUCCESS;
-                responseObj.message = "Success";
-                responseObj.data    = submissionData;
-            } else {
-                responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                responseObj.message = "No record found";
-                responseObj.data    = {};
-            }
-            response.send(responseObj);
-        })
-        .catch(error => {
-            responseObj.status  = errorCodes.SYNTAX_ERROR;
-            responseObj.message = error;
-            responseObj.data    = {};
-            response.send(responseObj);
-        });
-    } else {
-        responseObj.status  = errorCodes.SYNTAX_ERROR;
-        responseObj.message = "Invalid id";
-        responseObj.data    = {};
-        response.send(responseObj);
-    }
-    return;
+  let id;
+  if (request.query._id) {
+      id = request.query._id;
+  } else {
+      responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
+      responseObj.message = "Required parameters missing";
+      responseObj.data    = {};
+      response.send(responseObj);
+      return;
+  }
+  if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
+      const where = {};
+      where._id = mongodb.ObjectId(id);
+
+      submissionDatalayer.findSubmission(where)
+      .then((submissionData) => {
+          if (submissionData !== null && typeof submissionData !== undefined) {
+              //The submission exists on the database. Now we need to get the comments
+              const criteria = {};
+              criteria["$and"] = [];
+              criteria["$and"].push({
+                  parent: {
+                      $eq: null
+                  }
+              });
+              criteria["$and"].push({
+                  submission: {
+                      $eq: submissionData._id
+                  }
+              });
+              //Search all comments relateds to the submission, including comments of comments
+              let aggregateArr = createAggregateCommentArray(criteria);
+              commentDatalayer.aggregateComment(aggregateArr)
+              .then((commentData) => {
+                  if (commentData !== null && typeof commentData !== undefined) {
+                    //Change the comment propery from the submissionData to the commentData
+                    let submission = JSON.parse(JSON.stringify(submissionData));
+                    submission.comments = commentData;
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = submission;
+                  } else {
+                      responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                      responseObj.message = "No record found";
+                      responseObj.data    = {};
+                  }
+                  response.send(responseObj);
+              })
+              .catch(error => {
+                  responseObj.status  = errorCodes.SYNTAX_ERROR;
+                  responseObj.message = error;
+                  responseObj.data    = {};
+                  response.send(responseObj);
+              });
+          } else {
+              responseObj.status  = errorCodes.DATA_NOT_FOUND;
+              responseObj.message = "No record found";
+              responseObj.data    = {};
+              response.send(responseObj);
+          }
+      })
+      .catch(error => {
+          responseObj.status  = errorCodes.SYNTAX_ERROR;
+          responseObj.message = error;
+          responseObj.data    = {};
+          response.send(responseObj);
+      });
+  } else {
+      responseObj.status  = errorCodes.SYNTAX_ERROR;
+      responseObj.message = "Invalid id";
+      responseObj.data    = {};
+      response.send(responseObj);
+  }
+  return;
 };
 
 exports.page = async (request, response) => {
@@ -163,82 +192,7 @@ exports.page = async (request, response) => {
         responseObj.data    = {};
         response.send(responseObj);
     });
-}
-
-exports.comments = async (request, response) => {
-    let id;
-    if (request.query._id) {
-        id = request.query._id;
-    } else {
-        responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
-        responseObj.message = "Required parameters missing";
-        responseObj.data    = {};
-        response.send(responseObj);
-        return;
-    }
-    if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
-        const where = {};
-        where._id = mongodb.ObjectId(id);
-
-        submissionDatalayer.findSubmission(where)
-        .then((submissionData) => {
-            if (submissionData !== null && typeof submissionData !== undefined) {
-                //The submission exists on the database. Now we need to get the comments
-                console.log(submissionData);
-                const criteria = {};
-                criteria["$and"] = [];
-                criteria["$and"].push({
-                    parent: {
-                        $eq: null
-                    }
-                });
-                criteria["$and"].push({
-                    submission: {
-                        $eq: submissionData._id
-                    }
-                });
-                //Search all comments relateds to the submission, including comments of comments
-                let aggregateArr = createAggregateCommentArray(criteria);
-                commentDatalayer.aggregateComment(aggregateArr)
-                .then((commentData) => {
-                    if (commentData !== null && typeof commentData !== undefined) {
-                        responseObj.status  = errorCodes.SUCCESS;
-                        responseObj.message = "Success";
-                        responseObj.data    = commentData;
-                    } else {
-                        responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                        responseObj.message = "No record found";
-                        responseObj.data    = {};
-                    }
-                    response.send(responseObj);
-                })
-                .catch(error => {
-                    responseObj.status  = errorCodes.SYNTAX_ERROR;
-                    responseObj.message = error;
-                    responseObj.data    = {};
-                    response.send(responseObj);
-                });
-            } else {
-                responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                responseObj.message = "No record found";
-                responseObj.data    = {};
-                response.send(responseObj);
-            }
-        })
-        .catch(error => {
-            responseObj.status  = errorCodes.SYNTAX_ERROR;
-            responseObj.message = error;
-            responseObj.data    = {};
-            response.send(responseObj);
-        });
-    } else {
-        responseObj.status  = errorCodes.SYNTAX_ERROR;
-        responseObj.message = "Invalid id";
-        responseObj.data    = {};
-        response.send(responseObj);
-    }
-    return;
-}
+};
 
 exports.create = async (request, response) => {
     console.log(request)

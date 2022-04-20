@@ -51,11 +51,6 @@ router.get(
     validateMiddleware.validate,
     SubmissionController.page
 );
-router.get(
-    "/submissionComments",
-    validateMiddleware.validate,    
-    SubmissionController.comments
-);
 router.post(
     "/newSubmission",
     validateMiddleware.validate,
