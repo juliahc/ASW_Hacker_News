@@ -37,7 +37,8 @@ UserCtrl.prototype.login_or_register = async function(id, username, email) {
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) {
         // User didn't exist -> register new user
         let user = new User({googleId: id, username: username, email: email})
-        db_id = await this.db.postRequest('/register', user);
+        let newUser = await this.db.postRequest('/register', user);
+        db_id = newUser.data.googleId;
         db_username = user.username;
         db_karma = user.karma;
     } else {

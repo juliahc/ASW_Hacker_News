@@ -21,7 +21,7 @@ router.get("/login", async (req, res) => {
 
 router.get("/logout", async (req, res) => {
     let goto = req.query.goto || '/';
-    clearCookie("access_token");
+    res.clearCookie("access_token");
     res.redirect(goto);
 });
 

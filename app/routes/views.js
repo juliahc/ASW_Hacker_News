@@ -127,6 +127,7 @@ router.get("/threads", auth.passthrough, async (req, res) => {
 
 router.get("/user", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {
+        console.log("asdfghjklñ: ", req.user_auth)
         if (req.user_auth !== null) res.redirect("/user?id=" + req.user_auth.id);
         else res.send("No such user");
         return;
@@ -134,7 +135,10 @@ router.get("/user", auth.passthrough, async (req, res) => {
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let user = await user_ctrl.profile(auth_id, req.query.id);
-        res.render("user", { user_auth: req.user_auth, user: user,  view: "/user?id=" + req.query.id });
+        let loggedProfile = req.user_auth !== null && req.user_auth.id === user.googleId;
+        
+        console.log("user: ", user);
+        res.render("user", { user_auth: req.user_auth, user: user, loggedProfile: loggedProfile,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");
     }

@@ -27,68 +27,116 @@
                         <td>
                             <table id="user">
                                 <tbody>
-                                    <tr>
-                                        <td>user:</td>
-                                        <td>username</td>
-                                    </tr>
-                                    <tr>
-                                        <td>created:</td>
-                                        <td>24 days ago</td>
-                                    </tr>                 
-                                    <tr>
-                                        <td>karma:</td>
-                                        <td>5</td>
-                                    </tr>
+                                    <% if (locals.user) { %> 
+                                        <tr>
+                                            <td>user:</td>
+                                            <td><%= user.username %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>created:</td>
+                                            <td><%= user.createdAt %></td>
+                                        </tr>                 
+                                        <tr>
+                                            <td>karma:</td>
+                                            <td><%= user.karma %></td>
+                                        </tr>
 
-                                    <!--remove--><tr><td>--Logged user--</td></tr>
-                                    <tr>
-                                        <td>
-                                            email:
-                                        </td>
-                                        <td>
-                                            paquito.chocolatero@estudiantat.upc.edu
-                                        </td>
-                                    </tr>
-                                    <!--form-->
-                                    <%- include("./userForm.ejs") %>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">submissions</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">comments</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">hidden</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">upvoted submissions</a>/ <a href="#">comments</a> <u>(private)</u></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">favorite submissions</a>/ <a href="#">comments</a> <u>(public)</u></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="submit" value="update" class="button"></td>
-                                    </tr>
+                                            <% if(loggedProfile) { %>
+                                            <tr>
+                                                <td>
+                                                    email:
+                                                </td>
+                                                <td>
+                                                    <%= user.email %>
+                                                </td>
+                                            </tr>
+                                            <!--form-->
+                                            <form method="put" action="/users">
+                                                <tr>
+                                                    <td></td>
+                                                    <td><textarea name="about" rows="4" cols="50"></textarea></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>showdead:</td>
+                                                    <td>
+                                                        <select name="showdead">
+                                                            <% if (user.howdead) { %>
+                                                                <option value="no" >no</option>
+                                                                <option value="yes" selected>yes</option>
+                                                            <% } else { %>
+                                                                <option value="no" selected>no</option>
+                                                                <option value="yes">yes</option>
+                                                            <% } %>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>noprocrast:</td>
+                                                    <td>
+                                                        <select name="noprocrast">
+                                                            <% if (user.noprocrast) { %>
+                                                                <option value="no" >no</option>
+                                                                <option value="yes" selected>yes</option>
+                                                            <% } else { %>
+                                                                <option value="no" selected>no</option>
+                                                                <option value="yes">yes</option>
+                                                            <% } %>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>maxvisit:</td>
+                                                    <td><input type="text" name="maxvisit" value="<%= user.maxvisit %>" size="20"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>minaway:</td>
+                                                    <td><input type="text" name="minaway" value="<%= user.minaway %>" size="20"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>dealy:</td>
+                                                    <td><input type="text" name="dealy" value="<%= user.delay %>" size="20"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">submissions</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">comments</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">hidden</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">upvoted submissions</a>/ <a href="#">comments</a> <u>(private)</u></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">favorite submissions</a>/ <a href="#">comments</a> <u>(public)</u></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><input type="submit" value="update" class="button"></td>
+                                                </tr>
+                                            </form>
+                                        <% } else { %>
 
-                                    <!--remove--><tr><td>--Another user--</td></tr>
-                                    
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">submissions</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">comments</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">favorites</a></td>
-                                    </tr>
+                                            
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">submissions</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">comments</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">favorites</a></td>
+                                            </tr>
+                                        <% } 
+                                    } %>
                                 </tbody>
                             </table>
                         </td>
