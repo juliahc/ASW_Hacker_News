@@ -40,8 +40,18 @@ router.get("/google/auth", async (req, res) => {
     }
 });
 
-router.put("/", auth.strict, async (req, res) => {
+router.post("/", auth.strict, async (req, res) => {
     const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
+    try {
+        showdead = showdead === "yes";
+        noprocrast = noprocrast === "yes";
+        maxvisit = Number(maxvisit);
+        minaway = Number(minaway);
+        delay = Number(delay);
+    } catch (e) {
+        res.status(400).send("Form values are not in correct format");
+        return;
+    }
     const authId = req.user_auth.id;
     try {
         await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);

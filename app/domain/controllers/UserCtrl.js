@@ -67,7 +67,17 @@ UserCtrl.prototype.profile = async function(authId, id) {
 }
 
 UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, maxvisit, minaway, delay) {
-
+    let postObject = { 
+        "googleId": authId,
+        "about": about,
+        "showdead": showdead,
+        "noprocrast": noprocrast,
+        "maxvisit": maxvisit,
+        "minaway": minaway,
+        "delay": delay
+    };
+    let resp = await this.db.postRequest('/updateUser', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
 }
 
 UserCtrl.prototype.getUpvotedSubmissions = async function(page, authId) {
@@ -96,7 +106,6 @@ UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
     let resp = await this.db.postRequest('/updateUser', postObject);
     
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
@@ -106,7 +115,6 @@ UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
         "type": "upvoteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
@@ -116,7 +124,6 @@ UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
         "type": "downvoteSubmission" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
@@ -126,7 +133,6 @@ UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
         "type": "downvoteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.getFavoriteSubmissions = async function(page, id) {
@@ -140,7 +146,6 @@ UserCtrl.prototype.getFavoriteSubmissions = async function(page, id) {
         result.push(submission);
     }
     result.push(data[data.length-1]); // The last element of data list is the number of pages left.
-    return result;
 }
 
 UserCtrl.prototype.getFavoriteComments = async function(id) {
@@ -154,7 +159,6 @@ UserCtrl.prototype.favoriteSubmission = async function(authId, submissionId) {
         "type": "favouriteSubmission" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.favoriteComment = async function(authId, commentId) {
@@ -164,7 +168,6 @@ UserCtrl.prototype.favoriteComment = async function(authId, commentId) {
         "type": "favouriteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.unfavoriteSubmission = async function(authId, submissionId) {
@@ -174,7 +177,6 @@ UserCtrl.prototype.unfavoriteSubmission = async function(authId, submissionId) {
         "type": "unfavouriteSubmission" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 UserCtrl.prototype.unfavoriteComment = async function(authId, commentId) {
@@ -184,7 +186,6 @@ UserCtrl.prototype.unfavoriteComment = async function(authId, commentId) {
         "type": "unfavouriteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
-    return;
 }
 
 module.exports = UserCtrl;
