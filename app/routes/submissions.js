@@ -9,23 +9,6 @@ const sub_ctrl = new SubmissionCtrl();
 const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
-router.get("/:id", async (req, res) => {
-    // Get one submission
-    try {
-        let submission = await sub_ctrl.fetchSubmission(req.params.id);
-        res.status(200).json(submission);
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-});
-
-
-router.get('/', async (req, res) => {
-    // Get all submissions
-    res.send("You should visit /news to get the view of submissions")
-});
-
-
 router.post("/", auth.strict, async (req, res) => {
     const {title, url, text} = req.body;
     
@@ -47,7 +30,7 @@ router.post("/:id/comments", auth.strict, async (req, res) => {
     if (text === "") { res.send("Error: text is empty."); }
 
     try {
-        await comm_ctrl.postComment(id, "sub", text, req.user_auth.id, req.user_auth.username);
+        await comm_ctrl.postComment(id, text, req.user_auth.id, req.user_auth.username);
         res.redirect("/newest"); //redirect to render context of comment (parent submission)
     } catch (e) {
         res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });

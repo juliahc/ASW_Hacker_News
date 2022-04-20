@@ -4,7 +4,7 @@ const AuthMiddleware = require("./auth_middleware");
 const googleAuth = require("../utils/googleAuth.js");
 const url = require('url');
 
-const nodeCookie = require('node-cookie');
+//const nodeCookie = require('node-cookie');
 const router = express.Router();
 module.exports = router;
 
@@ -20,6 +20,13 @@ router.get("/login", async (req, res) => {
     }
 });
 
+router.get("/logout", async (req, res) => {
+    let goto = req.query.goto || '/';
+    clearCookie("access_token");
+    //nodeCookie.clear(res, 'access_token');
+    res.redirect(goto);
+});
+
 router.get("/google/auth", async (req, res) => {
     // Get the user info
     try {
@@ -27,19 +34,20 @@ router.get("/google/auth", async (req, res) => {
 
         let token = await googleAuth.getAccessTokenFromCode(queryObject.code);
         let userInfo = await googleAuth.getGoogleUserInfo(token);
-        let user_auth = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email, token);
-        nodeCookie.create(res, 'access_token', user_auth);
+        let access_token = await user_ctrl.login_or_register(userInfo.id, userInfo.name, userInfo.email);
+        //nodeCookie.create(res, 'access_token', user_auth);
+        res.cookie('access_token' , access_token);
         res.redirect('/user?id='+userInfo.id);
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
 });
 
-router.patch("/:id", auth.strict, async (req, res) => {
+router.put("/", auth.strict, async (req, res) => {
     const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
     const authId = req.user_auth.id;
     try {
-        let user = await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);
+        await user_ctrl.update(authId, about, showdead, noprocrast, maxvisit, minaway, delay);
         res.redirect("/user?id="+authId);
     } catch (e) {
         res.render("update", { error: "Hacker News can't connect to its database", message: e.message });
@@ -47,16 +55,100 @@ router.patch("/:id", auth.strict, async (req, res) => {
 
 });
 
-router.get("/:id/upvotedSubmisisons", auth.strict, async (req, res) => {});
-router.get("/:id/upvotedComments", auth.strict, async (req, res) => {});
+router.post("/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        await user_ctrl.upvoteSubmission(authId, submissionId);
+        console.log("helloooo");
+        res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
+    } catch (e) {
+        res.status(500);
+    }
+    return;
+});
 
-router.post("/:id/upvotedSubmisisons/:submission_id", auth.strict, async (req, res) => {});  //upvoteSubmission
-router.post("/:id/upvotedComments/:comment_id", auth.strict, async (req, res) => {});        //upvoteComment
+router.post("/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        await user_ctrl.downvoteSubmission(authId, submissionId);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
 
-router.get("/:id/favoriteSubmisisons", async (req, res) => {});
-router.get("/:id/favoriteComments", async (req, res) => {});
+router.post("/upvoteComment/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        await user_ctrl.upvoteComment(authId, commentId);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
 
-router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {}); //favoriteSubmission
-router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {});       //favoriteComment
+router.post("/downvoteComment/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        await user_ctrl.downvoteComment(authId, commentId);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
+
+router.post("/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        await user_ctrl.favoriteSubmission(authId, submissionId);
+        res.redirect("/favoriteSubmisisons?id="+auth_id);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
+
+router.post("/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        await user_ctrl.unfavoriteSubmisisons(authId, submissionId);
+        res.redirect("/favoriteSubmisisons?id="+auth_id);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
+
+router.post("/favoriteComments/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        await user_ctrl.favoriteSubmission(authId, commentId);
+        res.redirect("/favoriteComments?id="+auth_id);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
+
+router.post("/unfavoriteComments/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        await user_ctrl.unfavoriteComments(authId, commentId);
+        res.redirect("/favoriteComments?id="+auth_id);
+        res.status(200);
+    } catch (e) {
+        res.status(500);
+    }
+});
 
 router.delete("/:id", auth.strict, async (req, res) => {});      //deleteUser??

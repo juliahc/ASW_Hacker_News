@@ -63,8 +63,9 @@ exports.create = async (request, response, next) => {
     params.submission = mongodb.ObjectId(params.submission);
     let commentObject = {
         text: params.text,
-        author: params.author,
-        authorName: params.authorName,
+        googleId: params.googleId,
+        username: params.username,
+        submission: mongodb.ObjectId(params.submission),
     }
     // In case of reply, add the parent comment to the comment object
     let reply = false;
@@ -85,8 +86,8 @@ exports.create = async (request, response, next) => {
             .then((submissionData) => {
                 console.log("Submission: ", submissionData);
                 if (submissionData !== null && typeof submissionData !== undefined) {
-                    submissionData.comments.push(commentData._id);
-                    submissionDatalayer.updateSubmission({_id: params.submission}, {comments: submissionData.comments})
+                    submissionData.comments++;
+                    submissionDatalayer.updateSubmission({_id: mongodb.ObjectId(params.submission)}, {comments: submissionData.comments})
                     .then((updateSubmissionData) => {
                         //In case that the comment is a reply  to an existing comment, add the reply to the parent comment
                         if (reply) {

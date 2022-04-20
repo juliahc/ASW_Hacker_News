@@ -1,11 +1,12 @@
 const { google } = require('googleapis');
+require("dotenv").config();
 
 const queryString = require("query-string");
 const axios = require("axios");
 
 const stringifiedParams = queryString.stringify({
-  client_id: "789298527421-770i8rkbq0fbja0dphk040ps3nb94mp7.apps.googleusercontent.com",  //process.env.GOOGLE_CLIENT_ID,
-  redirect_uri: "http://localhost:3000/users/google/auth",  //process.env.GOOGLE_REDIRECT_URL,
+  client_id: process.env.GOOGLE_CLIENT_ID,
+  redirect_uri: process.env.GOOGLE_REDIRECT_URL,
   scope: [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
@@ -22,9 +23,9 @@ async function getAccessTokenFromCode(code) {
     url: `https://oauth2.googleapis.com/token`,
     method: 'post',
     data: {
-      client_id: "789298527421-770i8rkbq0fbja0dphk040ps3nb94mp7.apps.googleusercontent.com", //process.env.GOOGLE_CLIENT_ID,
-      client_secret: "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",  //process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: "http://localhost:3000/users/google/auth",  //process.env.GOOGLE_REDIRECT_URL,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URL,
       grant_type: 'authorization_code',
       code,
     },

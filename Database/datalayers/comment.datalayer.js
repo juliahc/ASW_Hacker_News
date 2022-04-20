@@ -35,3 +35,16 @@ exports.updateComment = async (where = {}, updateParams) => {
         });
       });
 }
+
+exports.aggregateComment = async (aggregateArr) => {
+    return new Promise((resolve, reject) => {
+        CommentModel
+        .aggregate(aggregateArr)
+        .then((data) => {
+            resolve(data);
+        })
+        .catch((error) => {
+            reject(error);
+        });
+    });
+}

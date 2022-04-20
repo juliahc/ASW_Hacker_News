@@ -6,7 +6,7 @@ const { check } = require("express-validator");
 
 
 exports.register = async (request, response, next) => {
-  const params = request.body;
+  const params = request.body.params;
   const condition = {};
   condition["$and"] = [];
   condition["$and"].push({ username: { $eq: params.username } });

@@ -38,9 +38,16 @@
                                                 let pos = idx+(p-1)*10;
                                                 if (submission.type === "url") { 
                                             %>
-                                                <tr id="<%= submission._id %>" class="newInfo">
+                                                <tr id="<%= submission.id %>" class="newInfo">
                                                     <td class="oderNum"><%= pos %>.</td>
-                                                    <td class="voteButton"><i id="<%= submission._id %>" class="fas fa-heart"></i></td>
+                                                    <td class="voteButton">
+                                                        <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                            <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                                        
+                                                        </form>
+                                                        
+                                                        
+                                                    </td>
                                                     <td class="title">
                                                         <a class="newTitle titleText" href="<%= submission.url %>"> <%= submission.title %> </a>
                                                         <a class="newLink" href="<%= submission.url %>"><%= (new URL(submission.url).hostname) %></a>
@@ -49,7 +56,7 @@
                                                 <tr class="newActions">
                                                     <td colspan="2"></td>
                                                     <td>
-                                                        <span id="votes_<%= submission._id %>"><%= submission.points %> points</span>
+                                                        <span id="votes_<%= submission.id %>"><%= submission.points %> points</span>
                                                         by
                                                         <a href="#"><%= submission.username %></a>
                                                         &nbsp
@@ -72,9 +79,9 @@
                                                 <% 
                                                 } else {   
                                                 %>
-                                                <tr id="<%= submission._id %>" class="newInfo">
+                                                <tr id="<%= submission.id %>" class="newInfo">
                                                     <td class="oderNum"><%= pos %>.</td>
-                                                    <td class="voteButton"><i id="<%= submission._id %>" class="fas fa-heart"></i></td>
+                                                    <td class="voteButton"><i id="<%= submission.id %>" class="fas fa-heart"></i></td>
                                                     <td class="title">
                                                         <a class="newTitle titleText" href="#"> <%= submission.title %> </a>
                                                     </td>
@@ -82,7 +89,7 @@
                                                 <tr class="newActions">
                                                     <td colspan="2"></td>
                                                     <td>
-                                                        <span id="votes_<%= submission._id %>"><%= submission.points %> points</span>
+                                                        <span id="votes_<%= submission.id %>"><%= submission.points %> points</span>
                                                         by
                                                         <a href="#"><%= submission.username %></a>
                                                         &nbsp
@@ -108,7 +115,7 @@
                                     <tr id="moreButton">
                                         <td colspan="2"></td>
                                         <td>
-                                            <form method="get" action="/<%= view%>">
+                                            <form method="get" action="<%= view%>">
                                                 <input type="hidden" name="p" value="<%= parseInt(p)+1 %>">
                                                 <input id="moreNews" class="titleText button" type="submit" value="More" class="button">
                                             </form>

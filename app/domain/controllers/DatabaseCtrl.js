@@ -1,5 +1,6 @@
 const axios = require("axios");
 const errCodes = require("../../utils/errorCodes.js");
+require("dotenv").config();
 
 let DatabaseCtrl;
 (function() {
@@ -17,6 +18,7 @@ let DatabaseCtrl;
 
 DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
     let res = {};
+    console.log("POST",endpoint,params)
     await axios({
         method: 'post',
         url: this.DB_URI + endpoint,
@@ -24,7 +26,7 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
             params
         },
         headers: {
-            "x-api-key": "f4jaFD2jd8faASdn1h23jvsbhm43gssfASfaSDFqkj2hslkjfHDSFGji5yfdSFGhergkjsdmrew232huiaswdfuhi18bf"/* process.env.DB_SECRET_KEY */
+            "x-api-key": process.env.DB_SECRET_KEY
         }
       })
       .then(response => {
@@ -33,6 +35,7 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
       .catch(err => {
           throw Error(err.code);
       })
+    console.log("post result: ", res)
     return res;
 }
 //getRequest("/submission_page", {p: page, t: type, o: order});
@@ -43,7 +46,7 @@ DatabaseCtrl.prototype.getRequest = async function (endpoint, query) {
         url: this.DB_URI + endpoint,
         params: query,
         headers: {
-            "x-api-key": "f4jaFD2jd8faASdn1h23jvsbhm43gssfASfaSDFqkj2hslkjfHDSFGji5yfdSFGhergkjsdmrew232huiaswdfuhi18bfw"/* process.env.DB_SECRET_KEY */
+            "x-api-key": process.env.DB_SECRET_KEY
         }
       })
       .then(response => {
