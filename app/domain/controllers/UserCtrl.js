@@ -1,5 +1,6 @@
 const User = require("../User");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const SubmissionCtrl = require("./SubmissionCtrl");
 require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
@@ -23,6 +24,7 @@ let UserCtrl;
                 }
             )
         };
+        this.sub_ctrl = new SubmissionCtrl();
     };
 }());
 
@@ -67,8 +69,18 @@ UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, 
 
 }
 
-UserCtrl.prototype.getUpvotedSubmissions = async function(authId) {
-    return [];
+UserCtrl.prototype.getUpvotedSubmissions = async function(page, authId) {
+    let resp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up", "p": page});
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    let data = resp.data;
+    let result = [];
+    for (let i = 0; i < data.length-1; i++) {
+        let submission = this.sub_ctrl.fromDbSubToDomainSub(data[i]);
+        submission.upvoted = true;
+        result.push(submission);
+    }
+    result.push(data[data.length-1]); // The last element of data list is the number of pages left.
+    return result;
 }
 
 UserCtrl.prototype.getUpvotedComments = async function(authId) {
@@ -76,7 +88,6 @@ UserCtrl.prototype.getUpvotedComments = async function(authId) {
 }
 
 UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
-
     let postObject = { 
         "googleId": authId, 
         "submission": submissionId,
@@ -117,8 +128,18 @@ UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
     return;
 }
 
-UserCtrl.prototype.getFavoriteSubmissions = async function(id) {
-    return [];
+UserCtrl.prototype.getFavoriteSubmissions = async function(page, id) {
+    let resp = await this.db.getRequest("/userSubmissions", {"googleId": id, "type": "fav", "p": page});
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    let data = resp.data;
+    let result = [];
+    for (let i = 0; i < data.length-1; i++) {
+        let submission = this.sub_ctrl.fromDbSubToDomainSub(data[i]);
+        submission.upvoted = true;
+        result.push(submission);
+    }
+    result.push(data[data.length-1]); // The last element of data list is the number of pages left.
+    return result;
 }
 
 UserCtrl.prototype.getFavoriteComments = async function(id) {
