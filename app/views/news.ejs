@@ -41,8 +41,9 @@
                                                 <tr id="<%= submission.id %>" class="newInfo">
                                                     <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton">
-                                                        <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>">
+                                                        <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
                                                             <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                                        
                                                         </form>
                                                         
                                                         
@@ -114,7 +115,7 @@
                                     <tr id="moreButton">
                                         <td colspan="2"></td>
                                         <td>
-                                            <form method="get" action="/<%= view%>">
+                                            <form method="get" action="<%= view%>">
                                                 <input type="hidden" name="p" value="<%= parseInt(p)+1 %>">
                                                 <input id="moreNews" class="titleText button" type="submit" value="More" class="button">
                                             </form>
