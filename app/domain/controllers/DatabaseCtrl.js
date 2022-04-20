@@ -17,6 +17,7 @@ let DatabaseCtrl;
 
 DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
     let res = {};
+    console.log("POST",endpoint,params)
     await axios({
         method: 'post',
         url: this.DB_URI + endpoint,
@@ -33,6 +34,7 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
       .catch(err => {
           throw Error(err.code);
       })
+    console.log("post result: ", res)
     return res;
 }
 //getRequest("/submission_page", {p: page, t: type, o: order});

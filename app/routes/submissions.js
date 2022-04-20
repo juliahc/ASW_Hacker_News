@@ -9,23 +9,6 @@ const sub_ctrl = new SubmissionCtrl();
 const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
-router.get("/:id", async (req, res) => {
-    // Get one submission
-    try {
-        let submission = await sub_ctrl.fetchSubmission(req.params.id);
-        res.status(200).json(submission);
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-    }
-});
-
-
-router.get('/', async (req, res) => {
-    // Get all submissions
-    res.send("You should visit /news to get the view of submissions")
-});
-
-
 router.post("/", auth.strict, async (req, res) => {
     const {title, url, text} = req.body;
     
