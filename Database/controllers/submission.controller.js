@@ -27,11 +27,17 @@ exports.find = async (request, response) => {
       return;
   }
   if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
-      const where = {};
-      where._id = mongodb.ObjectId(id);
-
-      submissionDatalayer.findSubmission(where)
-      .then((submissionData) => {
+    const criteria = {};
+    criteria["$and"] = [];
+    criteria["$and"].push({
+        _id: {
+            $eq: mongodb.ObjectId(id)
+        }
+    });
+    let aggregateArr = createAggregateSubmissionArray(criteria);
+    submissionDatalayer.aggregateSubmission(aggregateArr)
+    .then((submissionData) => {
+      console.log("submissionData", submissionData);
           if (submissionData !== null && typeof submissionData !== undefined) {
               //The submission exists on the database. Now we need to get the comments
               const criteria = {};
@@ -43,7 +49,7 @@ exports.find = async (request, response) => {
               });
               criteria["$and"].push({
                   submission: {
-                      $eq: submissionData._id
+                      $eq: submissionData[0]._id
                   }
               });
               //Search all comments relateds to the submission, including comments of comments
@@ -52,7 +58,7 @@ exports.find = async (request, response) => {
               .then((commentData) => {
                   if (commentData !== null && typeof commentData !== undefined) {
                     //Change the comment propery from the submissionData to the commentData
-                    let submission = JSON.parse(JSON.stringify(submissionData));
+                    let submission = JSON.parse(JSON.stringify(submissionData[0]));
                     submission.comments = commentData;
                     responseObj.status  = errorCodes.SUCCESS;
                     responseObj.message = "Success";
@@ -408,6 +414,64 @@ function createAggregateSubmissionArray (match) {
           '$match': match
         }, {
           '$lookup': {
+            'from': 'urls', 
+            'let': {
+              'sId': '$_id'
+            }, 
+            'pipeline': [
+              {
+                '$match': {
+                  '$expr': {
+                    '$eq': [
+                      '$submission', '$$sId'
+                    ]
+                  }
+                }
+              }, {
+                '$project': {
+                  'url': 1
+                }
+              }
+            ], 
+            'as': 'url'
+          }
+        }, {
+          '$unwind': {
+            'path': '$url', 
+            'includeArrayIndex': 'string', 
+            'preserveNullAndEmptyArrays': true
+          }
+        }, {
+          '$lookup': {
+            'from': 'asks', 
+            'let': {
+              'sId': '$_id'
+            }, 
+            'pipeline': [
+              {
+                '$match': {
+                  '$expr': {
+                    '$eq': [
+                      '$submission', '$$sId' 
+                    ]
+                  }
+                }
+              }, {
+                '$project': {
+                  'text': 1
+                }
+              }
+            ], 
+            'as': 'ask'
+          }
+        }, {
+          '$unwind': {
+            'path': '$ask', 
+            'includeArrayIndex': 'string', 
+            'preserveNullAndEmptyArrays': true
+          }
+        }, {
+          '$lookup': {
             'from': 'users', 
             'let': {
               'gId': '$googleId'
@@ -445,7 +509,9 @@ function createAggregateSubmissionArray (match) {
             'points': 1, 
             'type': 1, 
             'createdAt': 1, 
-            'user': 1
+            'user': 1,
+            'url': 1,
+            'ask': 1
           }
         }
       ]
