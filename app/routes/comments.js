@@ -23,7 +23,7 @@ router.post("/:id/replies", auth.strict, async (req, res) => {
     if (text === "") { res.send("Error: text is empty."); } // TODO: redirect to submit comment (with error message)
     
     try {
-        await comm_ctrl.postComment(id, "comm", text, req.user_auth.id, req.user_auth.username);
+        await comm_ctrl.postReply(id, text, req.user_auth.id, req.user_auth.username);
         res.redirect("/newest"); // TODO: redirect to render context of comment (parent comment)
     } catch (e) {
         res.redirect("/news"); // TODO: redirect to error view

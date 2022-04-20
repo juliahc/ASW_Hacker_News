@@ -1,4 +1,5 @@
 const DatabaseCtrl = require("./DatabaseCtrl");
+const Comment = require("../Comment");
 
 let CommentCtrl;
 (function() {
@@ -8,17 +9,23 @@ let CommentCtrl;
         instance = this;
 
         // initialize any properties of the singleton
-        this.types = ["sub", "comm"];
         this.db = new DatabaseCtrl();
     };
 }());
 
 // Declare controller methods
 
-CommentCtrl.prototype.postComment = async function(parent, type, text, googleId, username) {
-    if (!type in this.types) throw Error("Comment parent type [" + type + "] not supported");
-    let comment = new Comment({parent: parent, text: text, googleId: googleId, username: username});
-    comment.type = type;
+CommentCtrl.prototype.postComment = async function(submission, text, googleId, username) {
+    let comment = new Comment({submission: submission, text: text, googleId: googleId, username: username});
+    delete comment.parent;
+    let id = await this.db.postRequest("/newComment", comment);
+    return id;
+}
+CommentCtrl.prototype.postReply = async function(parent, text, googleId, username) {
+    // Obtain submission from parent comment.
+    let resp = await this.db.getRequest("/comment", id);
+    if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
+    let comment = new Comment({parent: parent, submission: resp.data.submission, text: text, googleId: googleId, username: username});
     let id = await this.db.postRequest("/newComment", comment);
     return id;
 }

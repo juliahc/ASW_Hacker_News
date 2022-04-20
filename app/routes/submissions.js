@@ -30,7 +30,7 @@ router.post("/:id/comments", auth.strict, async (req, res) => {
     if (text === "") { res.send("Error: text is empty."); }
 
     try {
-        await comm_ctrl.postComment(id, "sub", text, req.user_auth.id, req.user_auth.username);
+        await comm_ctrl.postComment(id, text, req.user_auth.id, req.user_auth.username);
         res.redirect("/newest"); //redirect to render context of comment (parent submission)
     } catch (e) {
         res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });
