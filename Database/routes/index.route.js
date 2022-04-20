@@ -38,6 +38,11 @@ router.get(
     validateMiddleware.validate,
     UserController.userSubmissions
 );
+router.get(
+    "/userComments",
+    validateMiddleware.validate,
+    UserController.comments
+);
 /* /User */
 
 /*  Submission  */
