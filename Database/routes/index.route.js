@@ -91,7 +91,7 @@ router.post(
     "/newAsk",
     validateMiddleware.validate,
     AskController.create
-)
+);
 /*  /ask  */
 
 /*  comment    */
@@ -106,6 +106,6 @@ router.post(
     "/newComment",
     validateMiddleware.validate,
     CommentController.create
-)
+);
 
 /*  /comment    */
