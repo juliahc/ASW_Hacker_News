@@ -47,16 +47,90 @@ router.patch("/:id", auth.strict, async (req, res) => {
 
 });
 
-router.get("/:id/upvotedSubmisisons", auth.strict, async (req, res) => {});
-router.get("/:id/upvotedComments", auth.strict, async (req, res) => {});
+router.get("/upvotedSubmisisons", auth.strict, async (req, res) => {});
+router.get("/upvotedComments", auth.strict, async (req, res) => {});
 
-router.post("/:id/upvotedSubmisisons/:submission_id", auth.strict, async (req, res) => {});  //upvoteSubmission
-router.post("/:id/upvotedComments/:comment_id", auth.strict, async (req, res) => {});        //upvoteComment
+router.post("/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        user_ctrl.upvoteSubmission(authId, submissionId);
+    } catch (e) {
+        res.render("upvoteSubmisison", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
 
-router.get("/:id/favoriteSubmisisons", async (req, res) => {});
-router.get("/:id/favoriteComments", async (req, res) => {});
+router.post("/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        user_ctrl.downvoteSubmission(authId, submissionId);
+    } catch (e) {
+        res.render("downvoteSubmisison", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
 
-router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {}); //favoriteSubmission
-router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {});       //favoriteComment
+router.post("/upvoteComment/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        user_ctrl.upvoteComment(authId, commentId);
+    } catch (e) {
+        res.render("upvoteComment", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.post("/downvoteComment/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        user_ctrl.downvoteComment(authId, commentId);
+    } catch (e) {
+        res.render("downvoteComment", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.get("/favoriteSubmisisons", async (req, res) => {});
+router.get("/favoriteComments", async (req, res) => {});
+
+router.post("/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        user_ctrl.favoriteSubmission(authId, submissionId);
+    } catch (e) {
+        res.render("favoriteSubmisisons", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.post("/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        user_ctrl.unfavoriteSubmisisons(authId, submissionId);
+    } catch (e) {
+        res.render("unfavoriteSubmisisons", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.post("/favoriteComments/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        user_ctrl.favoriteSubmission(authId, commentId);
+    } catch (e) {
+        res.render("favoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
+
+router.post("/unfavoriteComments/:comment_id", auth.strict, async (req, res) => {
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        user_ctrl.unfavoriteComments(authId, commentId);
+    } catch (e) {
+        res.render("unfavoriteComments", { error: "Hacker News can't connect to its database", message: e.message });
+    }
+});
 
 router.delete("/:id", auth.strict, async (req, res) => {});      //deleteUser??

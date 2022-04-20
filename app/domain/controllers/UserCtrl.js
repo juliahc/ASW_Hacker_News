@@ -1,5 +1,6 @@
 const User = require("../User");
 const DatabaseCtrl = require("./DatabaseCtrl");
+require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
 
@@ -43,7 +44,7 @@ UserCtrl.prototype.login_or_register = async function(id, username, email, token
         db_karma = resp.data.karma;
     }
     // Return user_auth token
-    return this.encrypt(db_id, username, karma, tokens);
+    return this.encrypt(db_id, username, db_karma, tokens);
 }
 
 UserCtrl.prototype.profile = async function(authId, id) {
@@ -75,11 +76,43 @@ UserCtrl.prototype.getUpvotedCommentIds = async function(authId) {
 }
 
 UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
-
+    let postObject = { 
+        "googleId": authId, 
+        "submission": submissionId,
+        "type": "upvoteSubmission" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
 }
 
 UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
+    let postObject = { 
+        "googleId": authId, 
+        "comment": commentId,
+        "type": "upvoteComment" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
+}
 
+UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
+    let postObject = { 
+        "googleId": authId, 
+        "submission": submissionId,
+        "type": "downvoteSubmission" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
+}
+
+UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
+    let postObject = { 
+        "googleId": authId, 
+        "comment": commentId,
+        "type": "downvoteComment" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
 }
 
 UserCtrl.prototype.getFavoriteSubmissionIds = async function(id) {
@@ -91,11 +124,43 @@ UserCtrl.prototype.getFavoriteCommentIds = async function(id) {
 }
 
 UserCtrl.prototype.favoriteSubmission = async function(authId, submissionId) {
-
+    let postObject = { 
+        "googleId": authId, 
+        "submission": submissionId,
+        "type": "favouriteSubmission" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
 }
 
 UserCtrl.prototype.favoriteComment = async function(authId, commentId) {
+    let postObject = { 
+        "googleId": authId, 
+        "comment": commentId,
+        "type": "favouriteComment" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
+}
 
+UserCtrl.prototype.unfavoriteSubmission = async function(authId, submissionId) {
+    let postObject = { 
+        "googleId": authId, 
+        "submission": submissionId,
+        "type": "unfavouriteSubmission" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
+}
+
+UserCtrl.prototype.unfavoriteComment = async function(authId, commentId) {
+    let postObject = { 
+        "googleId": authId, 
+        "comment": commentId,
+        "type": "unfavouriteComment" };
+    let resp = await this.db.postRequest('/update', postObject);
+    if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return;
 }
 
 module.exports = UserCtrl;
