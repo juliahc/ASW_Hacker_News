@@ -23,18 +23,7 @@
             <a href="/submit">submit</a>
         </td>
         <td id="session">
-            <% if (user_auth == null) { %>
-                <a href="/users/login">login</a>
-            <% } else { %>
-                <a href="/user"><%= user_auth.username %></a>
-                <span>(<%= user_auth.karma %>)</span>
-                |
-                <% if (locals.view) { %>
-                    <a href=<%= "/users/logout?goto="+view %>>logout</a>
-                <% } else { %>
-                    <a href="/users/logout">logout</a>
-                <%}%>
-            <%}%>
+
         </td>
     </tr>
 </table>

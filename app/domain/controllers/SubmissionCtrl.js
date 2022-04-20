@@ -17,11 +17,11 @@ let SubmissionCtrl;
             submission.id = submission._id;
             delete submission._id;
             if (submission.type === "url") {
-                submission.url = submission.url[0].url;
+                submission.url = submission.url.url;
                 return new UrlSubmission(submission);
             }
             else {
-                submission.text = submission.ask[0].text;
+                submission.text = submission.ask.text;
                 delete submission.ask;
                 return new AskSubmission(submission);
             }
@@ -64,3 +64,4 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
 }
 
 module.exports = SubmissionCtrl;
+
