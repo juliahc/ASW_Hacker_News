@@ -47,10 +47,10 @@ router.patch("/:id", auth.strict, async (req, res) => {
 
 });
 
-router.get("/:id/upvotedSubmisisons", auth.strict, async (req, res) => {});
-router.get("/:id/upvotedComments", auth.strict, async (req, res) => {});
+router.get("/upvotedSubmisisons", auth.strict, async (req, res) => {});
+router.get("/upvotedComments", auth.strict, async (req, res) => {});
 
-router.post("/:id/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+router.post("/upvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -60,7 +60,7 @@ router.post("/:id/upvoteSubmisison/:submission_id", auth.strict, async (req, res
     }
 });
 
-router.post("/:id/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
+router.post("/downvoteSubmisison/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -70,9 +70,9 @@ router.post("/:id/downvoteSubmisison/:submission_id", auth.strict, async (req, r
     }
 });
 
-router.post("/:id/upvoteComment/:comment_id", auth.strict, async (req, res) => {
+router.post("/upvoteComment/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
-    const commentId = req.commentId;
+    const commentId = req.params.comment_id;
     try {
         user_ctrl.upvoteComment(authId, commentId);
     } catch (e) {
@@ -80,7 +80,7 @@ router.post("/:id/upvoteComment/:comment_id", auth.strict, async (req, res) => {
     }
 });
 
-router.post("/:id/downvoteComment/:comment_id", auth.strict, async (req, res) => {
+router.post("/downvoteComment/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -90,10 +90,10 @@ router.post("/:id/downvoteComment/:comment_id", auth.strict, async (req, res) =>
     }
 });
 
-router.get("/:id/favoriteSubmisisons", async (req, res) => {});
-router.get("/:id/favoriteComments", async (req, res) => {});
+router.get("/favoriteSubmisisons", async (req, res) => {});
+router.get("/favoriteComments", async (req, res) => {});
 
-router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+router.post("/favoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -103,7 +103,7 @@ router.post("/:id/favoriteSubmisisons/:submission_id", auth.strict, async (req, 
     }
 });
 
-router.post("/:id/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
+router.post("/unfavoriteSubmisisons/:submission_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -113,7 +113,7 @@ router.post("/:id/unfavoriteSubmisisons/:submission_id", auth.strict, async (req
     }
 });
 
-router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) => {
+router.post("/favoriteComments/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -123,7 +123,7 @@ router.post("/:id/favoriteComments/:comment_id", auth.strict, async (req, res) =
     }
 });
 
-router.post("/:id/unfavoriteComments/:comment_id", auth.strict, async (req, res) => {
+router.post("/unfavoriteComments/:comment_id", auth.strict, async (req, res) => {
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
