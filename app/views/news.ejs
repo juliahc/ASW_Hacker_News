@@ -41,12 +41,15 @@
                                                 <tr id="<%= submission.id %>" class="newInfo">
                                                     <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton">
-                                                        <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
-                                                            <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
-                                                        
-                                                        </form>
-                                                        
-                                                        
+                                                        <% if (!submission.upvoted) { %>
+                                                            <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                                            </form>
+                                                        <% } else { %>
+                                                            <form method="post" action="/users/downvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
+                                                            </form>
+                                                        <% } %>
                                                     </td>
                                                     <td class="title">
                                                         <a class="newTitle titleText" href="<%= submission.url %>"> <%= submission.title %> </a>
@@ -56,18 +59,16 @@
                                                 <tr class="newActions">
                                                     <td colspan="2"></td>
                                                     <td>
-                                                        <span id="votes_<%= submission.id %>"><%= submission.points %> points</span>
+                                                        <span><%= submission.points %> points</span>
                                                         by
-                                                        <a href="#"><%= submission.username %></a>
+                                                        <a href="/user?id=<%=submission.googleId%>"><%= submission.username %></a>
                                                         &nbsp
-                                                        <span title="<%= submission.createdAt %>">
-                                                            <a href="#"><%= submission.createdAt %></a>
-                                                        </span>
+                                                        <%= submission.createdAt %>
                                                         &nbsp
                                                         |
                                                         <a href="#">hide</a>
                                                         |
-                                                        <a href="#">
+                                                        <a href="/submission?id=<%= submission.id %>">
                                                         <% if(submission.comments != 0)  { %> 
                                                             <%= submission.comments %> comments
                                                         <% } else { %>
@@ -81,26 +82,39 @@
                                                 %>
                                                 <tr id="<%= submission.id %>" class="newInfo">
                                                     <td class="oderNum"><%= pos %>.</td>
-                                                    <td class="voteButton"><i id="<%= submission.id %>" class="fas fa-heart"></i></td>
+                                                    <td class="voteButton">
+                                                        <% if (!submission.upvoted) { %>
+                                                            <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                                            </form>
+                                                        <% } else { %>
+                                                            <form method="post" action="/users/downvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
+                                                            </form>
+                                                        <% } %>
+                                                    </td>
                                                     <td class="title">
-                                                        <a class="newTitle titleText" href="#"> <%= submission.title %> </a>
+                                                        <a class="newTitle titleText" href="/submission?id=<%= submission.id %>"> <%= submission.title %> </a>
                                                     </td>
                                                 </tr>
                                                 <tr class="newActions">
                                                     <td colspan="2"></td>
                                                     <td>
-                                                        <span id="votes_<%= submission.id %>"><%= submission.points %> points</span>
+                                                        <span><%= submission.points %> points</span>
                                                         by
-                                                        <a href="#"><%= submission.username %></a>
+                                                        <a href="/user?=<%= submission.googleId %>"><%= submission.username %></a>
                                                         &nbsp
-                                                        <span title="<%= new Date(submission.createdAt).toDateString() %>">
-                                                            <a href="#"><%= new Date(submission.createdAt).toDateString() %></a>
-                                                        </span>
+                                                        <%= new Date(submission.createdAt).toDateString() %>
                                                         &nbsp
                                                         |
                                                         <a href="#">hide</a>
                                                         |
-                                                        <a href="#">38 comments</a>
+                                                        <a href="/submission?id=<%= submission.id %>">
+                                                        <% if(submission.comments != 0)  { %> 
+                                                            <%= submission.comments %> comments
+                                                        <% } else { %>
+                                                            discuss
+                                                        <% } %></a>
                                                     </td>
                                                 </tr>
                                                 <tr class ="space-10px"></tr>

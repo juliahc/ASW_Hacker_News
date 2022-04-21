@@ -16,7 +16,8 @@ const user_ctrl = new UserCtrl();
 router.get("/", auth.passthrough, async (req, res) => {
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -24,7 +25,7 @@ router.get("/", auth.passthrough, async (req, res) => {
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/news", more: more });
     } catch (e) {
-        res.render("news", { error: "Hacker News can't connect to his database" });
+        res.render("news", { error: "Hacker News can't connect to his database: "+e.message });
     }
     
 });
@@ -32,7 +33,8 @@ router.get("/", auth.passthrough, async (req, res) => {
 router.get("/news", auth.passthrough, async (req, res) => {
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -40,7 +42,7 @@ router.get("/news", auth.passthrough, async (req, res) => {
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/news", more: more });
     } catch (e) {
-        res.render("news", {error: "Hacker News can't connect to his database"});
+        res.render("news", {error: "Hacker News can't connect to his database: "+e.message});
     }
     
 });
@@ -48,7 +50,8 @@ router.get("/news", auth.passthrough, async (req, res) => {
 router.get("/newest", auth.passthrough, async (req, res) => {
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -63,7 +66,8 @@ router.get("/newest", auth.passthrough, async (req, res) => {
 router.get("/ask", auth.passthrough, async (req, res) => {
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -83,7 +87,8 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
     }
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id,auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -103,8 +108,12 @@ router.get("/submission", async (req, res) => {
     // Get one submission
     try {
         let submission = await sub_ctrl.fetchSubmission(req.query.id);
-        submission.comments.forEach(comment => comment.addNavigationalIdentifiers(null, 0));
-        res.render("submission", { user_auth: req.user_auth, submission: submission });
+        submission.formatCreatedAtAsTimeAgo();
+        submission.comments.forEach(comment => {
+            comment.addNavigationalIdentifiers(null, 0);
+            comment.formatCreatedAtAsTimeAgo();
+        });
+        res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission" });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -158,7 +167,8 @@ router.get("/submit", auth.passthrough, async (req, res) => {
 router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
     try {
         let auth_id = req.user_auth.id;
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getUpvotedSubmissions(p, auth_id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -178,7 +188,8 @@ router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
         return;
     }
     try {
-        let p = req.query.p || 1;
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getFavoriteSubmissions(p, req.query.id);
         let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -190,4 +201,18 @@ router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
     }
 });
 router.get("/favoriteComments", async (req, res) => {});
+
+router.get("/reply", async (req, res) => {
+    if (!req.query || !req.query.id) {
+        res.send("No such reply");
+        return;
+    }
+    try {
+        let comment = await comm_ctrl.fetchComment(req.query.id);
+        comment.formatCreatedAtAsTimeAgo();
+        res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply" });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+});
 
