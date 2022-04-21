@@ -44,7 +44,7 @@ SubmissionCtrl.prototype.createSubmission = async function(title, url, text, goo
     }
     let db_sub = await this.db.postRequest("/newSubmission", submission);
     if (createComment) {
-        this.comm_ctrl.postComment(db_sub._id, text, googleId, username);
+        this.comm_ctrl.postComment(db_sub.data.id, text, googleId, username);
     }
     return db_sub;
 }
@@ -64,6 +64,7 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
         if (usrUpvCom.hasOwnProperty("status") && usrUpvCom.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
         usrUpvCom.data.forEach(comment => upvUsrCom.push(comment._id));
     }
+    console.log(upvUsrCom)
     let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
     let submission = this.fromDbSubToDomainSub(resp.data);

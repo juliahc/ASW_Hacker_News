@@ -35,9 +35,15 @@
                                 <!--Title-->
                                 <tr id="id" class="newInfo">
                                     <td class="voteButton">
-                                        <form method="post" action="/users/upvoteComment/<%= comment.id %>?goto=<%=view%>?id=<%=comment.id%>">
-                                            <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
-                                        </form>
+                                        <% if (!comment.upvoted) { %>
+                                            <form method="post" action="/users/upvoteComment/<%= comment.id %>?goto=<%=view%>">
+                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                            </form>
+                                        <% } else { %>
+                                            <form method="post" action="/users/downvoteComment/<%= comment.id %>?goto=<%=view%>">
+                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
+                                            </form>
+                                        <% } %>
                                     </td>
                                     <td class="newActions">
                                         <a href="/user?id=<%=comment.googleId%>"><%= comment.username %></a>

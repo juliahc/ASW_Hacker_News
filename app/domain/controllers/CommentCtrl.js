@@ -22,14 +22,16 @@ CommentCtrl.prototype.postComment = async function(submission, text, googleId, u
     let resp = await this.db.postRequest("/newComment", comment);
     return new Comment(resp.data);
 }
+
 CommentCtrl.prototype.postReply = async function(parent, text, googleId, username) {
     // Obtain submission from parent comment.
     let resp = await this.db.getRequest("/comment", {"_id": parent});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
-    let comment = new Comment({parent: parent, submission: resp.data.submission, text: text, googleId: googleId, username: username});
+    let comment = new Comment({parent: parent, submission: resp.data[0].submission, text: text, googleId: googleId, username: username});
+    console.log("comment bfore post: ", comment)
     resp = await this.db.postRequest("/newComment", comment);
     let c= new Comment(resp.data);
-    console.log(c)
+    console.log("resp.data: ",resp)
     return c;
 }
 
@@ -38,13 +40,16 @@ CommentCtrl.prototype.fetchComment = async function(id, authId) {
     let resp;
     if (authId !== null) {
         resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+        console.log(resp);
         if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
         resp.data.forEach(comment => upvUsrCom.push(comment._id));
     }
     resp = await this.db.getRequest("/comment", {"_id": id});
+    console.log("res.data: ", resp)
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
-    let comment = new Comment(resp.data);
+    let comment = new Comment(resp.data[0]);
     comment.setUpvotedFromUserList(upvUsrCom);
+    console.log("commmmmmm: ",comment)
     resp = await this.db.getRequest("/submission", {"_id": comment.submission});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("Comment does not have a submission!"); }
     comment.submissionTitle = resp.data.title;

@@ -41,13 +41,13 @@ router.get("/google/auth", async (req, res) => {
 });
 
 router.post("/", auth.strict, async (req, res) => {
-    const {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
+    let {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
     try {
         showdead = showdead === "yes";
         noprocrast = noprocrast === "yes";
-        maxvisit = Number(maxvisit);
-        minaway = Number(minaway);
-        delay = Number(delay);
+        maxvisit = parseInt(maxvisit);
+        minaway = parseInt(minaway);
+        delay = parseInt(delay);
     } catch (e) {
         res.status(400).send("Form values are not in correct format");
         return;

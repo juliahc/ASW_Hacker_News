@@ -27,7 +27,7 @@
                         <td>
                             <% if (locals.comments) {
                                 comments.forEach((c) => { %>
-                                    <%- include("./comment.ejs", {info: c, pos: 0}) %>
+                                    <%- include("./comment.ejs", {comment: c, pos: 0}) %>
                             <% }) } %>
                         </td>
                     </tr>

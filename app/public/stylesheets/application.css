@@ -135,3 +135,12 @@ main {
   margin-top: -10px;
 	cursor: pointer;
 }
+
+#sessionLogged {
+  display: flex;
+  width: max-content;
+}
+#sessionNoLogged {
+  width: auto;
+  text-align: right;
+}
