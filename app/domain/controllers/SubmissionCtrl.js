@@ -48,11 +48,18 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
             upvSubIds.push(submission._id);
         });
     }
+    let upvUsrCom = [];
+    if (authId !== null) {
+        let usrUpvCom = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+        if (usrUpvCom.hasOwnProperty("status") && usrUpvCom.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        usrUpvCom.data.forEach(comment => upvUsrCom.push(comment._id));
+    }
     let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
     let submission = this.fromDbSubToDomainSub(resp.data);
     if (upvSubIds.includes(submission.id)) submission.upvoted = true;
     else  submission.upvoted = false;
+    submission.comments.forEach(comment => comment.setUpvotedFromUserList(upvUsrCom));
     return submission;
 }
 

@@ -44,8 +44,7 @@ CommentCtrl.prototype.fetchComment = async function(id, authId) {
     resp = await this.db.getRequest("/comment", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let comment = new Comment(resp.data);
-    if (upvUsrCom.includes(comment.id)) comment.upvoted = true;
-    else comment.upvoted = false;
+    comment.setUpvotedFromUserList(upvUsrCom);
     resp = await this.db.getRequest("/submission", {"_id": comment.submission});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("Comment does not have a submission!"); }
     comment.submissionTitle = resp.data.title;
@@ -65,8 +64,7 @@ CommentCtrl.prototype.fetchCommentsOfUser = async function(id, authId) {
     let result = [];
     resp.data.forEach(comment_data => {
         let comment = new Comment(comment_data);
-        if (upvUsrCom.includes(comment.id)) comment.upvoted = true;
-        else comment.upvoted = false;
+        comment.setUpvotedFromUserList(upvUsrCom);
         result.push(comment);
     });
     return result;

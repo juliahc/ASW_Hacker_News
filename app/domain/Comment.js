@@ -46,6 +46,11 @@ class Comment {
         }
         if (this.parent === null) delete this.parent;
     }
+
+    setUpvotedFromUserList(up_list) {
+        this.upvoted = up_list.includes(this.id);
+        this.replies.forEach(reply => reply.setUpvotedFromUserList(up_list));
+    }
 }
 
 module.exports = Comment;
