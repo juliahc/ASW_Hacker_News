@@ -100,14 +100,15 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/submission", async (req, res) => {
+router.get("/submission", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {
         res.send("No such submission");
         return;
     }
     // Get one submission
     try {
-        let submission = await sub_ctrl.fetchSubmission(req.query.id);
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
+        let submission = await sub_ctrl.fetchSubmission(req.query.id, auth_id);
         submission.formatCreatedAtAsTimeAgo();
         submission.comments.forEach(comment => {
             comment.addNavigationalIdentifiers(null, 0);
@@ -126,7 +127,8 @@ router.get("/threads", auth.passthrough, async (req, res) => {
         return;
     }
     try {
-        let comment_list = await comm_ctrl.fetchCommentsOfUser(req.query.id);
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
+        let comment_list = await comm_ctrl.fetchCommentsOfUser(req.query.id, auth_id);
         comment_list.forEach(comment => comment.formatCreatedAtAsTimeAgo());
         res.render("threads", { user_auth: req.user_auth, comments: comment_list, view: "/threads?id=" + req.query.id });
     } catch {

@@ -39,10 +39,21 @@ SubmissionCtrl.prototype.createSubmission = async function(title, url, text, goo
     return id;
 }
 
-SubmissionCtrl.prototype.fetchSubmission = async function(id) {
+SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
+    let upvSubIds = [];
+    if (authId !== null) {
+        let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
+        if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        usrUpvRsp.data.forEach(submission => {
+            upvSubIds.push(submission._id);
+        });
+    }
     let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
-    return this.fromDbSubToDomainSub(resp.data);
+    let submission = this.fromDbSubToDomainSub(resp.data);
+    if (upvSubIds.includes(submission.id)) submission.upvoted = true;
+    else  submission.upvoted = false;
+    return submission;
 }
 
 SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order, googleId, authId) {

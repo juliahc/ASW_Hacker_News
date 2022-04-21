@@ -33,11 +33,14 @@ CommentCtrl.prototype.postReply = async function(parent, text, googleId, usernam
     return c;
 }
 
-CommentCtrl.prototype.fetchComment = async function(id) {
-    let resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
-    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+CommentCtrl.prototype.fetchComment = async function(id, authId) {
     let upvUsrCom = [];
-    resp.data.forEach(comment => upvUsrCom.push(comment._id));
+    let resp;
+    if (authId !== null) {
+        resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+        if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        resp.data.forEach(comment => upvUsrCom.push(comment._id));
+    }
     resp = await this.db.getRequest("/comment", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let comment = new Comment(resp.data);
@@ -49,11 +52,14 @@ CommentCtrl.prototype.fetchComment = async function(id) {
     return comment;
 }
 
-CommentCtrl.prototype.fetchCommentsOfUser = async function(id) {
-    let resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
-    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+CommentCtrl.prototype.fetchCommentsOfUser = async function(id, authId) {
     let upvUsrCom = [];
-    resp.data.forEach(comment => upvUsrCom.push(comment._id));
+    let resp;
+    if (authId !== null) {
+        resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+        if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        resp.data.forEach(comment => upvUsrCom.push(comment._id));
+    }
     resp = await this.db.getRequest("/userComments", {"googleId": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let result = [];
