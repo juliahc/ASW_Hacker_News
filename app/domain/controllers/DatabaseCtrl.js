@@ -10,7 +10,7 @@ let DatabaseCtrl;
         instance = this;
 
         // initialize any properties of the singleton
-        this.DB_URI = "http://localhost:2000/v1";
+        this.DB_URI = process.env.DB_URI;
         this.errors = errCodes;
     };
 }());
