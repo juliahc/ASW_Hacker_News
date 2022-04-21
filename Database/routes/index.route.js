@@ -43,6 +43,11 @@ router.get(
     validateMiddleware.validate,
     UserController.comments
 );
+router.get(
+    "/likedComments",
+    validateMiddleware.validate,
+    UserController.likedComments
+);
 /* /User */
 
 /*  Submission  */
@@ -86,7 +91,7 @@ router.post(
     "/newAsk",
     validateMiddleware.validate,
     AskController.create
-)
+);
 /*  /ask  */
 
 /*  comment    */
@@ -101,6 +106,6 @@ router.post(
     "/newComment",
     validateMiddleware.validate,
     CommentController.create
-)
+);
 
 /*  /comment    */

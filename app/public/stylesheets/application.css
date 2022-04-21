@@ -53,6 +53,9 @@ main {
 .fa-heart:hover {
   font-weight: 900 !important;
 }
+.filledHeart {
+  font-weight: 900 !important;
+}
 
 .oderNum {
   color: #345b63;
