@@ -90,6 +90,8 @@ router.post("/downvoteSubmisison/:submission_id", auth.passthrough, async (req, 
     try {
         await user_ctrl.downvoteSubmission(authId, submissionId);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }
@@ -105,6 +107,8 @@ router.post("/upvoteComment/:comment_id", auth.passthrough, async (req, res) => 
     try {
         await user_ctrl.upvoteComment(authId, commentId);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }
@@ -120,6 +124,8 @@ router.post("/downvoteComment/:comment_id", auth.passthrough, async (req, res) =
     try {
         await user_ctrl.downvoteComment(authId, commentId);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }
@@ -136,6 +142,8 @@ router.post("/favoriteSubmisisons/:submission_id", auth.passthrough, async (req,
         await user_ctrl.favoriteSubmission(authId, submissionId);
         res.redirect("/favoriteSubmisisons?id="+auth_id);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }
@@ -152,6 +160,8 @@ router.post("/unfavoriteSubmisisons/:submission_id", auth.passthrough, async (re
         await user_ctrl.unfavoriteSubmisisons(authId, submissionId);
         res.redirect("/favoriteSubmisisons?id="+auth_id);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }
@@ -168,6 +178,8 @@ router.post("/favoriteComments/:comment_id", auth.passthrough, async (req, res) 
         await user_ctrl.favoriteSubmission(authId, commentId);
         res.redirect("/favoriteComments?id="+auth_id);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }
@@ -184,6 +196,8 @@ router.post("/unfavoriteComments/:comment_id", auth.passthrough, async (req, res
         await user_ctrl.unfavoriteComments(authId, commentId);
         res.redirect("/favoriteComments?id="+auth_id);
         res.status(200);
+        let goto = req.query.goto || "/" ;
+        res.redirect(goto);
     } catch (e) {
         res.status(500);
     }

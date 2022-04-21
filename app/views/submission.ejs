@@ -28,22 +28,31 @@
                             <table>
                                 <!--Title-->
                                 <tr id="id" class="newInfo">
-                                    <td class="voteButton"><i id="#" class="fas fa-heart"></i></td>
-                                    <td class="title">
-                                        <a class="newTitle titleText" href="#"> Item title </a>
-                                        <a class="newLink" href="#">(itemlink.com)</a>
-                                    </td>
+                                    
+                                        <td class="voteButton">
+                                            <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?id=<%=submission.id%>">
+                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                            </form>
+                                        </td>
+                                        <td class="title">
+                                            <% if(submission.type === "url") { %>
+                                                <a class="newTitle titleText" href="submission.url"><%= submission.title %></a>
+                                                <a class="newLink" href="<%= (new URL(submission.url).hostname) %>"><%= (new URL(submission.url).hostname) %></a>
+                                            <% } else { %>
+                                                <a class="newTitle titleText" href="/submission?id=<%=submission.id%>"><%= submission.title %></a>
+                                            <% } %>
+                                        </td> 
                                 </tr>
                                 <!--Actions-->
                                 <tr class="newActions">
                                     <td colspan="1"></td>
                                     <td>
-                                        30 points
+                                        <%= submission.points %> points
                                         &nbsp
                                         by
-                                        <a href="#">pepe</a>
+                                        <a href="#"><%= submission.username %></a>
                                         &nbsp
-                                        <a href="#">20 min ago</a>
+                                        <%= submission.createdAt %>
                                         |
                                         <a href="#">past</a>
                                         |
@@ -51,23 +60,23 @@
                                         |
                                         <a href="#">favorite</a>
                                         |
-                                        <a href="#">20 comments</a>
+                                        <a href="#"><%= submission.comments.lenght %> comments</a>
                                     </td>
                                 </tr>
+                                <% if (submission.type === "ask") { %>
                                 <tr>
                                     <td></td>
                                     <td>
                                         <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur felis lectus, hendrerit cursus iaculis cursus, malesuada a nunc. Aliquam pulvinar diam eget lectus condimentum egestas. Curabitur laoreet lacinia magna, sit amet porttitor elit ornare in. Quisque placerat mauris est, at sagittis nisl congue ac. Mauris pharetra, justo nec posuere fringilla, leo ipsum sagittis turpis, at placerat ligula arcu at nisi. Morbi vitae velit et elit bibendum luctus. Sed a vehicula turpis.
-                                            <br><br>
-                                            Mauris sagittis ex et urna lacinia, a malesuada enim porta. Sed nec dignissim lorem. Donec id purus nulla. Nam varius, mauris fringilla tristique pretium, mi justo vestibulum augue, sed consectetur nisi diam ac neque. Curabitur at urna malesuada, laoreet nulla sit amet, eleifend massa. Praesent eu nibh a lectus commodo hendrerit finibus vitae magna. Curabitur tincidunt metus lectus, in bibendum sapien accumsan vitae. Vestibulum vel dolor eu augue pellentesque interdum. Ut mattis sagittis tellus vestibulum tempor. 
+                                            <%= submission.text %>
                                         </p>
                                     </td>
                                 </tr>
+                                <% } %>
                                 <tr>
                                     <td></td>
                                     <td>
-                                        <form method="post" action="#">
+                                        <form method="post" action="/submissions/<%=submission.id%>/comments">
                                             <textarea name="text" rows="6" cols="100" value=""></textarea>
                                             <br><br>
                                             <input type="submit" value="add comment" class="button">
@@ -82,72 +91,9 @@
                     <!--Comments-->
                     <tr>
                         <td>
-                            <% if (locals.comments) {
-                                comments.forEach((c) => { %>
-                                    <%- include("./comment.ejs", {info: c, pos: 0}) %>
-                            <% }) } %>
-
-
-
-
-                            <!--
-
-                                <tr id="11">
-                                    <td>
-                                        <table >
-                                            <td style="padding:12px"></td>
-                                            <td valign="top"><i id="id" class="fas fa-heart"></i></td>
-                                            <td>
-                                                <div class="newActions">
-                                                    <a href="#">pepe</a>
-                                                    <a href="#">20 min ago</a>
-                                                    |
-                                                    <a href="#">parent</a>
-                                                    |
-                                                    <a href="2">next</a>
-                                                    <button class="textButton" type="button">[-]</button>
-                                                
-                                                </div>
-                                                <div>
-                                                    <p>
-                                                        Nulla facilisi. Mauris sit amet fringilla sapien, vitae scelerisque sapien. Duis ullamcorper orci et semper euismod. Praesent interdum eget eros ut pharetra. Etiam ullamcorper maximus maximus. Sed aliquam sem ut eros imperdiet, feugiat porta diam pharetra. In fringilla libero quis odio pretium scelerisque. Ut pellentesque dui at dolor gravida, et feugiat urna accumsan. 
-                                                    </p>
-                                                    <a href="#">reply</a>
-                                                </div>
-                                            </td>
-                                        </table>
-                                    </td>
-                                </tr>
-                                <tr id="111">
-                                    <td>
-                                        <table >
-                                            <td style="padding:24px"></td>
-                                            <td valign="top"><i id="id" class="fas fa-heart"></i></td>
-                                            <td>
-                                                <div class="newActions">
-                                                    <a href="#">pepe</a>
-                                                    <a href="#">20 min ago</a>
-                                                    |
-                                                    <a href="#">root</a>
-                                                    |
-                                                    <a href="#">parent</a>
-                                                    |
-                                                    <a href="2">next</a>
-                                                    <button class="textButton" type="button">[-]</button>
-                                                
-                                                </div>
-                                                <div>
-                                                    <p>
-                                                        Nulla facilisi. Mauris sit amet fringilla sapien, vitae scelerisque sapien. Duis ullamcorper orci et semper euismod. Praesent interdum eget eros ut pharetra. Etiam ullamcorper maximus maximus. Sed aliquam sem ut eros imperdiet, feugiat porta diam pharetra. In fringilla libero quis odio pretium scelerisque. Ut pellentesque dui at dolor gravida, et feugiat urna accumsan. 
-                                                    </p>
-                                                    <a href="#">reply</a>
-                                                </div>
-                                            </td>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        -->
+                            <% submission.comments.forEach((c) => { %>
+                                    <%- include("./comment.ejs", {comment: c, view: view}) %>
+                            <% }) %>
                         </td>
                     </tr>
                     <!--Line-->

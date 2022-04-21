@@ -1,7 +1,7 @@
 class User {
     
     constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.googleId, params.username, params.email) }
+        if (!params.hasOwnProperty('createdAt')) { return this.constructDefault(params.googleId, params.username, params.email) }
         this.googleId = params.googleId;
         this.username = params.username;
         this.createdAt = params.createdAt;
