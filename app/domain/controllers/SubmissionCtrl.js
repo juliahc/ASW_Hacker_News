@@ -1,7 +1,6 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
-const CommentCtrl = require("./CommentCtrl");
 
 let SubmissionCtrl;
 (function() {
@@ -14,7 +13,6 @@ let SubmissionCtrl;
         this.types = ["any", "url", "ask"];
         this.orders = ["pts", "new"];
         this.db = new DatabaseCtrl();
-        this.comm_ctrl = new CommentCtrl();
         this.fromDbSubToDomainSub = function(submission) {
             submission.id = submission._id;
             delete submission._id;
