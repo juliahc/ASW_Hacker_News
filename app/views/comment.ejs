@@ -3,11 +3,11 @@
 
         <div>
             <% if (!comment.upvoted) { %>
-                <form method="post" action="/users/upvoteComment/<%= comment.submission %>?goto=<%=view%>">
+                <form method="post" action="/users/upvoteComment/<%= comment.id %>?goto=<%=view%>">
                     <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
                 </form>
             <% } else { %>
-                <form method="post" action="/users/downvoteComment/<%= comment.submission %>?goto=<%=view%>">
+                <form method="post" action="/users/downvoteComment/<%= comment.id %>?goto=<%=view%>">
                     <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
                 </form>
             <% } %>

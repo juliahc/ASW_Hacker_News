@@ -181,7 +181,19 @@ router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
         res.send("Something went wrong");
     }
 });
-router.get("/upvotedComments", auth.strict, async (req, res) => {});
+
+router.get("/upvotedComments", auth.strict, async (req, res) => {
+    try {
+        let comment_list = await user_ctrl.getUpvotedComments(req.user_auth.id);
+        comment_list.forEach(comment => {
+            comment.addNavigationalIdentifiers(null, 0);
+            comment.formatCreatedAtAsTimeAgo();
+        });
+        res.render("threads", { user_auth: req.user_auth, comments: comment_list, view: "/upvotedComments" });
+    } catch {
+        res.send("Something went wrong");
+    }
+});
 
 router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {

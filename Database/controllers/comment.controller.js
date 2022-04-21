@@ -93,9 +93,11 @@ exports.create = async (request, response, next) => {
                         if (reply) {
                             commentDatalayer.findComment({_id: params.parent})
                             .then((replyData) => {
+                                console.log("asdfasdf: ", replyData);
                                 if (replyData !== null && typeof replyData !== undefined) {
-                                    replyData.replies.push(commentData._id);
-                                    commentDatalayer.updateComment({_id: params.parent}, {replies: replyData.replies})
+                                    replyData[0].replies.push(commentData._id);
+                                    console.log("replyData després del push: ",replyData[0]);
+                                    commentDatalayer.updateComment({_id: params.parent}, {replies: replyData[0].replies})
                                     .then((data) => {
                                         responseObj.status  = errorCodes.SUCCESS;
                                         responseObj.message = "Success";
