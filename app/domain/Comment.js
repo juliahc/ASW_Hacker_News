@@ -1,7 +1,7 @@
 const time_ago = require("../utils/timeAgo");
 class Comment {
     constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.googleId, params.username, params.parent, params.submission, params.text) }
+        if (!params.hasOwnProperty('createdAt')) { return this.constructDefault(params.googleId, params.username, params.parent, params.submission, params.text) }
         this.id = params._id;
         this.googleId = params.googleId
         this.username = params.username
@@ -11,7 +11,11 @@ class Comment {
         this.parent = params.parent;
         this.submission = params.submission;
         this.replies = [];
-        params.replies.forEach(comment => this.replies.push(new Comment(comment)));
+        if (params.hasOwnProperty('children')){
+            params.children.forEach(comment => {
+                if (params.replies.includes(comment._id)) this.replies.push(new Comment(comment))
+            });
+        }
     }
 
     constructDefault(googleId, username, parent, submission, text) {
@@ -34,13 +38,18 @@ class Comment {
 
     addNavigationalIdentifiers(root, depth) {
         if (root !== null) this.root = root;
-        if (depth === 1) root = this.id;
+        if (depth === 1) root = this.parent;
         for (let i = 0; i < this.replies.length; i++) {
             if (i > 0) this.replies[i].prev = this.replies[i-1].id;
             if (i < this.replies.length-1) this.replies[i].next = this.replies[i+1].id;
             this.replies[i].addNavigationalIdentifiers(root, depth+1);
         }
         if (this.parent === null) delete this.parent;
+    }
+
+    setUpvotedFromUserList(up_list) {
+        this.upvoted = up_list.includes(this.id);
+        this.replies.forEach(reply => reply.setUpvotedFromUserList(up_list));
     }
 }
 

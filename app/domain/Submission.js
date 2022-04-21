@@ -3,7 +3,7 @@ const time_ago = require("../utils/timeAgo");
 
 class Submission {
     constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.title, params.googleId, params.username) }
+        if (!params.hasOwnProperty('createdAt')) { return this.onstructDefault(params.title, params.googleId, params.username) }
         this.id = params.id;
         this.title = params.title;
         this.googleId = params.googleId || params.user.googleId;

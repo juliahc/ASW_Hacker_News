@@ -1,6 +1,7 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const CommentCtrl = require("./CommentCtrl");
 
 let SubmissionCtrl;
 (function() {
@@ -13,6 +14,7 @@ let SubmissionCtrl;
         this.types = ["any", "url", "ask"];
         this.orders = ["pts", "new"];
         this.db = new DatabaseCtrl();
+        this.comm_ctrl = new CommentCtrl();
         this.fromDbSubToDomainSub = function(submission) {
             submission.id = submission._id;
             delete submission._id;
@@ -32,18 +34,43 @@ let SubmissionCtrl;
 // Declare controller methods
 
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, googleId, username) {
-    let submission;
-    if (url.length === 0) submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
-    else submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
-    let id = await this.db.postRequest("/newSubmission", submission);
-    return id;
+    let submission, createComment;
+    if (url.length === 0) {
+        submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
+        createComment = false;
+    } else {
+        submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
+        createComment = text.length > 0;
+    }
+    let db_sub = await this.db.postRequest("/newSubmission", submission);
+    if (createComment) {
+        this.comm_ctrl.postComment(db_sub._id, text, googleId, username);
+    }
+    return db_sub;
 }
 
-SubmissionCtrl.prototype.fetchSubmission = async function(id) {
+SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
+    let upvSubIds = [];
+    if (authId !== null) {
+        let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
+        if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        usrUpvRsp.data.forEach(submission => {
+            upvSubIds.push(submission._id);
+        });
+    }
+    let upvUsrCom = [];
+    if (authId !== null) {
+        let usrUpvCom = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+        if (usrUpvCom.hasOwnProperty("status") && usrUpvCom.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        usrUpvCom.data.forEach(comment => upvUsrCom.push(comment._id));
+    }
     let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
-    if (!'url' in resp.data) return new UrlSubmission(resp.data);
-    else return new AskSubmission(resp.data);
+    let submission = this.fromDbSubToDomainSub(resp.data);
+    if (upvSubIds.includes(submission.id)) submission.upvoted = true;
+    else  submission.upvoted = false;
+    submission.comments.forEach(comment => comment.setUpvotedFromUserList(upvUsrCom));
+    return submission;
 }
 
 SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order, googleId, authId) {
@@ -52,7 +79,6 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
     if (page <= 0) throw TypeError("Page must be greater than zero.");
     // Get logged user upvoted submissions
     let upvSubIds = [];
-    /*
     if (authId !== null) {
         let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
         if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
@@ -60,7 +86,6 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
             upvSubIds.push(submission._id);
         });
     }
-    */
     // Get submissions list
     let params = {p: page, t: type, o: order};
     if (googleId !== null) params["usr"] = googleId;

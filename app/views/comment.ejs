@@ -1,25 +1,42 @@
-<div class="comment" id="">
+<div class="comment" id="<%= comment.id %>">
     <div class="commentData">
-        <div><i id="id" class="fas fa-heart"></i></div>
+        <div>
+            <form method="post" action="/users/upvoteComment/<%= comment.id %>?goto=<%=view%>">
+                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+            </form>
+        </div>
         <div>
             <div class="newActions">
-                <a href="#">pepe</a>
-                <a href="#">20 min ago</a>
-                |
-                <a href="2">next</a>
-                <button class="textButton" type="button">[-]</button>
-            
+                <a href="/user?id=<%=comment.googleId%>"><%= comment.username %></a>
+                <%= comment.createdAt %>
+                <% if (locals.comment.root) { %>
+                    |
+                    <a href="#<%= comment.root %>">root</a>
+                <% } %>
+                <% if (locals.comment.parent) { %>
+                    |
+                    <a href="#<%= comment.parent %>">parent</a>
+                <% } %>
+                <% if (locals.comment.prev) { %>
+                    |
+                    <a href="#<%= comment.prev %>">root</a>
+                <% } %>
+                <% if (locals.comment.next) { %>
+                    |
+                    <a href="#<%= comment.next %>">root</a>
+                <% } %>
+                <button class="buttonNoStyle" type="button">[-]</button>
             </div>
             <div>
                 <p>
-                    <%= info.title %> <%= pos %>
+                    <%= comment.text %>
                 </p>
-                <a class="reply" href="#">reply</a>
+                <a class="reply" href="/reply?id=<%=comment.id%>">reply</a>
             </div>
         </div>
     </div>   
-    <% info.replies.map(r => { %>
-        <%- include("./comment.ejs", {info: r, pos: pos+1}) %>
+    <% comment.replies.map(r => { %>
+        <%- include("./comment.ejs", {comment: r}) %>
     <%}) %>
 
 </div>

@@ -24,16 +24,20 @@ router.post("/", auth.strict, async (req, res) => {
     }
 });
 
-router.post("/:id/comments", auth.strict, async (req, res) => {
+router.post("/:id/comments", auth.passthrough, async (req, res) => {
+    if (req.user_auth === null) {
+        res.redirect("/users/login");
+        return;
+    }
     const {text} = req.body;
 
     if (text === "") { res.send("Error: text is empty."); }
 
     try {
-        await comm_ctrl.postComment(id, text, req.user_auth.id, req.user_auth.username);
-        res.redirect("/newest"); //redirect to render context of comment (parent submission)
+        let db_comment = await comm_ctrl.postComment(req.params.id, text, req.user_auth.id, req.user_auth.username);
+        res.redirect("/submission?id="+req.params.id+"#"+db_comment.id); //redirect to render context of comment (parent submission)
     } catch (e) {
-        res.render("submit", { error: "Hacker News can't connect to his database", message: e.message });
+        res.status(500).send(e.message);
     }
 });
 
