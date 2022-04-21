@@ -361,9 +361,9 @@ exports.userSubmissions = (request, response) => {
         console.log("userData", userData);
         if (userData !== null && typeof userData !== undefined) {
             if ((type === "up" && userData.upvotedSubmissions.length === 0) || (type === "fav" && userData.favouriteSubmissions.length === 0)) {
-                responseObj.status  = errorCodes.BAD_REQUEST;
-                responseObj.message = "Bad request";
-                responseObj.data    = {};
+                responseObj.status  = errorCodes.SUCCESS;
+                responseObj.message = "Success";
+                responseObj.data    = [];
                 response.send(responseObj);
                 return;
             }
