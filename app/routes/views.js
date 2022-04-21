@@ -184,6 +184,7 @@ router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
         res.send("Something went wrong");
     }
 });
+
 router.get("/upvotedComments", auth.strict, async (req, res) => {
     try {
         let comment_list = await user_ctrl.getUpvotedComments(req.user_auth.id);
