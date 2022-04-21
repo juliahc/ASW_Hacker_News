@@ -1,6 +1,7 @@
 const User = require("../User");
 const DatabaseCtrl = require("./DatabaseCtrl");
 const SubmissionCtrl = require("./SubmissionCtrl");
+const Comment = require("../Comment");
 require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
@@ -95,7 +96,16 @@ UserCtrl.prototype.getUpvotedSubmissions = async function(page, authId) {
 }
 
 UserCtrl.prototype.getUpvotedComments = async function(authId) {
-    return [];
+    let resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    let data = resp.data;
+    let result = [];
+    data.forEach(comment_data => {
+        let comment = new Comment(comment_data);
+        comment.upvoted = true;
+        result.push(comment);
+    });
+    return result;
 }
 
 UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {

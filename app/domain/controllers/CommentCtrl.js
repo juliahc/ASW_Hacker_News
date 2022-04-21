@@ -31,9 +31,15 @@ CommentCtrl.prototype.postReply = async function(parent, text, googleId, usernam
 }
 
 CommentCtrl.prototype.fetchComment = async function(id) {
-    let resp = await this.db.getRequest("/comment", {"_id": id});
+    let resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    let upvUsrCom = [];
+    resp.data.forEach(comment => upvUsrCom.push(comment._id));
+    resp = await this.db.getRequest("/comment", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let comment = new Comment(resp.data);
+    if (upvUsrCom.includes(comment.id)) comment.upvoted = true;
+    else comment.upvoted = false;
     resp = await this.db.getRequest("/submission", {"_id": comment.submission});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("Comment does not have a submission!"); }
     comment.submissionTitle = resp.data.title;
@@ -41,11 +47,18 @@ CommentCtrl.prototype.fetchComment = async function(id) {
 }
 
 CommentCtrl.prototype.fetchCommentsOfUser = async function(id) {
-    let resp = await this.db.getRequest("/userComments", {"googleId": id});
+    let resp = await this.db.getRequest("/likedComments", {"googleId": authId, "type": "up"});
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    let upvUsrCom = [];
+    resp.data.forEach(comment => upvUsrCom.push(comment._id));
+    resp = await this.db.getRequest("/userComments", {"googleId": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such comment"); }
     let result = [];
-    resp.data.forEach(comment => {
-        result.push(new Comment(comment));
+    resp.data.forEach(comment_data => {
+        let comment = new Comment(comment_data);
+        if (upvUsrCom.includes(comment.id)) comment.upvoted = true;
+        else comment.upvoted = false;
+        result.push(comment);
     });
     return result;
 }
