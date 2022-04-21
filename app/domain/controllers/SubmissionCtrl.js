@@ -1,6 +1,7 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const CommentCtrl = require("./CommentCtrl");
 
 let SubmissionCtrl;
 (function() {
@@ -13,6 +14,7 @@ let SubmissionCtrl;
         this.types = ["any", "url", "ask"];
         this.orders = ["pts", "new"];
         this.db = new DatabaseCtrl();
+        this.comm_ctrl = new CommentCtrl();
         this.fromDbSubToDomainSub = function(submission) {
             submission.id = submission._id;
             delete submission._id;
@@ -32,11 +34,19 @@ let SubmissionCtrl;
 // Declare controller methods
 
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, googleId, username) {
-    let submission;
-    if (url.length === 0) submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
-    else submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
-    let id = await this.db.postRequest("/newSubmission", submission);
-    return id;
+    let submission, createComment;
+    if (url.length === 0) {
+        submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
+        createComment = false;
+    } else {
+        submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
+        createComment = text.length > 0;
+    }
+    let db_sub = await this.db.postRequest("/newSubmission", submission);
+    if (createComment) {
+        this.comm_ctrl.postComment(db_sub._id, text, googleId, username);
+    }
+    return db_sub;
 }
 
 SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
