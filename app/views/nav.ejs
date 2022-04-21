@@ -22,8 +22,17 @@
             |
             <a href="/submit">submit</a>
         </td>
-        <td id="session">
-            <a href="/users/login">login</a>
+        <% if(user_auth == null) { %>
+            <td id="sessionNoLogged">
+                <a href="/users/login">login</a>
+            </td>
+        <% } else { %>
+            <td id="sessionLogged">
+                <div><a href="/user"><%= user_auth.username %></a></div>
+                <div><span>&nbsp (<%= user_auth.karma %>) &nbsp</span></div>
+                <div>|&nbsp<a href="/users/logout">logout</a></div>
+            </td>
+        <% } %>
         </td>
     </tr>
 </table>

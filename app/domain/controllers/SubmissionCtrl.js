@@ -32,11 +32,19 @@ let SubmissionCtrl;
 // Declare controller methods
 
 SubmissionCtrl.prototype.createSubmission = async function(title, url, text, googleId, username) {
-    let submission;
-    if (url.length === 0) submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
-    else submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
-    let id = await this.db.postRequest("/newSubmission", submission);
-    return id;
+    let submission, createComment;
+    if (url.length === 0) {
+        submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
+        createComment = false;
+    } else {
+        submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
+        createComment = text.length > 0;
+    }
+    let db_sub = await this.db.postRequest("/newSubmission", submission);
+    if (createComment) {
+        this.comm_ctrl.postComment(db_sub.data.id, text, googleId, username);
+    }
+    return db_sub;
 }
 
 SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
@@ -54,6 +62,7 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
         if (usrUpvCom.hasOwnProperty("status") && usrUpvCom.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
         usrUpvCom.data.forEach(comment => upvUsrCom.push(comment._id));
     }
+    console.log(upvUsrCom)
     let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
     let submission = this.fromDbSubToDomainSub(resp.data);

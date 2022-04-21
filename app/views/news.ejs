@@ -102,7 +102,7 @@
                                                     <td>
                                                         <span><%= submission.points %> points</span>
                                                         by
-                                                        <a href="/user?=<%= submission.googleId %>"><%= submission.username %></a>
+                                                        <a href="/user?id=<%= submission.googleId %>"><%= submission.username %></a>
                                                         &nbsp
                                                         <%= new Date(submission.createdAt).toDateString() %>
                                                         &nbsp

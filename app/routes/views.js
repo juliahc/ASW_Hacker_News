@@ -114,7 +114,7 @@ router.get("/submission", auth.passthrough, async (req, res) => {
             comment.addNavigationalIdentifiers(null, 0);
             comment.formatCreatedAtAsTimeAgo();
         });
-        res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission" });
+        res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -218,15 +218,17 @@ router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
 });
 router.get("/favoriteComments", async (req, res) => {});
 
-router.get("/reply", async (req, res) => {
+router.get("/reply", auth.passthrough , async (req, res) => {
     if (!req.query || !req.query.id) {
         res.send("No such reply");
         return;
     }
     try {
-        let comment = await comm_ctrl.fetchComment(req.query.id);
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
+        let comment = await comm_ctrl.fetchComment(req.query.id, auth_id);
         comment.formatCreatedAtAsTimeAgo();
-        res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply" });
+        console.log("comment: ", comment)
+        res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }

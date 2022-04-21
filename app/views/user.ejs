@@ -54,13 +54,13 @@
                                             <form method="post" action="/users">
                                                 <tr>
                                                     <td></td>
-                                                    <td><textarea name="about" rows="4" cols="50"></textarea></td>
+                                                    <td><textarea name="about" rows="4" cols="50"><%= user.about %></textarea></td>
                                                 </tr>
                                                 <tr>
                                                     <td>showdead:</td>
                                                     <td>
                                                         <select name="showdead">
-                                                            <% if (user.howdead) { %>
+                                                            <% if (user.showdead) { %>
                                                                 <option value="no" >no</option>
                                                                 <option value="yes" selected>yes</option>
                                                             <% } else { %>
@@ -98,11 +98,11 @@
                                                 </tr>
                                                 <tr>
                                                     <td></td>
-                                                    <td><a href="#">submissions</a></td>
+                                                    <td><a href="/submitted?id=<%= user.googleId %>">submissions</a></td>
                                                 </tr>
                                                 <tr>
                                                     <td></td>
-                                                    <td><a href="#">comments</a></td>
+                                                    <td><a href="/threads?id=<%= user.googleId %>">comments</a></td>
                                                 </tr>
                                                 <tr>
                                                     <td></td>
@@ -125,11 +125,11 @@
                                             
                                             <tr>
                                                 <td></td>
-                                                <td><a href="#">submissions</a></td>
+                                                <td><a href="/submitted?id=<%=user.googleId%>">submissions</a></td>
                                             </tr>
                                             <tr>
                                                 <td></td>
-                                                <td><a href="#">comments</a></td>
+                                                <td><a href="/threads?id=<%= user.googleId %>">comments</a></td>
                                             </tr>
                                             <tr>
                                                 <td></td>
