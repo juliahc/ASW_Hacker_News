@@ -60,24 +60,22 @@ exports.create = async (request, response, next) => {
         return;
     }
 
-    //check if submission 
-    if (mongodb.ObjectId.isValid(mongodb.ObjectId(params.submission))) {
-        params.submission = mongodb.ObjectId(params.submission);
-        let commentObject = {
-            text: params.text,
-            googleId: params.googleId,
-            username: params.username,
-            submission: params.submission,
+    params.submission = mongodb.ObjectId(params.submission);
+    let commentObject = {
+        text: params.text,
+        googleId: params.googleId,
+        username: params.username,
+        submission: mongodb.ObjectId(params.submission),
+    }
+    // In case of reply, add the parent comment to the comment object
+    let reply = false;
+    if (params.parent !== undefined && params.parent !== null) {
+        if (mongodb.ObjectId.isValid(mongodb.ObjectId(params.parent))) {
+            params.parent = mongodb.ObjectId(params.parent);
+            commentObject.parent = params.parent;
+            reply = true;
         }
-        // In case of reply, add the parent comment to the comment object
-        let reply = false;
-        if (params.parent !== undefined && params.parent !== null) {
-            if (mongodb.ObjectId.isValid(mongodb.ObjectId(params.parent))) {
-                params.parent = mongodb.ObjectId(params.parent);
-                commentObject.parent = params.parent;
-                reply = true;
-            }
-        }
+    }
 
     commentDatalayer.createComment(commentObject)
     .then((commentData) => {
@@ -109,54 +107,58 @@ exports.create = async (request, response, next) => {
                                     .catch(error => {
                                         responseObj.status  = errorCodes.SYNTAX_ERROR;
                                         responseObj.message = "Error updating reply: " + error;
-
                                         responseObj.data    = {};
                                         response.send(responseObj);
-                                    }
-                                })
-                                .catch(error => {
+                                    });
+                                } else {
                                     responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                                    responseObj.message = error;
+                                    responseObj.message = "No record found";
                                     responseObj.data    = {};
                                     response.send(responseObj);
-                                });
-                            }
-                            else {
-                                responseObj.status  = errorCodes.SUCCESS;
-                                responseObj.message = "Success";
-                                responseObj.data    = commentData;
+                                }
+                            })
+                            .catch(error => {
+                                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                                responseObj.message = error;
+                                responseObj.data    = {};
                                 response.send(responseObj);
-                            }
-
-
-                        })
-                        .catch((error) => { 
-                            responseObj.status  = errorCodes.SYNTAX_ERROR;
-                            responseObj.message = error;
-                            responseObj.data    = {};
+                            });
+                        }
+                        else {
+                            responseObj.status  = errorCodes.SUCCESS;
+                            responseObj.message = "Success";
+                            responseObj.data    = commentData;
                             response.send(responseObj);
-                        });
-                    }
-                })
-                .catch(error => {
-                    responseObj.status  = errorCodes.SYNTAX_ERROR;
-                    responseObj.message = error;
-                    responseObj.data    = {};
-                    response.send(responseObj);
-                });
-            } else {
-                responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                responseObj.message = "No record found";
+                        }
+
+
+                    })
+                    .catch((error) => { 
+                        responseObj.status  = errorCodes.SYNTAX_ERROR;
+                        responseObj.message = error;
+                        responseObj.data    = {};
+                        response.send(responseObj);
+                    });
+                }
+            })
+            .catch(error => {
+                responseObj.status  = errorCodes.SYNTAX_ERROR;
+                responseObj.message = error;
                 responseObj.data    = {};
                 response.send(responseObj);
-            }
-        })
-        .catch(error => {
-            responseObj.status  = errorCodes.SYNTAX_ERROR;
-            responseObj.message = error;
+            });
+        } else {
+            responseObj.status  = errorCodes.DATA_NOT_FOUND;
+            responseObj.message = "No record found";
             responseObj.data    = {};
             response.send(responseObj);
-        });
-    }
+        }
+    })
+    .catch(error => {
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = error;
+        responseObj.data    = {};
+        response.send(responseObj);
+    });
     return;
 };
