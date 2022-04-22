@@ -19,7 +19,7 @@ router.get("/", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id,auth_id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -37,7 +37,7 @@ router.get("/news", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -55,7 +55,7 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null,auth_id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -72,7 +72,7 @@ router.get("/ask", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null,auth_id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -94,7 +94,7 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id,auth_id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -178,7 +178,7 @@ router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getUpvotedSubmissions(p, auth_id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
@@ -212,7 +212,7 @@ router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getFavoriteSubmissions(p, req.query.id);
-        let submissionsLeft = [];
+        let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
