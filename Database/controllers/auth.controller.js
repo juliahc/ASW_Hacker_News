@@ -13,9 +13,8 @@ exports.register = async (request, response, next) => {
 
   userDatalayer.findUser(condition).then(async (userData) => {
     if (!userData) {
-      userObj.googleId = bcrypt.hashSync(userObj.googleId, 10);
       userDatalayer
-        .createUser(params)
+        .createUser(/* userObj */params)
         .then(async (userData) => {
           responseObj.status    = errorCodes.CONTENT_CREATED;
           responseObj.message   = "User registered successfully";
