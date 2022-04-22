@@ -142,7 +142,6 @@ router.get("/threads", auth.passthrough, async (req, res) => {
 
 router.get("/user", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {
-        console.log("asdfghjklñ: ", req.user_auth)
         if (req.user_auth !== null) res.redirect("/user?id=" + req.user_auth.id);
         else res.send("No such user");
         return;
@@ -175,7 +174,8 @@ router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getUpvotedSubmissions(p, auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());

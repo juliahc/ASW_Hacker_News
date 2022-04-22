@@ -514,7 +514,6 @@ exports.comments = async (request, response) => {
 
 exports.likedComments = async (request, response) => {
   let params = {};
-  console.log("db query: ", request.query)
   if (request.query.googleId) {
       params = request.query;
   } else {
