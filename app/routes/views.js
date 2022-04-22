@@ -120,7 +120,8 @@ router.get("/submission", auth.passthrough, async (req, res) => {
             comment.addNavigationalIdentifiers(null, 0);
             comment.formatCreatedAtAsTimeAgo();
         });
-        res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission?id="+req.query.id });
+        if (req.query.error === "NoText") res.render("submission", { user_auth: req.user_auth, submission: submission, error: "The text field must contain characters", view: "/submission?id="+req.query.id});
+        else res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -235,7 +236,8 @@ router.get("/reply", auth.passthrough , async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let comment = await comm_ctrl.fetchComment(req.query.id, auth_id);
         comment.formatCreatedAtAsTimeAgo();
-        res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id });
+        if (req.query.error === "NoText") res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id, error: "The text field must contain characters" });
+        else res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }

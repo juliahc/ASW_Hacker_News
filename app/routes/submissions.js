@@ -33,7 +33,7 @@ router.post("/:id/comments", auth.passthrough, async (req, res) => {
     }
     const {text} = req.body;
 
-    if (text === "") { res.send("Error: text is empty."); }
+    if (text === "") { res.redirect("/submission?id="+req.params.id+"&error=NoText"); return; }
 
     try {
         let db_comment = await comm_ctrl.postComment(req.params.id, text, req.user_auth.id, req.user_auth.username);
