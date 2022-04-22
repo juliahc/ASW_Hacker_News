@@ -62,6 +62,7 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/newest", more: more });
     } catch (e) {
+        console.log("error")
         res.render("news", {error: "Hacker News can't connect to his database"});
     }
 });

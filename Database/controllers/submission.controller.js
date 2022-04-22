@@ -219,6 +219,20 @@ exports.create = async (request, response) => {
         type: (params.hasOwnProperty("url")) ? "url" : "ask",
         googleId: params.googleId
     }
+
+    if (submissionObject.type == "url") {
+      urlDatalayer.findUrl({"url": params.url})
+      .then((urlData) => {
+        if (urlData !== null && typeof urlData !== "undefined") {
+          responseObj.status = errorCodes.DATA_ALREADY_EXISTS;
+          responseObj.message = "Url already exists";
+          responseObj.data = urlData.submission;
+          response.send(responseObj);
+          return;
+        }
+      })
+    }
+
     //Creating submission on the database
     submissionDatalayer.createSubmission(submissionObject)
     .then((submissionData) => {

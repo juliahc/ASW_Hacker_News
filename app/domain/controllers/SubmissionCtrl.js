@@ -41,10 +41,12 @@ SubmissionCtrl.prototype.createSubmission = async function(title, url, text, goo
         createComment = text.length > 0;
     }
     let db_sub = await this.db.postRequest("/newSubmission", submission);
+    console.log("db_sub: ", db_sub)
+    if (db_sub.hasOwnProperty("status") && db_sub.status === this.db.errors.DATA_ALREADY_EXISTS) return {success: false, id: db_sub.data}
     if (createComment) {
         this.comm_ctrl.postComment(db_sub.data.id, text, googleId, username);
     }
-    return db_sub;
+    return {success: true, id: db_sub.data.id};
 }
 
 SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
