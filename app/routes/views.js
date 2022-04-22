@@ -128,7 +128,7 @@ router.get("/submission", auth.passthrough, async (req, res) => {
 router.get("/threads", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {
         if (req.user_auth !== null) res.redirect("/threads?id=" + req.user_auth.id);
-        else res.send("No such user");
+        else res.redirect("/users/login");
         return;
     }
     try {
