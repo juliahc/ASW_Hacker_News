@@ -17,8 +17,10 @@ router.post("/", auth.strict, async (req, res) => {
         return;
     }
     try {
-        await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
-        res.redirect("/newest");
+        let created =  await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
+        if (created.success) res.redirect("/newest");
+        else if (!created.existant) res.redirect("/submit?err=url_not_found");
+        else res.redirect("/submission?id="+created.id);
     } catch (e) {
         res.redirect("/submit?err=unknown");
     }
@@ -31,7 +33,7 @@ router.post("/:id/comments", auth.passthrough, async (req, res) => {
     }
     const {text} = req.body;
 
-    if (text === "") { res.send("Error: text is empty."); }
+    if (text === "") { res.redirect("/submission?id="+req.params.id+"&error=NoText"); return; }
 
     try {
         let db_comment = await comm_ctrl.postComment(req.params.id, text, req.user_auth.id, req.user_auth.username);

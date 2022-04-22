@@ -1,7 +1,6 @@
 const UserModel = require('../models/user.model')
 
 exports.createUser = async (params) => {
-    console.log(params);
     return new Promise((resolve, reject) => {
         UserModel
         .create(params)

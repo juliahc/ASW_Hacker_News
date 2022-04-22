@@ -91,7 +91,7 @@ UserCtrl.prototype.getUpvotedSubmissions = async function(page, authId) {
         submission.upvoted = true;
         result.push(submission);
     }
-    result.push(data[data.length-1]); // The last element of data list is the number of pages left.
+    if (data.length) result.push(data[data.length-1]); // The last element of data list is the number of pages left.
     return result;
 }
 

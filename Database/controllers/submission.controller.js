@@ -37,7 +37,6 @@ exports.find = async (request, response) => {
     let aggregateArr = createAggregateSubmissionArray(criteria);
     submissionDatalayer.aggregateSubmission(aggregateArr)
     .then((submissionData) => {
-      console.log("submissionData", submissionData);
           if (submissionData !== null && typeof submissionData !== undefined) {
               //The submission exists on the database. Now we need to get the comments
               const criteria = {};
@@ -100,7 +99,6 @@ exports.find = async (request, response) => {
 
 exports.page = async (request, response) => {
     let params = {}
-    //console.log(request);
     if (request.query.hasOwnProperty("p") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
         params = request.query;
     } else {
@@ -186,7 +184,7 @@ exports.page = async (request, response) => {
                 console.log(err);
             });
           } else {
-            responseObj.status  = errorCodes.DATA_NOT_FOUND;
+            responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Data not found";
             responseObj.data    = [];
             response.send(responseObj);
@@ -201,7 +199,6 @@ exports.page = async (request, response) => {
 };
 
 exports.create = async (request, response) => {
-    console.log(request)
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -219,6 +216,23 @@ exports.create = async (request, response) => {
         type: (params.hasOwnProperty("url")) ? "url" : "ask",
         googleId: params.googleId
     }
+    
+    let cont = true;
+
+    if (params.hasOwnProperty("url")) {
+      await urlDatalayer.findUrl({"url": params.url})
+      .then((urlData) => {
+        if (urlData !== null && typeof urlData !== "undefined") {
+          responseObj.status = errorCodes.DATA_ALREADY_EXISTS;
+          responseObj.message = "Url already exists";
+          responseObj.data = urlData.submission;
+          response.send(responseObj);
+          cont = false;
+        }
+      })
+    }
+
+    if (!cont) return;
     //Creating submission on the database
     submissionDatalayer.createSubmission(submissionObject)
     .then((submissionData) => {

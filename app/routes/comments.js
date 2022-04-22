@@ -14,7 +14,7 @@ router.post("/:id/replies", auth.passthrough, async (req, res) => {
     }
     const {text} = req.body;
 
-    if (text === "") { res.send("Error: text is empty."); }
+    if (text === "") { res.redirect("/reply?id="+req.params.id+"&error=NoText"); return; }
 
     try {
         let db_comment = await comm_ctrl.postReply(req.params.id, text, req.user_auth.id, req.user_auth.username);

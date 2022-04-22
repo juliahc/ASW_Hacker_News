@@ -29,6 +29,9 @@
                     <!--Space-->
                     <tr id="space-10px"></tr>
                     <!--Item info-->
+                    <% if (locals.error) { %>
+                        <tr><td><span class="errorMessage"> <b>Something is wrong!</b> <%= error %></span><br><br></td></tr>
+                    <% } %>
                     <tr>
                         <td>
                             <table>

@@ -1,6 +1,7 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const axios = require("axios"); 
 
 let SubmissionCtrl;
 (function() {
@@ -37,14 +38,25 @@ SubmissionCtrl.prototype.createSubmission = async function(title, url, text, goo
         submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
         createComment = false;
     } else {
+        let valid = true;
+        await axios({ method: 'get', url: url })
+          .then(response => {
+            valid = true;
+          })
+          .catch(err => {
+              valid = false;
+          });
+        
+        if (!valid) return {success: false, existant: false};
         submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
         createComment = text.length > 0;
     }
     let db_sub = await this.db.postRequest("/newSubmission", submission);
+    if (db_sub.hasOwnProperty("status") && db_sub.status === this.db.errors.DATA_ALREADY_EXISTS) return {success: false, id: db_sub.data, existant: true};
     if (createComment) {
         this.comm_ctrl.postComment(db_sub.data.id, text, googleId, username);
     }
-    return db_sub;
+    return {success: true, id: db_sub.data.id};
 }
 
 SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
@@ -62,7 +74,6 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
         if (usrUpvCom.hasOwnProperty("status") && usrUpvCom.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
         usrUpvCom.data.forEach(comment => upvUsrCom.push(comment._id));
     }
-    console.log(upvUsrCom)
     let resp = await this.db.getRequest("/submission", {"_id": id});
     if (resp.status === this.db.errors.RESOURCE_NOT_FOUND) { throw Error("No such submission"); }
     let submission = this.fromDbSubToDomainSub(resp.data);
@@ -98,7 +109,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
         else  submission.upvoted = false;
         result.push(submission);
     }
-    result.push(data[data.length-1]); // The last element of data list is the number of pages left.
+    if(data.length) result.push(data[data.length-1]); // The last element of data list is the number of pages left.
     return result;
 }
 

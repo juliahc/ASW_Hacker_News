@@ -2,6 +2,7 @@ const express = require("express");
 const SubmissionCtrl = require("../domain/controllers/SubmissionCtrl");
 const CommentCtrl = require("../domain/controllers/CommentCtrl");
 const router = express.Router();
+const time_ago = require("../utils/timeAgo");
 
 const AuthMiddleware = require("./auth_middleware");
 const UserCtrl = require("../domain/controllers/UserCtrl");
@@ -19,7 +20,8 @@ router.get("/", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -36,7 +38,8 @@ router.get("/news", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -53,7 +56,8 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -69,13 +73,14 @@ router.get("/ask", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/ask", more: more });
     } catch (e) {
-        res.render("news", {error: "Hacker News can't connect to his database"});
+        res.send("Error!");
     }
 });
 
@@ -90,7 +95,8 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -114,7 +120,8 @@ router.get("/submission", auth.passthrough, async (req, res) => {
             comment.addNavigationalIdentifiers(null, 0);
             comment.formatCreatedAtAsTimeAgo();
         });
-        res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission?id="+req.query.id });
+        if (req.query.error === "NoText") res.render("submission", { user_auth: req.user_auth, submission: submission, error: "The text field must contain characters", view: "/submission?id="+req.query.id});
+        else res.render("submission", { user_auth: req.user_auth, submission: submission, view: "/submission?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -123,7 +130,7 @@ router.get("/submission", auth.passthrough, async (req, res) => {
 router.get("/threads", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {
         if (req.user_auth !== null) res.redirect("/threads?id=" + req.user_auth.id);
-        else res.send("No such user");
+        else res.redirect("/users/login");
         return;
     }
     try {
@@ -141,7 +148,6 @@ router.get("/threads", auth.passthrough, async (req, res) => {
 
 router.get("/user", auth.passthrough, async (req, res) => {
     if (!req.query || !req.query.id) {
-        console.log("asdfghjklñ: ", req.user_auth)
         if (req.user_auth !== null) res.redirect("/user?id=" + req.user_auth.id);
         else res.send("No such user");
         return;
@@ -150,8 +156,7 @@ router.get("/user", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let user = await user_ctrl.profile(auth_id, req.query.id);
         let loggedProfile = req.user_auth !== null && req.user_auth.id === user.googleId;
-        
-        console.log("user: ", user);
+        user.createdAt  = time_ago(user.createdAt);
         res.render("user", { user_auth: req.user_auth, user: user, loggedProfile: loggedProfile,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");
@@ -166,6 +171,7 @@ router.get("/submit", auth.passthrough, async (req, res) => {
     let submitData = {};
     if (req.query && req.query.err === "badtitle") submitData.error = "That's not a valid title."
     if (req.query && req.query.err === "unknown") submitData.error = "Something went wrong, most likely connecting to the DB."
+    if (req.query && req.query.err === "url_not_found") submitData.error = "That URL doesn't exist."
     res.render("submit", submitData);
 });
 
@@ -175,7 +181,8 @@ router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getUpvotedSubmissions(p, auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -208,7 +215,8 @@ router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getFavoriteSubmissions(p, req.query.id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = 0;
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -228,8 +236,8 @@ router.get("/reply", auth.passthrough , async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let comment = await comm_ctrl.fetchComment(req.query.id, auth_id);
         comment.formatCreatedAtAsTimeAgo();
-        console.log("comment: ", comment)
-        res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id });
+        if (req.query.error === "NoText") res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id, error: "The text field must contain characters" });
+        else res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }

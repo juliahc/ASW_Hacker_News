@@ -1,7 +1,6 @@
 const UrlModel = require('../models/url.model')
 
 exports.createUrl= async (params) => {
-    console.log(params);
     return new Promise((resolve, reject) => {
         UrlModel
         .create(params)
