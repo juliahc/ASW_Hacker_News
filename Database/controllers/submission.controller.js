@@ -186,7 +186,7 @@ exports.page = async (request, response) => {
                 console.log(err);
             });
           } else {
-            responseObj.status  = errorCodes.DATA_NOT_FOUND;
+            responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Data not found";
             responseObj.data    = [];
             response.send(responseObj);

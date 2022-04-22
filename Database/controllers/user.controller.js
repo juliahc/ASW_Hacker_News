@@ -108,7 +108,6 @@ exports.update = async (request, response, next) => {
                         return;
                     }
                     userData.upvotedSubmissions.push(mongodb.ObjectId(params.submission));
-                    console.log("userdata: ", userData);
                     updateData = {
                         googleId: params.googleId,
                         upvotedSubmissions: userData.upvotedSubmissions
@@ -358,7 +357,6 @@ exports.userSubmissions = (request, response) => {
 
     userDatalayer.findUser({googleId: params.googleId})
     .then((userData) => {
-        console.log("userData", userData);
         if (userData !== null && typeof userData !== undefined) {
             if ((type === "up" && userData.upvotedSubmissions.length === 0) || (type === "fav" && userData.favouriteSubmissions.length === 0)) {
                 responseObj.status  = errorCodes.SUCCESS;

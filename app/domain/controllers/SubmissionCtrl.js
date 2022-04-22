@@ -98,7 +98,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
         else  submission.upvoted = false;
         result.push(submission);
     }
-    result.push(data[data.length-1]); // The last element of data list is the number of pages left.
+    if(data.length) result.push(data[data.length-1]); // The last element of data list is the number of pages left.
     return result;
 }
 

@@ -90,7 +90,8 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -151,7 +152,6 @@ router.get("/user", auth.passthrough, async (req, res) => {
         let user = await user_ctrl.profile(auth_id, req.query.id);
         let loggedProfile = req.user_auth !== null && req.user_auth.id === user.googleId;
         
-        console.log("user: ", user);
         res.render("user", { user_auth: req.user_auth, user: user, loggedProfile: loggedProfile,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");
