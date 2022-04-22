@@ -19,7 +19,8 @@ router.get("/", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -36,7 +37,8 @@ router.get("/news", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -53,7 +55,8 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
@@ -69,13 +72,14 @@ router.get("/ask", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null,auth_id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/ask", more: more });
     } catch (e) {
-        res.render("news", {error: "Hacker News can't connect to his database"});
+        res.send("Error!");
     }
 });
 
@@ -208,7 +212,8 @@ router.get("/favoriteSubmissions", auth.passthrough, async (req, res) => {
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
         let sub_page = await user_ctrl.getFavoriteSubmissions(p, req.query.id);
-        let submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
+        let submissionsLeft = [];
+        if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());

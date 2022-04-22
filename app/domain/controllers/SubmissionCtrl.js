@@ -99,6 +99,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
         result.push(submission);
     }
     if(data.length) result.push(data[data.length-1]); // The last element of data list is the number of pages left.
+    console.log("result: ", result)
     return result;
 }
 
