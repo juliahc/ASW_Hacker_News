@@ -80,11 +80,9 @@ exports.create = async (request, response, next) => {
     commentDatalayer.createComment(commentObject)
     .then((commentData) => {
         if (commentData !== null && typeof commentData !== undefined) {
-            console.log("Comment Data: ", commentData);
             //Find the submission related to the comment
             submissionDatalayer.findSubmission({_id: params.submission})
             .then((submissionData) => {
-                console.log("Submission: ", submissionData);
                 if (submissionData !== null && typeof submissionData !== undefined) {
                     submissionData.comments++;
                     submissionDatalayer.updateSubmission({_id: mongodb.ObjectId(params.submission)}, {comments: submissionData.comments})
@@ -93,10 +91,8 @@ exports.create = async (request, response, next) => {
                         if (reply) {
                             commentDatalayer.findComment({_id: params.parent})
                             .then((replyData) => {
-                                console.log("asdfasdf: ", replyData);
                                 if (replyData !== null && typeof replyData !== undefined) {
                                     replyData[0].replies.push(commentData._id);
-                                    console.log("replyData després del push: ",replyData[0]);
                                     commentDatalayer.updateComment({_id: params.parent}, {replies: replyData[0].replies})
                                     .then((data) => {
                                         responseObj.status  = errorCodes.SUCCESS;

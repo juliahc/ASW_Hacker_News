@@ -170,6 +170,7 @@ router.get("/submit", auth.passthrough, async (req, res) => {
     let submitData = {};
     if (req.query && req.query.err === "badtitle") submitData.error = "That's not a valid title."
     if (req.query && req.query.err === "unknown") submitData.error = "Something went wrong, most likely connecting to the DB."
+    if (req.query && req.query.err === "url_not_found") submitData.error = "That URL doesn't exist."
     res.render("submit", submitData);
 });
 

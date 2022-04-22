@@ -56,7 +56,6 @@ exports.create = async (request, response, next) => {
     }
     userDatalayer.createUser(params)
     .then((userData) => {
-        console.log(userData);
         if (userData !== null && typeof userData !== undefined) {
             responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Success";
@@ -138,7 +137,6 @@ exports.update = async (request, response, next) => {
                         googleId: params.googleId,
                         upvotedSubmissions: userData.upvotedSubmissions
                     }
-                    console.log("updateData: ", updateData);
                     updateSubmission = true;
                     updateSubmissionQuery = {
                         $inc: {

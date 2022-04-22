@@ -1,6 +1,7 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const axios = require("axios"); 
 
 let SubmissionCtrl;
 (function() {
@@ -37,12 +38,22 @@ SubmissionCtrl.prototype.createSubmission = async function(title, url, text, goo
         submission = new AskSubmission({title: title, googleId: googleId, username: username, text: text});
         createComment = false;
     } else {
+        let valid = true;
+        await axios({ method: 'get', url: url })
+          .then(response => {
+            valid = true;
+          })
+          .catch(err => {
+              valid = false;
+          });
+        
+        if (!valid) return {success: false, existant: false};
         submission = new UrlSubmission({title: title, googleId: googleId, username: username, url: url});
         createComment = text.length > 0;
     }
     let db_sub = await this.db.postRequest("/newSubmission", submission);
     console.log("db_sub: ", db_sub)
-    if (db_sub.hasOwnProperty("status") && db_sub.status === this.db.errors.DATA_ALREADY_EXISTS) return {success: false, id: db_sub.data}
+    if (db_sub.hasOwnProperty("status") && db_sub.status === this.db.errors.DATA_ALREADY_EXISTS) return {success: false, id: db_sub.data, existant: true};
     if (createComment) {
         this.comm_ctrl.postComment(db_sub.data.id, text, googleId, username);
     }
