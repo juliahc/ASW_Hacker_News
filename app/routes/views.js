@@ -2,6 +2,7 @@ const express = require("express");
 const SubmissionCtrl = require("../domain/controllers/SubmissionCtrl");
 const CommentCtrl = require("../domain/controllers/CommentCtrl");
 const router = express.Router();
+const time_ago = require("../utils/timeAgo");
 
 const AuthMiddleware = require("./auth_middleware");
 const UserCtrl = require("../domain/controllers/UserCtrl");
@@ -62,7 +63,6 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.render("news", { user_auth: req.user_auth, submissions: sub_page, p: p, view: "/newest", more: more });
     } catch (e) {
-        console.log("error")
         res.render("news", {error: "Hacker News can't connect to his database"});
     }
 });
@@ -155,7 +155,7 @@ router.get("/user", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let user = await user_ctrl.profile(auth_id, req.query.id);
         let loggedProfile = req.user_auth !== null && req.user_auth.id === user.googleId;
-        
+        user.createdAt  = time_ago(user.createdAt);
         res.render("user", { user_auth: req.user_auth, user: user, loggedProfile: loggedProfile,  view: "/user?id=" + req.query.id });
     } catch {
         res.send("No such user");
@@ -235,7 +235,6 @@ router.get("/reply", auth.passthrough , async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let comment = await comm_ctrl.fetchComment(req.query.id, auth_id);
         comment.formatCreatedAtAsTimeAgo();
-        console.log("comment: ", comment)
         res.render("reply", { user_auth: req.user_auth, comment: comment, view: "/reply?id="+req.query.id });
     } catch (e) {
         res.status(500).json({ message: e.message });

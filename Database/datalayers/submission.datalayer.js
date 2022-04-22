@@ -1,7 +1,6 @@
 const SubmissionModel = require('../models/submission.model')
 
 exports.createSubmission = async (params) => {
-    console.log(params);
     return new Promise((resolve, reject) => {
         SubmissionModel
         .create(params)

@@ -30,7 +30,6 @@ async function getAccessTokenFromCode(code) {
       code,
     },
   });
-  // console.log(data); // { access_token, expires_in, token_type, refresh_token }
   return data.access_token;
 };
 
@@ -42,7 +41,6 @@ async function getGoogleUserInfo(access_token) {
       Authorization: `Bearer ${access_token}`,
     },
   });
-  //console.log(data); // { id, email, given_name, family_name }
   return data;
 };
 

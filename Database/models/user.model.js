@@ -18,7 +18,6 @@ const UsersSchema = new global.Schema({
     },
     email: {
         type: String,
-        /* required: true */
         default: null
     },
     showdead: {

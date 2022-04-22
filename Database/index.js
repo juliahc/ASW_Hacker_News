@@ -31,7 +31,6 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.use("/v1/", function(req, res, next) {
     const contentType = req.headers["content-type"];
-    // console.log(contentType);
     next();
 });
 

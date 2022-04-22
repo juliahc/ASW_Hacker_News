@@ -11,7 +11,6 @@ class auth {
         }
         try {
             const decoded = jwt.verify(token, process.env.USER_AUTH_SECRET_KEY);
-            console.log(decoded)
             req.user_auth = decoded;
         } catch (err) {
             return res.status(401).send("Invalid Token");

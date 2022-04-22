@@ -18,7 +18,6 @@ router.post("/", auth.strict, async (req, res) => {
     }
     try {
         let created =  await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
-        console.log("created: ", created)
         if (created.success) res.redirect("/newest");
         else if (!created.existant) res.redirect("/submit?err=url_not_found");
         else res.redirect("/submission?id="+created.id);

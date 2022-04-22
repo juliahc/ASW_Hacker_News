@@ -8,8 +8,11 @@
             |
             <a href="/newest">new</a>
             |
-            <a href="/threads">threads</a>
-            |
+            <% if(user_auth !== null) { %>
+                <a href="/threads">threads</a>
+                |
+            <% } %>
+            
             <a href="#">past</a>
             |
             <a href="#">comments</a>
