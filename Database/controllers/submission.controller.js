@@ -131,12 +131,14 @@ exports.page = async (request, response) => {
     switch(request.query.o) {
         case "new":
             orderBy = {
-                "createdAt": -1
+                "createdAt": -1,
+                "points": -1
             };
             break;
         default:
             orderBy = {
-                "points": -1
+                "points": -1,
+                "createdAt": -1
             };
             break;
     }
