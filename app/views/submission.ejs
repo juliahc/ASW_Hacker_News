@@ -29,6 +29,7 @@
                         <td>
                             <table>
                                 <!--Title-->
+<<<<<<< Updated upstream
                                 <tr id="id" class="newInfo">          
                                     <td class="voteButton">
                                         <% if (!submission.upvoted) { %>
@@ -49,6 +50,37 @@
                                             <a class="newTitle titleText" href="/submission?id=<%=submission.id%>"><%= submission.title %></a>
                                         <% } %>
                                     </td> 
+=======
+                                <tr id="id" class="newInfo">
+<<<<<<< Updated upstream
+                                    <td class="voteButton"><i id="#" class="fas fa-heart"></i></td>
+                                    <td class="title">
+                                        <a class="newTitle titleText" href="#"> Item title </a>
+                                        <a class="newLink" href="#">(itemlink.com)</a>
+                                    </td>
+=======
+                                    
+                                        <td class="voteButton">
+                                            <% if (!submission.upvoted) { %>
+                                                <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>">
+                                                    <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                                </form>
+                                            <% } else { %>
+                                                <form method="post" action="/users/downvoteSubmisison/<%= submission.id %>?goto=<%=view%>">
+                                                    <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
+                                                </form>
+                                            <% } %>
+                                        </td>
+                                        <td class="title">
+                                            <% if(submission.type === "url") { %>
+                                                <a class="newTitle titleText" href="submission.url"><%= submission.title %></a>
+                                                <a class="newLink" href="<%= (new URL(submission.url).hostname) %>"><%= (new URL(submission.url).hostname) %></a>
+                                            <% } else { %>
+                                                <a class="newTitle titleText" href="/submission?id=<%=submission.id%>"><%= submission.title %></a>
+                                            <% } %>
+                                        </td> 
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
                                 </tr>
                                 <!--Actions-->
                                 <tr class="newActions">
