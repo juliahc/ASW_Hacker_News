@@ -6,6 +6,7 @@ const errorCodes = require("../helpers/errorCodes.helper.js");
 const userDatalayer = require("../datalayers/user.datalayer");
 const submissionDatalayer = require("../datalayers/submission.datalayer");
 const commentDatalayer = require("../datalayers/comment.datalayer");
+const apiKeysDatalayer = require("../datalayers/apiKeys.datalayer");
 
 //Search a user by its googleId
 exports.find = async (request, response) => {
@@ -24,9 +25,30 @@ exports.find = async (request, response) => {
     userDatalayer.findUser(where)
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
-            responseObj.status  = errorCodes.SUCCESS;
-            responseObj.message = "Success";
-            responseObj.data    = userData;
+            //get the api key related to the user
+            const apiKeyParams = {};
+            apiKeyParams.googleId = userData.googleId;
+            apiKeysDatalayer.findApiKey(apiKeyParams)
+            .then((apiKeyData) => {
+                //join the api key with the user
+                userData.apiKey = apiKeyData.key;
+                if (apiKeyData !== null && typeof apiKeyData !== undefined) {
+                  responseObj.status  = errorCodes.SUCCESS;
+                  responseObj.message = "Success";
+                  responseObj.data    = userData;
+                } else {
+                  responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                  responseObj.message = "Cannot find the api key";
+                  responseObj.data    = {};
+                }
+                response.send(responseObj);
+            })
+            .catch(error => {
+                responseObj.status  = errorCodes.SYNTAX_ERROR;
+                responseObj.message = error;
+                responseObj.data    = {};
+                response.send(responseObj);
+            });
         } else {
             responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "User not found";
@@ -43,6 +65,11 @@ exports.find = async (request, response) => {
     return;
 };
 
+async function generateRandomKey() {
+    const apiKey = await apiKeysDatalayer.generateRandomKey();
+    return apiKey.key;
+}
+
 exports.create = async (request, response, next) => {
     let params = {};
     if (request.body.params) {
@@ -57,9 +84,31 @@ exports.create = async (request, response, next) => {
     userDatalayer.createUser(params)
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
-            responseObj.status  = errorCodes.SUCCESS;
-            responseObj.message = "Success";
-            responseObj.data    = userData;
+
+            //Create an API key for the user
+            const apiKeyParams = {};
+            apiKeyParams.googleId = userData.googleId;
+            //generate a random key
+            apiKeyParams.key = generateRandomKey();
+            apiKeysDatalayer.createApiKey(apiKeyParams)
+            .then((apiKeyData) => {
+                if (apiKeyData !== null && typeof apiKeyData !== undefined) {
+                  responseObj.status  = errorCodes.SUCCESS;
+                  responseObj.message = "Success";
+                  responseObj.data    = userData;
+                } else {
+                  responseObj.status  = errorCodes.SYNTAX_ERROR;
+                  responseObj.message = "Error creating API key";
+                  responseObj.data    = {};
+                }
+                response.send(responseObj);
+            })
+            .catch(error => {
+                responseObj.status  = errorCodes.SYNTAX_ERROR;
+                responseObj.message = error;
+                responseObj.data    = {};
+                response.send(responseObj);
+            });
         } else {
             responseObj.status  = errorCodes.DATA_NOT_FOUND;
             responseObj.message = "No record found";
