@@ -10,6 +10,19 @@ exports.createApiKey= async (params) => {
     })
 }
 
+exports.findApiKey = async (where = {}) => {
+    return new Promise((resolve, reject) => {
+        ApiKeyModel
+        .findOne(where)
+        .then((data) => {
+            resolve(data)
+        })
+        .catch((error) => {
+            reject(error)
+        })
+    })
+}
+
 exports.deleteApiKey = async (where = {}) => {
     return new Promise((resolve, reject) => {
         ApiKeyModel
