@@ -13,6 +13,7 @@ class User {
         this.maxvisit = params.maxvisit;
         this.minaway = params.minaway;
         this.delay = params.delay;
+        this.apiKey = params.apiKey;
     }
 
     constructDefault(googleId, username, email) {
@@ -27,6 +28,7 @@ class User {
         this.maxvisit = 20;
         this.minaway = 180;
         this.delay = 0;
+        this.apiKey = "";
     }
     
 }
