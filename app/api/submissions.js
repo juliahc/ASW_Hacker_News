@@ -45,15 +45,15 @@ router.get("/user/:id", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/submission", auth.passthrough, async (req, res) => {
-    if (!req.query || !req.query.id) {
+router.get("/submission/:id", auth.passthrough, async (req, res) => {
+    if (!req.params || !req.params.id) {
         res.status(400).json({"error_msg": "No 'id' field in query or it is empty"});
         return;
     }
     // Get one submission
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let submission = await sub_ctrl.fetchSubmission(req.query.id, auth_id);
+        let submission = await sub_ctrl.fetchSubmission(req.params.id, auth_id);
         submission.formatCreatedAtAsTimeAgo();
         submission.comments.forEach(comment => {
             comment.addNavigationalIdentifiers(null, 0);
