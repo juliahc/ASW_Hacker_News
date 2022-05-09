@@ -52,3 +52,23 @@ router.put("/:id", auth.strict, async (req, res) => {
         res.status(500).json({"error_msg": e.message});
     }
 });
+
+router.get(":id/upvotedSubmissions", auth.strict, async (req, res) => {
+    try {
+        let p = 1;
+        if (req.query && req.query.p) p = req.query.p;
+        let upvotedSubmissions = await user_ctrl.getUpvotedSubmissions(p, req.user_auth.id);
+        res.status(200).json(upvotedSubmissions);
+    } catch {
+        res.status(404).json({"error_msg": "No upvoted submissions or not user"});
+    }
+});
+
+router.get(":id/upvotedComments", auth.strict, async (req, res) => {
+    try {
+        let upvotedComments = await user_ctrl.getUpvotedComments(req.user_auth.id);
+        res.status(200).json(upvotedComments);
+    } catch {
+        res.status(404).json({"error_msg": "No upvoted comments or not user"});
+    }
+});
