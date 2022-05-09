@@ -27,6 +27,7 @@ exports.register = async (request, response, next) => {
           //Create an API key for the user
           const apiKeyParams = {};
           apiKeyParams.googleId = userData.googleId;
+          apiKeyParams.username = userData.username;
           //generate a random key
           apiKeyParams.key = (await generateRandomKey()).toString();
           apiKeysDatalayer.createApiKey(apiKeyParams)
@@ -79,7 +80,7 @@ exports.userKey = async (request, response) => {
     if (apiKeyData) {
       responseObj.status    = errorCodes.SUCCESS;
       responseObj.message   = "User key found";
-      responseObj.data      = {id: apiKeyData.googleId};
+      responseObj.data      = {id: apiKeyData.googleId, username: apiKeyData.username};
       response.send(responseObj);
     } else {
       responseObj.status    = errorCodes.BAD_REQUEST;
