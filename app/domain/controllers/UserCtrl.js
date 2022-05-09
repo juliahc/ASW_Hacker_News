@@ -35,10 +35,12 @@ UserCtrl.prototype.login_or_register = async function(id, username, email) {
     // This method should only be called from the callback endpoint passed to google auth, as a result of a successful login.
     let resp, db_id, db_username, db_karma;
     resp = await this.db.getRequest('/user', {"googleId" : id});
+    console.log("Response to the get: ", resp);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) {
         // User didn't exist -> register new user
         let user = new User({googleId: id, username: username, email: email})
         let newUser = await this.db.postRequest('/register', user);
+        console.log("Register response: ", newUser);
         db_id = newUser.data.googleId;
         db_username = user.username;
         db_karma = user.karma;
@@ -53,6 +55,7 @@ UserCtrl.prototype.login_or_register = async function(id, username, email) {
 
 UserCtrl.prototype.profile = async function(authId, id) {
     let resp = await this.db.getRequest('/user', {"googleId": id});
+    console.log(resp);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('No such user'); }
     let user = new User(resp.data);
     if (authId != id) {

@@ -27,7 +27,7 @@ exports.find = async (request, response) => {
         if (userData !== null && typeof userData !== undefined) {
             //get the api key related to the user
             const apiKeyParams = {};
-            apiKeyParams.googleId = userData.googleId;
+            apiKeyParams.googleId = id;
             apiKeysDatalayer.findApiKey(apiKeyParams)
             .then((apiKeyData) => {
                 //join the api key with the user
@@ -53,8 +53,8 @@ exports.find = async (request, response) => {
             responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "User not found";
             responseObj.data    = {};
+            response.send(responseObj);
         }
-        response.send(responseObj);
     })
     .catch(error => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -66,8 +66,7 @@ exports.find = async (request, response) => {
 };
 
 async function generateRandomKey() {
-    const apiKey = await apiKeysDatalayer.generateRandomKey();
-    return apiKey.key;
+  return Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23)
 }
 
 exports.create = async (request, response, next) => {
@@ -81,38 +80,48 @@ exports.create = async (request, response, next) => {
         response.send(responseObj);
         return;
     }
-    userDatalayer.createUser(params)
-    .then((userData) => {
+    let userinfo = {};
+    await userDatalayer.createUser(params)
+    .then(async (userData) => {
         if (userData !== null && typeof userData !== undefined) {
-
-            //Create an API key for the user
-            const apiKeyParams = {};
-            apiKeyParams.googleId = userData.googleId;
-            //generate a random key
-            apiKeyParams.key = generateRandomKey();
-            apiKeysDatalayer.createApiKey(apiKeyParams)
-            .then((apiKeyData) => {
-                if (apiKeyData !== null && typeof apiKeyData !== undefined) {
-                  responseObj.status  = errorCodes.SUCCESS;
-                  responseObj.message = "Success";
-                  responseObj.data    = userData;
-                } else {
-                  responseObj.status  = errorCodes.SYNTAX_ERROR;
-                  responseObj.message = "Error creating API key";
-                  responseObj.data    = {};
-                }
-                response.send(responseObj);
-            })
-            .catch(error => {
-                responseObj.status  = errorCodes.SYNTAX_ERROR;
-                responseObj.message = error;
-                responseObj.data    = {};
-                response.send(responseObj);
-            });
+            userinfo = userData;
         } else {
             responseObj.status  = errorCodes.DATA_NOT_FOUND;
             responseObj.message = "No record found";
             responseObj.data    = {};
+            response.send(responseObj);
+        }
+    })
+    .catch(error => {
+      console.log("Error?")
+        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.message = error;
+        responseObj.data    = {};
+        response.send(responseObj);
+    });
+    if (userinfo == null || userinfo == undefined) {
+      console.log("error");
+      return;
+    } 
+
+console.log("uer info: ", userinfo);
+
+    //Create an API key for the user
+    const apiKeyParams = {};
+    apiKeyParams.googleId = userinfo.googleId;
+    //generate a random key
+    apiKeyParams.key = (await generateRandomKey()).toString();
+    apiKeysDatalayer.createApiKey(apiKeyParams)
+    .then((apiKeyData) => {
+      console.log("Api key data ", apiKeyData)
+        if (apiKeyData !== null && typeof apiKeyData !== undefined) {
+          responseObj.status  = errorCodes.SUCCESS;
+          responseObj.message = "Success";
+          responseObj.data    = userinfo;
+        } else {
+          responseObj.status  = errorCodes.SYNTAX_ERROR;
+          responseObj.message = "Error creating API key";
+          responseObj.data    = {};
         }
         response.send(responseObj);
     })
@@ -122,7 +131,6 @@ exports.create = async (request, response, next) => {
         responseObj.data    = {};
         response.send(responseObj);
     });
-    return;
 };
 
 exports.update = async (request, response, next) => {

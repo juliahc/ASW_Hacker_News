@@ -4,8 +4,9 @@ exports.createUser = async (params) => {
     return new Promise((resolve, reject) => {
         UserModel
         .create(params)
-        .then((data) => { 
-            resolve(data) })
+        .then((data) => {
+            resolve(data) }
+        )
         .catch((error) => { reject(error) })
     })
 }
