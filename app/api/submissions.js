@@ -62,6 +62,6 @@ router.get("/submission/:id", auth.passthrough, async (req, res) => {
         /* if (req.query.error === "NoText") res.status(400).json({"error_msg": "Form missing values"}) ("submission", { user_auth: req.user_auth, submission: submission, error: "The text field must contain characters", view: "/submission?id="+req.query.id}); */
         res.status(200).json(submission);
     } catch (e) {
-        res.status(400).json({"error_msg": e.message});
+        res.status(404).json({"error_msg": e.message});
     }
 });
