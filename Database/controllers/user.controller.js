@@ -34,7 +34,7 @@ exports.find = async (request, response) => {
                 userData.apiKey = apiKeyData.key;
                 if (apiKeyData !== null && typeof apiKeyData !== undefined) {
                   let result = JSON.parse(JSON.stringify(userData));
-                  result.key = apiKeyData.key;
+                  result.apiKey = apiKeyData.key;
 
                   responseObj.status  = errorCodes.SUCCESS;
                   responseObj.message = "Success";
@@ -73,7 +73,6 @@ async function generateRandomKey() {
 };
 
 exports.create = async (request, response, next) => {
-  console.log("Hola");
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -97,20 +96,14 @@ exports.create = async (request, response, next) => {
         }
     })
     .catch(error => {
-      console.log("Error?")
         responseObj.status  = errorCodes.SYNTAX_ERROR;
         responseObj.message = error;
         responseObj.data    = {};
         response.send(responseObj);
     });
     if (userinfo == null || userinfo == undefined) {
-      console.log("error");
       return;
     } 
-
-    console.log("user info: ", userinfo);
-
-    
 };
 
 exports.update = async (request, response, next) => {
