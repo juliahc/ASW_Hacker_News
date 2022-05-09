@@ -1,20 +1,18 @@
-const UserModel = require('../models/user.model')
+const ApiKeyModel = require('../models/apiKeys.model')
 
-exports.createUser = async (params) => {
+exports.createApiKey= async (params) => {
     return new Promise((resolve, reject) => {
-        UserModel
+        ApiKeyModel
         .create(params)
-        .then((data) => {
-            resolve(data) }
-        )
+        .then((data) => { 
+            resolve(data) })
         .catch((error) => { reject(error) })
     })
 }
 
-
-exports.findUser = async (where = {}) => {
+exports.findApiKey = async (where = {}) => {
     return new Promise((resolve, reject) => {
-        UserModel
+        ApiKeyModel
         .findOne(where)
         .then((data) => {
             resolve(data)
@@ -25,15 +23,15 @@ exports.findUser = async (where = {}) => {
     })
 }
 
-exports.updateUser = async (where = {}, params) => {
+exports.deleteApiKey = async (where = {}) => {
     return new Promise((resolve, reject) => {
-        UserModel.
-        updateMany(where, params)
+        ApiKeyModel
+        .deleteOne(where)
         .then((data) => {
-            resolve(data);
+            resolve(data)
         })
         .catch((error) => {
-            reject(error);
-        });
-    });
+            reject(error)
+        })
+    })
 }

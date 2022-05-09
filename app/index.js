@@ -19,6 +19,7 @@ app.use(require("./routes/views"));
 app.use('/submissions', require("./routes/submissions"));
 app.use('/comments', require("./routes/comments"));
 app.use('/users', require("./routes/users"));
+app.use('/api/users', require("./api/users"));
 
 function listen() {
     app.listen(3000);

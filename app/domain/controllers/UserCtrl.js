@@ -63,6 +63,7 @@ UserCtrl.prototype.profile = async function(authId, id) {
         delete user.maxvisit;
         delete user.minaway;
         delete user.delay;
+        delete user.apiKey;
     }
     return user;
 }

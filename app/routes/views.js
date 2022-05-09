@@ -154,8 +154,10 @@ router.get("/user", auth.passthrough, async (req, res) => {
     }
     try {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
+        console.log(auth_id)
         let user = await user_ctrl.profile(auth_id, req.query.id);
         let loggedProfile = req.user_auth !== null && req.user_auth.id === user.googleId;
+        console.log(loggedProfile)
         user.createdAt  = time_ago(user.createdAt);
         res.render("user", { user_auth: req.user_auth, user: user, loggedProfile: loggedProfile,  view: "/user?id=" + req.query.id });
     } catch {
