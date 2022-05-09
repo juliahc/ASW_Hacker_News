@@ -53,6 +53,37 @@ router.put("/:id", auth.strict, async (req, res) => {
     }
 });
 
+router.post(":id/upvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+    if (req.params.id !== req.user_auth.id) {
+        res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
+        return;
+    }
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        await user_ctrl.upvoteSubmission(authId, submissionId);
+        res.status(200);
+    } catch (e) {
+        res.status(500).json({"error_msg": e.message});
+    }
+    return;
+});
+
+router.post(":id/downvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+    if (req.params.id !== req.user_auth.id) {
+        res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
+        return;
+    }
+    const authId = req.user_auth.id;
+    const submissionId = req.params.submission_id;
+    try {
+        await user_ctrl.downvoteSubmission(authId, submissionId);
+        res.status(200);
+    } catch (e) {
+        res.status(500).json({"error_msg": e.message});
+    }
+});
+
 router.get(":id/upvotedSubmissions", auth.strict, async (req, res) => {
     try {
         let p = 1;
@@ -61,6 +92,36 @@ router.get(":id/upvotedSubmissions", auth.strict, async (req, res) => {
         res.status(200).json(upvotedSubmissions);
     } catch {
         res.status(404).json({"error_msg": "No upvoted submissions or not user"});
+    }
+});
+
+router.post(":id/upvoteComment/:comment_id", auth.passthrough, async (req, res) => {
+    if (req.params.id !== req.user_auth.id) {
+        res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
+        return;
+    }
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        await user_ctrl.upvoteComment(authId, commentId);
+        res.status(200);
+    } catch (e) {
+        res.status(500).json({"error_msg": e.message});
+    }
+});
+
+router.post(":id/downvoteComment/:comment_id", auth.passthrough, async (req, res) => {
+    if (req.params.id !== req.user_auth.id) {
+        res.status(403).json({"error_msg": "Only the owner of the account can downvote a comment"});
+        return;
+    }
+    const authId = req.user_auth.id;
+    const commentId = req.params.comment_id;
+    try {
+        await user_ctrl.downvoteComment(authId, commentId);
+        res.status(200);
+    } catch (e) {
+        res.status(500).json({"error_msg": e.message});
     }
 });
 
