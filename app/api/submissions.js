@@ -10,9 +10,11 @@ const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
 router.post("/", auth.strict, async (req, res) => {
-    const {title, url, text} = req.body;
+    const title = req.body.title;
+    const url = req.body.url;
+    const text = req.body.text;
     
-    if (title === "") {
+    if (!title || title === "") {
         res.status(400).json({"error_msg": "No 'title' field in body or it is empty"});
         return;
     }
@@ -21,6 +23,6 @@ router.post("/", auth.strict, async (req, res) => {
         let db_submission =  await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
         res.status(201).json(db_submission);
     } catch (e) {
-        res.status(400).json({"error_msg": "Error"});
+        res.status(404).json({"error_msg": "Error"});
     }
 });
