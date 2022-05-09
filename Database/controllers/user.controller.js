@@ -26,16 +26,19 @@ exports.find = async (request, response) => {
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
             //get the api key related to the user
-            const apiKeyParams = {};
+            let apiKeyParams = {};
             apiKeyParams.googleId = id;
             apiKeysDatalayer.findApiKey(apiKeyParams)
             .then((apiKeyData) => {
                 //join the api key with the user
                 userData.apiKey = apiKeyData.key;
                 if (apiKeyData !== null && typeof apiKeyData !== undefined) {
+                  let result = JSON.parse(JSON.stringify(userData));
+                  result.key = apiKeyData.key;
+
                   responseObj.status  = errorCodes.SUCCESS;
                   responseObj.message = "Success";
-                  responseObj.data    = userData;
+                  responseObj.data    = result;
                 } else {
                   responseObj.status  = errorCodes.DATA_NOT_FOUND;
                   responseObj.message = "Cannot find the api key";
@@ -66,10 +69,11 @@ exports.find = async (request, response) => {
 };
 
 async function generateRandomKey() {
-  return Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23)
-}
+  return Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23);
+};
 
 exports.create = async (request, response, next) => {
+  console.log("Hola");
     let params = {};
     if (request.body.params) {
         params = request.body.params;
@@ -104,33 +108,9 @@ exports.create = async (request, response, next) => {
       return;
     } 
 
-console.log("uer info: ", userinfo);
+    console.log("user info: ", userinfo);
 
-    //Create an API key for the user
-    const apiKeyParams = {};
-    apiKeyParams.googleId = userinfo.googleId;
-    //generate a random key
-    apiKeyParams.key = (await generateRandomKey()).toString();
-    apiKeysDatalayer.createApiKey(apiKeyParams)
-    .then((apiKeyData) => {
-      console.log("Api key data ", apiKeyData)
-        if (apiKeyData !== null && typeof apiKeyData !== undefined) {
-          responseObj.status  = errorCodes.SUCCESS;
-          responseObj.message = "Success";
-          responseObj.data    = userinfo;
-        } else {
-          responseObj.status  = errorCodes.SYNTAX_ERROR;
-          responseObj.message = "Error creating API key";
-          responseObj.data    = {};
-        }
-        response.send(responseObj);
-    })
-    .catch(error => {
-        responseObj.status  = errorCodes.SYNTAX_ERROR;
-        responseObj.message = error;
-        responseObj.data    = {};
-        response.send(responseObj);
-    });
+    
 };
 
 exports.update = async (request, response, next) => {
