@@ -371,7 +371,7 @@ exports.update = async (request, response, next) => {
 
 exports.userSubmissions = (request, response) => {
     let params = {};
-    if (request.query.googleId && request.query.limit && request.query.offset && request.query.type) {
+    if (request.query.googleId && request.query.type) {
         params = request.query;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
@@ -393,8 +393,7 @@ exports.userSubmissions = (request, response) => {
                 response.send(responseObj);
                 return;
             }
-            //search submissions by aggregation
-            let skip = (params.hasOwnProperty("offset")) ? { "$skip": parseInt(params.offset) } : "";
+            
             let criteria = {};
             criteria["$and"] = [];
             criteria["$and"].push({
@@ -406,6 +405,8 @@ exports.userSubmissions = (request, response) => {
                 "createdAt": -1
             };
             let limit = (params.hasOwnProperty("limit")) ? { "$limit": parseInt(params.limit) } : "";
+            //search submissions by aggregation
+            let skip = (params.hasOwnProperty("offset")) ? { "$skip": parseInt(params.offset) } : "";
             let aggregateArr = createAggregateArray(skip, criteria, orderBy, limit);
             submissionDatalayer
             .aggregateSubmission(aggregateArr)

@@ -91,16 +91,16 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(limit, offse
     let upvSubIds = [];
     if (authId !== null) {
         let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
-        if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error(usrUpvRsp.message);
         usrUpvRsp.data.forEach(submission => {
             upvSubIds.push(submission._id);
         });
     }
     // Get submissions list
-    let params = {limit: limit, offset: offset, t: type, o: order};
+    let params = {limit: (limit !== undefined) ? limit : "", offset: (offset !== undefined) ? offset : "", t: type, o: order};
     if (googleId !== null) params["usr"] = googleId;
     let resp = await this.db.getRequest("/submission_page", params);
-    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error(resp.message);
     let data = resp.data;
     let result = [];
     for (let i = 0; i < data.length-1; i++) {

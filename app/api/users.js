@@ -9,7 +9,7 @@ module.exports = router;
 const user_ctrl = new UserCtrl();
 const auth = new AuthMiddleware();
 
-router.get("/:id", auth.strict, async (req, res) => {
+router.get("/:id", auth.strict.bind(auth), async (req, res) => {
     try {
         let user = await user_ctrl.profile(req.user_auth.id, req.params.id);
         res.status(200).json(user);
@@ -18,7 +18,7 @@ router.get("/:id", auth.strict, async (req, res) => {
     }
 });
 
-router.put("/:id", auth.strict, async (req, res) => {
+router.put("/:id", auth.strict.bind(auth), async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
         res.status(403).json({"error_msg": "Only the owner of the account can update its profile"});
         return;
@@ -53,23 +53,22 @@ router.put("/:id", auth.strict, async (req, res) => {
     }
 });
 
-router.post(":id/upvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+router.post("/:id/upvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
         res.status(403).json({"error_msg": "Only the owner of the account can upvote a submission"});
         return;
     }
-    const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
-        await user_ctrl.upvoteSubmission(authId, submissionId);
-        res.status(200);
+        await user_ctrl.upvoteSubmission(req.user_auth.id, submissionId);
+        res.status(200).json({"success": "The upvote have been submitted successfully"});
     } catch (e) {
         res.status(500).json({"error_msg": e.message});
     }
     return;
 });
 
-router.post(":id/downvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+router.post("/:id/downvoteSubmisison/:submission_id", auth.strict.bind(auth), async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
         res.status(403).json({"error_msg": "Only the owner of the account can downvote a submission"});
         return;
@@ -78,13 +77,13 @@ router.post(":id/downvoteSubmisison/:submission_id", auth.passthrough, async (re
     const submissionId = req.params.submission_id;
     try {
         await user_ctrl.downvoteSubmission(authId, submissionId);
-        res.status(200);
+        res.status(200).json({"success": "The downvote have been submitted successfully"});
     } catch (e) {
         res.status(500).json({"error_msg": e.message});
     }
 });
 
-router.get(":id/upvotedSubmissions", auth.strict, async (req, res) => {
+router.get("/:id/upvotedSubmissions", auth.strict.bind(auth), async (req, res) => {
     const {limit, offset} = req.query;
 
     if(!limit || !offset) {
@@ -101,7 +100,7 @@ router.get(":id/upvotedSubmissions", auth.strict, async (req, res) => {
     }
 });
 
-router.post(":id/upvoteComment/:comment_id", auth.passthrough, async (req, res) => {
+router.post("/:id/upvoteComment/:comment_id", auth.strict.bind(auth), async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
         res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
         return;
@@ -110,13 +109,13 @@ router.post(":id/upvoteComment/:comment_id", auth.passthrough, async (req, res) 
     const commentId = req.params.comment_id;
     try {
         await user_ctrl.upvoteComment(authId, commentId);
-        res.status(200);
+        res.status(200).json({"success": "The upvote have been submitted successfully"});
     } catch (e) {
         res.status(500).json({"error_msg": e.message});
     }
 });
 
-router.post(":id/downvoteComment/:comment_id", auth.passthrough, async (req, res) => {
+router.post("/:id/downvoteComment/:comment_id", auth.strict.bind(auth), async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
         res.status(403).json({"error_msg": "Only the owner of the account can downvote a comment"});
         return;
@@ -125,13 +124,13 @@ router.post(":id/downvoteComment/:comment_id", auth.passthrough, async (req, res
     const commentId = req.params.comment_id;
     try {
         await user_ctrl.downvoteComment(authId, commentId);
-        res.status(200);
+        res.status(200).json({"success": "The downvote have been submitted successfully"});
     } catch (e) {
         res.status(500).json({"error_msg": e.message});
     }
 });
 
-router.get(":id/upvotedComments", auth.strict, async (req, res) => {
+router.get("/:id/upvotedComments", auth.strict.bind(auth), async (req, res) => {
     try {
         let comment_list = await user_ctrl.getUpvotedComments(req.user_auth.id);
         comment_list.forEach(comment => {

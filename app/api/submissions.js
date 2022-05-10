@@ -10,23 +10,22 @@ const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
 
-router.get("/", auth.passthrough, async (req, res) => {
+router.get("/", auth.strict.bind(auth), async (req, res) => {
 
     const {type, order, limit, offset} = req.query;
 
-    if(!type || !order || !limit || !offset) {
-        res.status(400).json({"error_msg": "Parameters missing in query. Must contain [type, order, limit, offset]"});
+    if(!type || !order) {
+        res.status(400).json({"error_msg": "Parameters missing in query. Must contain [type, order]. Optional: [limit, offset]"});
         return;
     }
 
-    if (!(type==="all" || type==="ask" || type==="url") || !(order==="pts" || order==="new") || limit<0 || offset<0 ) {
+    if (!(type==="all" || type==="ask" || type==="url") || !(order==="pts" || order==="new") || (limit !== undefined && limit<0) || (offset !== undefined && offset<0) ) {
         res.status(400).json({"error_msg": "Incorrect parameter(s) format. Must be [type={'all','ask','url'}, order={'pts','new'}, limit>=0, offset>=0]"});
         return;
     }
 
     try {
-        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(limit, offset,type,order,null,auth_id,auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(limit, offset,type,order,null,req.user_auth.id,req.user_auth.id);
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.status(200).json({sub_page});
@@ -35,7 +34,7 @@ router.get("/", auth.passthrough, async (req, res) => {
     }
 });
 
-router.post("/", auth.strict, async (req, res) => {
+router.post("/", auth.strict.bind(auth), async (req, res) => {
 
     const {title, url, text} = req.body;
     
@@ -52,7 +51,7 @@ router.post("/", auth.strict, async (req, res) => {
     }
 });
 
-router.post("/:id/comments", auth.strict, async (req, res) => {
+router.post("/:id/comments", auth.strict.bind(auth), async (req, res) => {
     const {text} = req.body;
 
     if (!text || text === "") { 
@@ -68,7 +67,7 @@ router.post("/:id/comments", auth.strict, async (req, res) => {
     }
 });
   
-router.get("/user/:id", auth.passthrough, async (req, res) => {   
+router.get("/user/:id", auth.strict.bind(auth), async (req, res) => {   
 
     const {limit, offset} = req.query;
 
@@ -77,8 +76,7 @@ router.get("/user/:id", auth.passthrough, async (req, res) => {
     }
 
     try {
-        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(limit, offset,"any","new",req.params.id, auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(limit, offset,"any","new",req.params.id, req.user_auth.id);
         sub_page.pop();
         sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.status(200).json({sub_page});
@@ -87,15 +85,14 @@ router.get("/user/:id", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/submission/:id", auth.passthrough, async (req, res) => {
+router.get("/submission/:id", auth.strict.bind(auth), async (req, res) => {
     if (!req.params || !req.params.id) {
         res.status(400).json({"error_msg": "No 'id' field in query or it is empty"});
         return;
     }
     // Get one submission
     try {
-        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let submission = await sub_ctrl.fetchSubmission(req.params.id, auth_id);
+        let submission = await sub_ctrl.fetchSubmission(req.params.id, req.user_auth.id);
         submission.formatCreatedAtAsTimeAgo();
         submission.comments.forEach(comment => {
             comment.addNavigationalIdentifiers(null, 0);
