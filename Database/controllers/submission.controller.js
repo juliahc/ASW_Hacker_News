@@ -99,7 +99,7 @@ exports.find = async (request, response) => {
 
 exports.page = async (request, response) => {
     let params = {}
-    if (request.query.hasOwnProperty("p") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
+    if (request.query.hasOwnProperty("offset") && request.query.hasOwnProperty("limit") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
         params = request.query;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
@@ -147,7 +147,7 @@ exports.page = async (request, response) => {
         delete criteria['$and'];
     }
 
-    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
+    let aggregateArr = createAggregateArray(request.query.offset, request.query.limit, criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
@@ -175,7 +175,7 @@ exports.page = async (request, response) => {
             submissionDatalayer
             .aggregateSubmission(aggregateQuery)
             .then((ret => {
-                ret[0].submissionsLeft -= (request.query.p * 10);
+                ret[0].submissionsLeft -= (request.query.offset + request.query.limit);
                 submissionData.push(ret[0]);
                 responseObj.status  = errorCodes.SUCCESS;
                 responseObj.message = "Success";
@@ -533,7 +533,7 @@ function createAggregateSubmissionArray (match) {
       ]
 }
 
-function createAggregateArray (page, match, orderBy) {
+function createAggregateArray (offset, limit, match, orderBy) {
     return [
         {
           '$match': match
@@ -598,10 +598,10 @@ function createAggregateArray (page, match, orderBy) {
           }, {
           '$sort': orderBy
         }, {
-            '$skip': page
+            '$skip': offset
         },
         {
-            '$limit': 10
+            '$limit': limit
         }
       ];
 }
