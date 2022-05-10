@@ -147,17 +147,8 @@ exports.page = async (request, response) => {
         delete criteria['$and'];
     }
 
-    if (parseInt(request.query.limit) === 0) {
-        responseObj.status  = errorCodes.SUCCESS;
-        responseObj.message = "Success";
-        responseObj.data    = [];
-        response.send(responseObj);
-        return;
-    }
-
-    let aggregateArr = await createAggregateArray(request.query.offset, request.query.limit, criteria, orderBy);
+    let aggregateArr = await createAggregateArray(params.offset, params.limit, criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
-    console.log("agg array: ", JSON.stringify(aggregateArr));
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
     .then((submissionData) => {
@@ -184,11 +175,18 @@ exports.page = async (request, response) => {
             submissionDatalayer
             .aggregateSubmission(aggregateQuery)
             .then((ret => {
-                ret[0].submissionsLeft -= (parseInt(request.query.offset) + parseInt(request.query.limit));
-                submissionData.push(ret[0]);
-                responseObj.status  = errorCodes.SUCCESS;
-                responseObj.message = "Success";
-                responseObj.data    = submissionData;
+                if (parseInt(request.query.limit) === 0) {
+                    ret[0].submissionsLeft -= parseInt(params.offset);
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = [{"submissionsLeft": ret[0].submissionsLeft}];
+                } else {
+                  ret[0].submissionsLeft -= (parseInt(request.query.offset) + parseInt(request.query.limit));
+                  submissionData.push(ret[0]);
+                  responseObj.status  = errorCodes.SUCCESS;
+                  responseObj.message = "Success";
+                  responseObj.data    = submissionData;
+                }
                 response.send(responseObj);
             }))
             .catch((err) => {
