@@ -371,7 +371,7 @@ exports.update = async (request, response, next) => {
 
 exports.userSubmissions = (request, response) => {
     let params = {};
-    if (request.query.googleId) {
+    if (request.query.googleId && request.query.limit && request.query.offset && request.query.type) {
         params = request.query;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
@@ -394,7 +394,7 @@ exports.userSubmissions = (request, response) => {
                 return;
             }
             //search submissions by aggregation
-            let page = (params.hasOwnProperty("p")) ? { "$skip": (params.p - 1) * 10 } : "";
+            let skip = (params.hasOwnProperty("offset")) ? { "$skip": parseInt(params.offset) } : "";
             let criteria = {};
             criteria["$and"] = [];
             criteria["$and"].push({
@@ -405,45 +405,45 @@ exports.userSubmissions = (request, response) => {
             let orderBy = {
                 "createdAt": -1
             };
-            let limit = (params.hasOwnProperty("p")) ? { "$limit": 10 } : "";
-            let aggregateArr = createAggregateArray(page, criteria, orderBy, limit);
+            let limit = (params.hasOwnProperty("limit")) ? { "$limit": parseInt(params.limit) } : "";
+            let aggregateArr = createAggregateArray(skip, criteria, orderBy, limit);
             submissionDatalayer
             .aggregateSubmission(aggregateArr)
             .then((submissionData) => {
                 if (submissionData !== null && typeof submissionData !== undefined) {
-                    if (params.hasOwnProperty("p")) {
-                        //Get elements on bbdd
-                        let match = {};
-                        match = {
-                            _id: {
-                                $in: (type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
-                            }
-                        };
-                        let aggregateQuery = [
-                            {
-                            '$match': match
-                            }, {
-                            '$count': "submissionsLeft"
-                        }];
-                        submissionDatalayer
-                        .aggregateSubmission(aggregateQuery)
-                        .then((ret => {
-                            ret[0].submissionsLeft -= (params.p * 10);
-                            submissionData.push(ret[0]);
-                            responseObj.status  = errorCodes.SUCCESS;
-                            responseObj.message = "Success";
-                            responseObj.data    = submissionData;
-                            response.send(responseObj);
-                        }))
-                        .catch(error => {
-                            console.log(error);
-                        });
-                    } else {
-                        responseObj.status  = errorCodes.SUCCESS;
-                        responseObj.message = "Success";
-                        responseObj.data    = submissionData;
+                    //Get elements on bbdd
+                    let match = {};
+                    match = {
+                        _id: {
+                            $in: (type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
+                        }
+                    };
+                    let aggregateQuery = [
+                        {
+                        '$match': match
+                        }, {
+                        '$count': "submissionsLeft"
+                    }];
+                    submissionDatalayer
+                    .aggregateSubmission(aggregateQuery)
+                    .then((ret => {
+                        if (params.limit == 0) {
+                          ret[0].submissionsLeft -= parseInt(params.offset);
+                          responseObj.status  = errorCodes.SUCCESS;
+                          responseObj.message = "Success";
+                          responseObj.data    = [{"submissionsLeft": ret[0].submissionsLeft}];
+                        } else {
+                          ret[0].submissionsLeft = ((ret[0].submissionsLeft - (parseInt(params.limit) + parseInt(params.offset))) < 0 ) ? 0 : (ret[0].submissionsLeft - (parseInt(params.limit) + parseInt(params.offset)));
+                          submissionData.push(ret[0]);
+                          responseObj.status  = errorCodes.SUCCESS;
+                          responseObj.message = "Success";
+                          responseObj.data    = submissionData;
+                        }
                         response.send(responseObj);
-                    }
+                    }))
+                    .catch(error => {
+                        console.log(error);
+                    });
                 } else {
                     responseObj.status  = errorCodes.DATA_NOT_FOUND;
                     responseObj.message = "No record found";
@@ -722,7 +722,7 @@ function createAggregateCommentArray (match) {
   ]
 };
 
-function createAggregateArray (page, match, orderBy, limit) {
+function createAggregateArray (skip, match, orderBy, limit) {
     let aggregateArr = [
         {
           '$match': match
@@ -788,10 +788,10 @@ function createAggregateArray (page, match, orderBy, limit) {
           '$sort': orderBy
         }
       ];
-    if (page !== "") {
-        aggregateArr.push(page);
+    if (skip !== "") {
+        aggregateArr.push(skip);
     }
-    if (limit !== "") {
+    if (limit !== "" && limit > 0) {
         aggregateArr.push(limit);
     }
     return aggregateArr;
