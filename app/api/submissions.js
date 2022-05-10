@@ -70,3 +70,24 @@ router.get("/user/:id", auth.passthrough, async (req, res) => {
         res.status(500).json({"error_msg": "No such user"});
     }
 });
+
+router.get("/submission/:id", auth.passthrough, async (req, res) => {
+    if (!req.params || !req.params.id) {
+        res.status(400).json({"error_msg": "No 'id' field in query or it is empty"});
+        return;
+    }
+    // Get one submission
+    try {
+        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
+        let submission = await sub_ctrl.fetchSubmission(req.params.id, auth_id);
+        submission.formatCreatedAtAsTimeAgo();
+        submission.comments.forEach(comment => {
+            comment.addNavigationalIdentifiers(null, 0);
+            comment.formatCreatedAtAsTimeAgo();
+        });
+        /* if (req.query.error === "NoText") res.status(400).json({"error_msg": "Form missing values"}) ("submission", { user_auth: req.user_auth, submission: submission, error: "The text field must contain characters", view: "/submission?id="+req.query.id}); */
+        res.status(200).json(submission);
+    } catch (e) {
+        res.status(404).json({"error_msg": e.message});
+    }
+});
