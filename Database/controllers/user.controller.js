@@ -6,6 +6,7 @@ const errorCodes = require("../helpers/errorCodes.helper.js");
 const userDatalayer = require("../datalayers/user.datalayer");
 const submissionDatalayer = require("../datalayers/submission.datalayer");
 const commentDatalayer = require("../datalayers/comment.datalayer");
+const apiKeysDatalayer = require("../datalayers/apiKeys.datalayer");
 
 //Search a user by its googleId
 exports.find = async (request, response) => {
@@ -24,15 +25,39 @@ exports.find = async (request, response) => {
     userDatalayer.findUser(where)
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
-            responseObj.status  = errorCodes.SUCCESS;
-            responseObj.message = "Success";
-            responseObj.data    = userData;
+            //get the api key related to the user
+            let apiKeyParams = {};
+            apiKeyParams.googleId = id;
+            apiKeysDatalayer.findApiKey(apiKeyParams)
+            .then((apiKeyData) => {
+                //join the api key with the user
+                userData.apiKey = apiKeyData.key;
+                if (apiKeyData !== null && typeof apiKeyData !== undefined) {
+                  let result = JSON.parse(JSON.stringify(userData));
+                  result.apiKey = apiKeyData.key;
+
+                  responseObj.status  = errorCodes.SUCCESS;
+                  responseObj.message = "Success";
+                  responseObj.data    = result;
+                } else {
+                  responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                  responseObj.message = "Cannot find the api key";
+                  responseObj.data    = {};
+                }
+                response.send(responseObj);
+            })
+            .catch(error => {
+                responseObj.status  = errorCodes.SYNTAX_ERROR;
+                responseObj.message = error;
+                responseObj.data    = {};
+                response.send(responseObj);
+            });
         } else {
             responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "User not found";
             responseObj.data    = {};
+            response.send(responseObj);
         }
-        response.send(responseObj);
     })
     .catch(error => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -41,6 +66,10 @@ exports.find = async (request, response) => {
         response.send(responseObj);
     });
     return;
+};
+
+async function generateRandomKey() {
+  return Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23);
 };
 
 exports.create = async (request, response, next) => {
@@ -54,18 +83,17 @@ exports.create = async (request, response, next) => {
         response.send(responseObj);
         return;
     }
-    userDatalayer.createUser(params)
-    .then((userData) => {
+    let userinfo = {};
+    await userDatalayer.createUser(params)
+    .then(async (userData) => {
         if (userData !== null && typeof userData !== undefined) {
-            responseObj.status  = errorCodes.SUCCESS;
-            responseObj.message = "Success";
-            responseObj.data    = userData;
+            userinfo = userData;
         } else {
             responseObj.status  = errorCodes.DATA_NOT_FOUND;
             responseObj.message = "No record found";
             responseObj.data    = {};
+            response.send(responseObj);
         }
-        response.send(responseObj);
     })
     .catch(error => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -73,7 +101,9 @@ exports.create = async (request, response, next) => {
         responseObj.data    = {};
         response.send(responseObj);
     });
-    return;
+    if (userinfo == null || userinfo == undefined) {
+      return;
+    } 
 };
 
 exports.update = async (request, response, next) => {

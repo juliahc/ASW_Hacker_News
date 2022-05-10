@@ -109,3 +109,13 @@ router.post(
 );
 
 /*  /comment    */
+
+/* API KEYS */
+
+router.get(
+    "/apiKey",
+    validateMiddleware.validate,
+    AuthController.userKey
+);
+
+/* /API KEYS */

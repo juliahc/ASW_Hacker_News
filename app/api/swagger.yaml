@@ -1,0 +1,24 @@
+/threads:
+  get:
+    tags:
+      - user
+      - comment
+    summary: Get all threads from a user
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    parameters:
+      - name: id
+        in: query
+        description: The user's id to get threads for
+        required: true
+        type: string
+        format: string
+    responses:
+      200:
+        description: The user's threads were successfully retrieved
+      400:
+        description: Missing id
+      404:
+        description: User not found
