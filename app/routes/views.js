@@ -181,7 +181,6 @@ router.get("/submit", auth.passthrough, async (req, res) => {
     if (req.query && req.query.err === "url_not_found") submitData.error = "That URL doesn't exist."
     res.render("submit", submitData);
 });
-
 router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
     try {
         let auth_id = req.user_auth.id;

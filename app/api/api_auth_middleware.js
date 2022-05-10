@@ -22,6 +22,22 @@ class auth {
         }
         return next();
     }
+    passthrough(req, res, next) {
+        const apiKey = req.headers['api_key'];
+        if (!apiKey) {
+            req.user_auth = null;
+        }
+        try {
+            let resp = await this.db.getRequest('/apiKey', {"key" : apiKey});
+            if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) {
+                return res.status(401).json({"error_msg":"Invalid api key"});
+            }
+            req.user_auth = {id: resp.data.id, username: resp.data.username};
+        } catch (err) {
+            req.user_auth = null;
+        }
+        return next();
+    }
 }
 
 module.exports = auth;
