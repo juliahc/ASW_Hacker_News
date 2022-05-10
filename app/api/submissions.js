@@ -9,6 +9,7 @@ const sub_ctrl = new SubmissionCtrl();
 const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
+
 router.get("/", auth.passthrough, async (req, res) => {
 
     const {type, order, limit, offset} = req.query;
@@ -34,7 +35,6 @@ router.get("/", auth.passthrough, async (req, res) => {
     }
 });
 
-
 router.post("/", auth.strict, async (req, res) => {
 
     const {title, url, text} = req.body;
@@ -52,6 +52,22 @@ router.post("/", auth.strict, async (req, res) => {
     }
 });
 
+router.post("/:id/comments", auth.strict, async (req, res) => {
+    const {text} = req.body;
+
+    if (!text || text === "") { 
+        res.status(400).json({"error_msg": "No 'text' field in body or it is empty"});
+        return; 
+    }
+
+    try {
+        let db_comment = await comm_ctrl.postComment(req.params.id, text, req.user_auth.id, req.user_auth.username);
+        res.status(201).json(db_comment);
+    } catch (e) {
+        res.status(404).json({"error_msg": "No such submission"});
+    }
+});
+  
 router.get("/user/:id", auth.passthrough, async (req, res) => {   
 
     const {limit, offset} = req.query;
@@ -91,3 +107,4 @@ router.get("/submission/:id", auth.passthrough, async (req, res) => {
         res.status(404).json({"error_msg": e.message});
     }
 });
+

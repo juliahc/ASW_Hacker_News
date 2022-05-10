@@ -21,6 +21,11 @@ app.use('/comments', require("./routes/comments"));
 app.use('/users', require("./routes/users"));
 app.use('/api/users', require("./api/users"));
 
+// Api routes
+app.use('/api/submissions'. require("./api/submissions"));
+app.use('/api/comments'. require("./api/comments"));
+app.use('/api/users'. require("./api/users"));
+
 function listen() {
     app.listen(3000);
     console.log("Express app started on port " + 3000);

@@ -80,6 +80,7 @@ UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, 
     };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return new User(resp.data);
 }
 
 UserCtrl.prototype.getUpvotedSubmissions = async function(limit, offset, authId) {

@@ -43,11 +43,3 @@ router.post("/:id/comments", auth.passthrough, async (req, res) => {
     }
 });
 
-router.patch("/:id", async (req, res) => {
-    // Modify some elements of a submission
-});
-
-router.delete("/:id", async (req, res) => {
-    // Delete one submission
-});
-
