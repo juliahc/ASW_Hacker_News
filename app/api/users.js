@@ -55,7 +55,7 @@ router.put("/:id", auth.strict, async (req, res) => {
 
 router.post(":id/upvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
+        res.status(403).json({"error_msg": "Only the owner of the account can upvote a submission"});
         return;
     }
     const authId = req.user_auth.id;
@@ -71,7 +71,7 @@ router.post(":id/upvoteSubmisison/:submission_id", auth.passthrough, async (req,
 
 router.post(":id/downvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
+        res.status(403).json({"error_msg": "Only the owner of the account can downvote a submission"});
         return;
     }
     const authId = req.user_auth.id;
@@ -85,11 +85,17 @@ router.post(":id/downvoteSubmisison/:submission_id", auth.passthrough, async (re
 });
 
 router.get(":id/upvotedSubmissions", auth.strict, async (req, res) => {
+    const {limit, offset} = req.query;
+
+    if(!limit || !offset) {
+        res.status(400).json({"error_msg": "Parameters missing in query. Must contain [limit, offset]"});
+        return;
+    }
     try {
-        let p = 1;
-        if (req.query && req.query.p) p = req.query.p;
-        let upvotedSubmissions = await user_ctrl.getUpvotedSubmissions(p, req.user_auth.id);
-        res.status(200).json(upvotedSubmissions);
+        let sub_page = await user_ctrl.getUpvotedSubmissions(limit, offset, req.user_auth.id);
+        sub_page.pop();
+        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
+        res.status(200).json({sub_page});
     } catch {
         res.status(404).json({"error_msg": "No upvoted submissions or not user"});
     }
@@ -127,8 +133,12 @@ router.post(":id/downvoteComment/:comment_id", auth.passthrough, async (req, res
 
 router.get(":id/upvotedComments", auth.strict, async (req, res) => {
     try {
-        let upvotedComments = await user_ctrl.getUpvotedComments(req.user_auth.id);
-        res.status(200).json(upvotedComments);
+        let comment_list = await user_ctrl.getUpvotedComments(req.user_auth.id);
+        comment_list.forEach(comment => {
+            comment.addNavigationalIdentifiers(null, 0);
+            comment.formatCreatedAtAsTimeAgo();
+        });
+        res.status(200).json({comment_list});
     } catch {
         res.status(404).json({"error_msg": "No upvoted comments or not user"});
     }

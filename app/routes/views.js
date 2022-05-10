@@ -178,9 +178,13 @@ router.get("/submit", auth.passthrough, async (req, res) => {
 router.get("/upvotedSubmissions", auth.strict, async (req, res) => {
     try {
         let auth_id = req.user_auth.id;
-        let p = 1;
-        if (req.query && req.query.p) p = req.query.p;
-        let sub_page = await user_ctrl.getUpvotedSubmissions(p, auth_id);
+        const {limit, offset} = req.query;
+
+        if(!limit || !offset) {
+            res.status(400).json({"error_msg": "Parameters missing in query. Must contain [limit, offset]"});
+            return;
+        }
+        let sub_page = await user_ctrl.getUpvotedSubmissions(limit, offset, auth_id);
         let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
