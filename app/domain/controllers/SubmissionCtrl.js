@@ -83,10 +83,10 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
     return submission;
 }
 
-SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order, googleId, authId) {
+SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(limit, offset, type, order, googleId, authId) {
     if (!this.types.includes(type)) throw TypeError("Type of submissions is not supported.");
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
-    if (page <= 0) throw TypeError("Page must be greater than zero.");
+    if (limit < 0 || offset < 0) throw TypeError("Limit and Offset must be >= than zero.");
     // Get logged user upvoted submissions
     let upvSubIds = [];
     if (authId !== null) {
@@ -97,7 +97,7 @@ SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, 
         });
     }
     // Get submissions list
-    let params = {p: page, t: type, o: order};
+    let params = {limit: limit, offset: offset, t: type, o: order};
     if (googleId !== null) params["usr"] = googleId;
     let resp = await this.db.getRequest("/submission_page", params);
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
