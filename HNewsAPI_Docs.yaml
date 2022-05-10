@@ -138,7 +138,7 @@ paths:
         - name: limit
           in: query
           description: number of submissions
-          required: true
+          required: false
           style: form
           explode: true
           schema:
@@ -147,7 +147,7 @@ paths:
         - name: offset
           in: query
           description: offset
-          required: true
+          required: false
           style: form
           explode: true
           schema:
