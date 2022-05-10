@@ -173,12 +173,16 @@ paths:
               $ref: '#/components/schemas/PostSubmission'
         required: true
       responses:
+        '200':
+          description: Submission with that url already exists.
         '201':
           description: Submission was created successfully.
         '400':
           description: No 'title' field in body or it is empty.
+        '409':
+          description: Url is not valid.
         '500':
-          description: Internal error
+          description: Internal error.
   /submissions/user/{userId}:
     get:
       tags:
