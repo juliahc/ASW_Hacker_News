@@ -10,7 +10,7 @@ const auth = new AuthMiddleware();
 router.post("/:id/replies", auth.strict.bind(auth), async (req, res) => {
     const {text} = req.body;
 
-    if (text === "") { 
+    if (!text || text === "") { 
         res.status(400).json( { "error_msg": "No text" } );
         return;
     }
@@ -26,10 +26,6 @@ router.post("/:id/replies", auth.strict.bind(auth), async (req, res) => {
 router.get("/user/:id", auth.strict.bind(auth), async (req, res) => {
     try {
         let comment_list = await comm_ctrl.fetchCommentsOfUser(req.params.id, req.user_auth.id);
-        comment_list.forEach(comment => {
-            comment.addNavigationalIdentifiers(null, 0);
-            comment.formatCreatedAtAsTimeAgo();
-        });
         res.status(200).json(comment_list);
     } catch {
         res.status(404).json( { "error_msg": "No such user" } );

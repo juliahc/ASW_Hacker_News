@@ -17,7 +17,7 @@ exports.find = async (request, response) => {
         response.send(responseObj);
         return;
     }
-    if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
+    if (mongodb.ObjectId.isValid(id)) {
         const where = {};
         where._id = mongodb.ObjectId(id);
         commentDatalayer.findComment(where)
@@ -40,7 +40,7 @@ exports.find = async (request, response) => {
             response.send(responseObj);
         });
     } else {
-        responseObj.status  = errorCodes.SYNTAX_ERROR;
+        responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
         responseObj.message = "Invalid id";
         responseObj.data    = {};
         response.send(responseObj);
