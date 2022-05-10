@@ -83,8 +83,8 @@ UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, 
     return new User(resp.data);
 }
 
-UserCtrl.prototype.getUpvotedSubmissions = async function(page, authId) {
-    let resp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up", "p": page});
+UserCtrl.prototype.getUpvotedSubmissions = async function(limit, offset, authId) {
+    let resp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up", "limit": limit, "offset": offset});
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];
@@ -147,8 +147,8 @@ UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
 }
 
-UserCtrl.prototype.getFavoriteSubmissions = async function(page, id) {
-    let resp = await this.db.getRequest("/userSubmissions", {"googleId": id, "type": "fav", "p": page});
+UserCtrl.prototype.getFavoriteSubmissions = async function(limit, offset, id) {
+    let resp = await this.db.getRequest("/userSubmissions", {"googleId": id, "type": "fav", "limit": limit, "offset": offset});
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];

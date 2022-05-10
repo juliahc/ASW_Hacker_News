@@ -99,7 +99,7 @@ exports.find = async (request, response) => {
 
 exports.page = async (request, response) => {
     let params = {}
-    if (request.query.hasOwnProperty("p") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
+    if (request.query.hasOwnProperty("offset") && request.query.hasOwnProperty("limit") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
         params = request.query;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
@@ -147,7 +147,7 @@ exports.page = async (request, response) => {
         delete criteria['$and'];
     }
 
-    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
+    let aggregateArr = await createAggregateArray(params.offset, params.limit, criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
@@ -175,11 +175,18 @@ exports.page = async (request, response) => {
             submissionDatalayer
             .aggregateSubmission(aggregateQuery)
             .then((ret => {
-                ret[0].submissionsLeft -= (request.query.p * 10);
-                submissionData.push(ret[0]);
-                responseObj.status  = errorCodes.SUCCESS;
-                responseObj.message = "Success";
-                responseObj.data    = submissionData;
+                if (parseInt(request.query.limit) === 0) {
+                    ret[0].submissionsLeft -= parseInt(params.offset);
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = [{"submissionsLeft": ret[0].submissionsLeft}];
+                } else {
+                  ret[0].submissionsLeft -= (parseInt(request.query.offset) + parseInt(request.query.limit));
+                  submissionData.push(ret[0]);
+                  responseObj.status  = errorCodes.SUCCESS;
+                  responseObj.message = "Success";
+                  responseObj.data    = submissionData;
+                }
                 response.send(responseObj);
             }))
             .catch((err) => {
@@ -533,8 +540,8 @@ function createAggregateSubmissionArray (match) {
       ]
 }
 
-function createAggregateArray (page, match, orderBy) {
-    return [
+async function createAggregateArray (offset, limit, match, orderBy) {
+    let returnStatement =  [
         {
           '$match': match
         }, {
@@ -597,11 +604,17 @@ function createAggregateArray (page, match, orderBy) {
             }
           }, {
           '$sort': orderBy
-        }, {
-            '$skip': page
-        },
-        {
-            '$limit': 10
         }
       ];
+    if (offset > 0) { 
+      returnStatement.push({
+        '$skip': parseInt(offset)
+      });
+    }
+    if (limit > 0) { 
+      returnStatement.push({
+        '$limit': parseInt(limit)
+      });
+    }
+    return returnStatement;
 }

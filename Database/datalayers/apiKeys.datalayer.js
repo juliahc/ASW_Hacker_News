@@ -35,20 +35,3 @@ exports.deleteApiKey = async (where = {}) => {
         })
     })
 }
-
-exports.generateRandomKey = () => {
-    return new Promise((resolve, reject) => {
-        let key = Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23)
-        ApiKeyModel.findOne({ key: key })
-        .then((data) => {
-            if(data != null && data != undefined) {
-                exports.generateRandomKey()
-            } else {
-                resolve(key)
-            }
-        })
-        .catch((error) => {
-            reject(error)
-        })
-    })
-}
