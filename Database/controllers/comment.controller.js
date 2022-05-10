@@ -60,101 +60,109 @@ exports.create = async (request, response, next) => {
         return;
     }
 
-    params.submission = mongodb.ObjectId(params.submission);
-    let commentObject = {
-        text: params.text,
-        googleId: params.googleId,
-        username: params.username,
-        submission: mongodb.ObjectId(params.submission),
-    }
-    // In case of reply, add the parent comment to the comment object
-    let reply = false;
-    if (params.parent !== undefined && params.parent !== null) {
-        if (mongodb.ObjectId.isValid(mongodb.ObjectId(params.parent))) {
-            params.parent = mongodb.ObjectId(params.parent);
-            commentObject.parent = params.parent;
-            reply = true;
+    if (params.submission && mongodb.ObjectId.isValid(params.submission)) {
+        params.submission = mongodb.ObjectId(params.submission);
+        let commentObject = {
+            text: params.text,
+            googleId: params.googleId,
+            username: params.username,
+            submission: mongodb.ObjectId(params.submission),
         }
-    }
+        // In case of reply, add the parent comment to the comment object
+        let reply = false;
+        if (params.parent !== undefined && params.parent !== null) {
+            if (mongodb.ObjectId.isValid(mongodb.ObjectId(params.parent))) {
+                params.parent = mongodb.ObjectId(params.parent);
+                commentObject.parent = params.parent;
+                reply = true;
+            }
+        }
 
-    commentDatalayer.createComment(commentObject)
-    .then((commentData) => {
-        if (commentData !== null && typeof commentData !== undefined) {
-            //Find the submission related to the comment
-            submissionDatalayer.findSubmission({_id: params.submission})
-            .then((submissionData) => {
-                if (submissionData !== null && typeof submissionData !== undefined) {
-                    submissionData.comments++;
-                    submissionDatalayer.updateSubmission({_id: mongodb.ObjectId(params.submission)}, {comments: submissionData.comments})
-                    .then((updateSubmissionData) => {
-                        //In case that the comment is a reply  to an existing comment, add the reply to the parent comment
-                        if (reply) {
-                            commentDatalayer.findComment({_id: params.parent})
-                            .then((replyData) => {
-                                if (replyData !== null && typeof replyData !== undefined) {
-                                    replyData[0].replies.push(commentData._id);
-                                    commentDatalayer.updateComment({_id: params.parent}, {replies: replyData[0].replies})
-                                    .then((data) => {
-                                        responseObj.status  = errorCodes.SUCCESS;
-                                        responseObj.message = "Success";
-                                        responseObj.data    = commentData;
-                                        response.send(responseObj);
-                                    })
-                                    .catch(error => {
-                                        responseObj.status  = errorCodes.SYNTAX_ERROR;
-                                        responseObj.message = "Error updating reply: " + error;
+        commentDatalayer.createComment(commentObject)
+        .then((commentData) => {
+            if (commentData !== null && typeof commentData !== undefined) {
+                //Find the submission related to the comment
+                submissionDatalayer.findSubmission({_id: params.submission})
+                .then((submissionData) => {
+                    if (submissionData !== null && typeof submissionData !== undefined) {
+                        submissionData.comments++;
+                        submissionDatalayer.updateSubmission({_id: mongodb.ObjectId(params.submission)}, {comments: submissionData.comments})
+                        .then((updateSubmissionData) => {
+                            //In case that the comment is a reply  to an existing comment, add the reply to the parent comment
+                            if (reply) {
+                                commentDatalayer.findComment({_id: params.parent})
+                                .then((replyData) => {
+                                    if (replyData !== null && typeof replyData !== undefined) {
+                                        replyData[0].replies.push(commentData._id);
+                                        commentDatalayer.updateComment({_id: params.parent}, {replies: replyData[0].replies})
+                                        .then((data) => {
+                                            responseObj.status  = errorCodes.SUCCESS;
+                                            responseObj.message = "Success";
+                                            responseObj.data    = commentData;
+                                            response.send(responseObj);
+                                        })
+                                        .catch(error => {
+                                            responseObj.status  = errorCodes.SYNTAX_ERROR;
+                                            responseObj.message = "Error updating reply: " + error;
+                                            responseObj.data    = {};
+                                            response.send(responseObj);
+                                        });
+                                    } else {
+                                        responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                                        responseObj.message = "No record found";
                                         responseObj.data    = {};
                                         response.send(responseObj);
-                                    });
-                                } else {
+                                    }
+                                })
+                                .catch(error => {
                                     responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                                    responseObj.message = "No record found";
+                                    responseObj.message = error;
                                     responseObj.data    = {};
                                     response.send(responseObj);
-                                }
-                            })
-                            .catch(error => {
-                                responseObj.status  = errorCodes.DATA_NOT_FOUND;
-                                responseObj.message = error;
-                                responseObj.data    = {};
+                                });
+                            }
+                            else {
+                                responseObj.status  = errorCodes.SUCCESS;
+                                responseObj.message = "Success";
+                                responseObj.data    = commentData;
                                 response.send(responseObj);
-                            });
-                        }
-                        else {
-                            responseObj.status  = errorCodes.SUCCESS;
-                            responseObj.message = "Success";
-                            responseObj.data    = commentData;
+                            }
+
+
+                        })
+                        .catch((error) => { 
+                            responseObj.status  = errorCodes.SYNTAX_ERROR;
+                            responseObj.message = error;
+                            responseObj.data    = {};
                             response.send(responseObj);
-                        }
-
-
-                    })
-                    .catch((error) => { 
-                        responseObj.status  = errorCodes.SYNTAX_ERROR;
-                        responseObj.message = error;
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                    });
-                }
-            })
-            .catch(error => {
-                responseObj.status  = errorCodes.SYNTAX_ERROR;
-                responseObj.message = error;
+                        });
+                    }
+                })
+                .catch(error => {
+                    responseObj.status  = errorCodes.SYNTAX_ERROR;
+                    responseObj.message = error;
+                    responseObj.data    = {};
+                    response.send(responseObj);
+                });
+            } else {
+                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                responseObj.message = "No record found";
                 responseObj.data    = {};
                 response.send(responseObj);
-            });
-        } else {
-            responseObj.status  = errorCodes.DATA_NOT_FOUND;
-            responseObj.message = "No record found";
+            }
+        })
+        .catch(error => {
+            responseObj.status  = errorCodes.SYNTAX_ERROR;
+            responseObj.message = error;
             responseObj.data    = {};
             response.send(responseObj);
-        }
-    })
-    .catch(error => {
+        });
+    }
+    else {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
-        responseObj.message = error;
+        responseObj.message = "Invalid submission id";
         responseObj.data    = {};
         response.send(responseObj);
-    });
+    }
     return;
 };

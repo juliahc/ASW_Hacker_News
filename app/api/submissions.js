@@ -36,16 +36,26 @@ router.get("/", auth.strict.bind(auth), async (req, res) => {
 
 router.post("/", auth.strict.bind(auth), async (req, res) => {
 
-    const {title, url, text} = req.body;
+    let {title, url, text} = req.body;
     
     if (!title || title === "") {
         res.status(400).json({"error_msg": "No 'title' field in body or it is empty"});
         return;
     }
 
+    if (text === undefined) text = "";
+    if (url === undefined) url = "";
+
     try {
         let db_submission =  await sub_ctrl.createSubmission(title, url, text, req.user_auth.id, req.user_auth.username);
-        res.status(201).json(db_submission);
+        if (db_submission.success) {
+            db_submission.message = "Submission created successfully";
+            res.status(201).json(db_submission);
+        }
+        else {
+            if (!db_submission.existant) res.status(409).json({"error_msg": "Invalid url!" });
+            else res.status(200).json({"error_msg": "This url already exists on a submission!" });
+        }
     } catch (e) {
         res.status(500).json({"error_msg": e.message});
     }
@@ -70,9 +80,10 @@ router.post("/:id/comments", auth.strict.bind(auth), async (req, res) => {
 router.get("/user/:id", auth.strict.bind(auth), async (req, res) => {   
 
     const {limit, offset} = req.query;
-
-    if (!limit || !offset || limit < 0 || offset < 0) {
-        res.status(400).json({"error_msg": "No 'limit' or 'offset' param in request or they are < 1"});
+    
+    if ((limit && limit < 0) || (offset && offset < 0)) {
+        res.status(400).json({"error_msg": " 'limit' or 'offset' are < 0"});
+        return;
     }
 
     try {

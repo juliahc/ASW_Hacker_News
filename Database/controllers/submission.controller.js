@@ -26,7 +26,7 @@ exports.find = async (request, response) => {
       response.send(responseObj);
       return;
   }
-  if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
+  if (mongodb.ObjectId.isValid(id)) {
     const criteria = {};
     criteria["$and"] = [];
     criteria["$and"].push({
@@ -37,7 +37,17 @@ exports.find = async (request, response) => {
     let aggregateArr = createAggregateSubmissionArray(criteria);
     submissionDatalayer.aggregateSubmission(aggregateArr)
     .then((submissionData) => {
+      console.log("THEN, submissionData: ", submissionData);
           if (submissionData !== null && typeof submissionData !== undefined) {
+            if (submissionData[0].comments == 0) {
+              let submission = JSON.parse(JSON.stringify(submissionData[0]));
+              submission.comments = [];
+              responseObj.status  = errorCodes.SUCCESS;
+              responseObj.message = "Success";
+              responseObj.data    = submission;
+              response.send(responseObj);
+              return;
+            } else {
               //The submission exists on the database. Now we need to get the comments
               const criteria = {};
               criteria["$and"] = [];
@@ -63,33 +73,36 @@ exports.find = async (request, response) => {
                     responseObj.message = "Success";
                     responseObj.data    = submission;
                   } else {
-                      responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                       responseObj.message = "No record found";
                       responseObj.data    = {};
                   }
                   response.send(responseObj);
               })
               .catch(error => {
-                  responseObj.status  = errorCodes.SYNTAX_ERROR;
+                  responseObj.status  = errorCodes.SUCCESS;
                   responseObj.message = error;
-                  responseObj.data    = {};
+                  responseObj.data    = submissionData;
                   response.send(responseObj);
               });
+            }
+              
           } else {
-              responseObj.status  = errorCodes.DATA_NOT_FOUND;
+              responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
               responseObj.message = "No record found";
               responseObj.data    = {};
               response.send(responseObj);
           }
       })
       .catch(error => {
+        console.log("CATCH");
           responseObj.status  = errorCodes.SYNTAX_ERROR;
           responseObj.message = error;
           responseObj.data    = {};
           response.send(responseObj);
       });
   } else {
-      responseObj.status  = errorCodes.SYNTAX_ERROR;
+      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
       responseObj.message = "Invalid id";
       responseObj.data    = {};
       response.send(responseObj);

@@ -1,6 +1,7 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const CommentCtrl = require("./CommentCtrl");
 const axios = require("axios"); 
 
 let SubmissionCtrl;
@@ -26,7 +27,8 @@ let SubmissionCtrl;
                 delete submission.ask;
                 return new AskSubmission(submission);
             }
-        }
+        };
+        this.comm_ctrl = new CommentCtrl();
     };
 }());
 
