@@ -39,13 +39,6 @@ paths:
           schema:
             type: string
             format: string
-        - name: api_key
-          in: header
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
       responses:
         '200':
           description: Successfully retrieved user profile.
@@ -72,13 +65,6 @@ paths:
           schema:
             type: string
             format: string
-        - name: api_key
-          in: header
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
       requestBody:
         description: User object to be updated.
         content:
