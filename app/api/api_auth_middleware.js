@@ -6,7 +6,7 @@ class auth {
     constructor() {
         this.db = new DatabaseCtrl();
     }
-    strict(req, res, next) {
+    async strict (req, res, next) {
         const apiKey = req.headers['api_key'];
         if (!apiKey) {
             return res.status(401).json({"error_msg":"An apiKey is required for authentication"});

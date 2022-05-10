@@ -5,6 +5,10 @@ const ApiKeySchema = new global.Schema({
         required: true,
         unique: true
     },
+    username: {
+        type: String,
+        required: true,
+    },
     key: {
         type: String,
         required: true,

@@ -26,16 +26,19 @@ exports.find = async (request, response) => {
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
             //get the api key related to the user
-            const apiKeyParams = {};
-            apiKeyParams.googleId = userData.googleId;
+            let apiKeyParams = {};
+            apiKeyParams.googleId = id;
             apiKeysDatalayer.findApiKey(apiKeyParams)
             .then((apiKeyData) => {
                 //join the api key with the user
                 userData.apiKey = apiKeyData.key;
                 if (apiKeyData !== null && typeof apiKeyData !== undefined) {
+                  let result = JSON.parse(JSON.stringify(userData));
+                  result.apiKey = apiKeyData.key;
+
                   responseObj.status  = errorCodes.SUCCESS;
                   responseObj.message = "Success";
-                  responseObj.data    = userData;
+                  responseObj.data    = result;
                 } else {
                   responseObj.status  = errorCodes.DATA_NOT_FOUND;
                   responseObj.message = "Cannot find the api key";
@@ -53,8 +56,8 @@ exports.find = async (request, response) => {
             responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "User not found";
             responseObj.data    = {};
+            response.send(responseObj);
         }
-        response.send(responseObj);
     })
     .catch(error => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -66,9 +69,8 @@ exports.find = async (request, response) => {
 };
 
 async function generateRandomKey() {
-    const apiKey = await apiKeysDatalayer.generateRandomKey();
-    return apiKey.key;
-}
+  return Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23);
+};
 
 exports.create = async (request, response, next) => {
     let params = {};
@@ -81,40 +83,17 @@ exports.create = async (request, response, next) => {
         response.send(responseObj);
         return;
     }
-    userDatalayer.createUser(params)
-    .then((userData) => {
+    let userinfo = {};
+    await userDatalayer.createUser(params)
+    .then(async (userData) => {
         if (userData !== null && typeof userData !== undefined) {
-
-            //Create an API key for the user
-            const apiKeyParams = {};
-            apiKeyParams.googleId = userData.googleId;
-            //generate a random key
-            apiKeyParams.key = generateRandomKey();
-            apiKeysDatalayer.createApiKey(apiKeyParams)
-            .then((apiKeyData) => {
-                if (apiKeyData !== null && typeof apiKeyData !== undefined) {
-                  responseObj.status  = errorCodes.SUCCESS;
-                  responseObj.message = "Success";
-                  responseObj.data    = userData;
-                } else {
-                  responseObj.status  = errorCodes.SYNTAX_ERROR;
-                  responseObj.message = "Error creating API key";
-                  responseObj.data    = {};
-                }
-                response.send(responseObj);
-            })
-            .catch(error => {
-                responseObj.status  = errorCodes.SYNTAX_ERROR;
-                responseObj.message = error;
-                responseObj.data    = {};
-                response.send(responseObj);
-            });
+            userinfo = userData;
         } else {
             responseObj.status  = errorCodes.DATA_NOT_FOUND;
             responseObj.message = "No record found";
             responseObj.data    = {};
+            response.send(responseObj);
         }
-        response.send(responseObj);
     })
     .catch(error => {
         responseObj.status  = errorCodes.SYNTAX_ERROR;
@@ -122,7 +101,9 @@ exports.create = async (request, response, next) => {
         responseObj.data    = {};
         response.send(responseObj);
     });
-    return;
+    if (userinfo == null || userinfo == undefined) {
+      return;
+    } 
 };
 
 exports.update = async (request, response, next) => {
@@ -390,7 +371,7 @@ exports.update = async (request, response, next) => {
 
 exports.userSubmissions = (request, response) => {
     let params = {};
-    if (request.query.googleId) {
+    if (request.query.googleId && request.query.limit && request.query.offset && request.query.type) {
         params = request.query;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
@@ -413,7 +394,7 @@ exports.userSubmissions = (request, response) => {
                 return;
             }
             //search submissions by aggregation
-            let page = (params.hasOwnProperty("p")) ? { "$skip": (params.p - 1) * 10 } : "";
+            let skip = (params.hasOwnProperty("offset")) ? { "$skip": parseInt(params.offset) } : "";
             let criteria = {};
             criteria["$and"] = [];
             criteria["$and"].push({
@@ -424,45 +405,45 @@ exports.userSubmissions = (request, response) => {
             let orderBy = {
                 "createdAt": -1
             };
-            let limit = (params.hasOwnProperty("p")) ? { "$limit": 10 } : "";
-            let aggregateArr = createAggregateArray(page, criteria, orderBy, limit);
+            let limit = (params.hasOwnProperty("limit")) ? { "$limit": parseInt(params.limit) } : "";
+            let aggregateArr = createAggregateArray(skip, criteria, orderBy, limit);
             submissionDatalayer
             .aggregateSubmission(aggregateArr)
             .then((submissionData) => {
                 if (submissionData !== null && typeof submissionData !== undefined) {
-                    if (params.hasOwnProperty("p")) {
-                        //Get elements on bbdd
-                        let match = {};
-                        match = {
-                            _id: {
-                                $in: (type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
-                            }
-                        };
-                        let aggregateQuery = [
-                            {
-                            '$match': match
-                            }, {
-                            '$count': "submissionsLeft"
-                        }];
-                        submissionDatalayer
-                        .aggregateSubmission(aggregateQuery)
-                        .then((ret => {
-                            ret[0].submissionsLeft -= (params.p * 10);
-                            submissionData.push(ret[0]);
-                            responseObj.status  = errorCodes.SUCCESS;
-                            responseObj.message = "Success";
-                            responseObj.data    = submissionData;
-                            response.send(responseObj);
-                        }))
-                        .catch(error => {
-                            console.log(error);
-                        });
-                    } else {
-                        responseObj.status  = errorCodes.SUCCESS;
-                        responseObj.message = "Success";
-                        responseObj.data    = submissionData;
+                    //Get elements on bbdd
+                    let match = {};
+                    match = {
+                        _id: {
+                            $in: (type === "up") ? userData.upvotedSubmissions : userData.favouriteSubmissions
+                        }
+                    };
+                    let aggregateQuery = [
+                        {
+                        '$match': match
+                        }, {
+                        '$count': "submissionsLeft"
+                    }];
+                    submissionDatalayer
+                    .aggregateSubmission(aggregateQuery)
+                    .then((ret => {
+                        if (params.limit == 0) {
+                          ret[0].submissionsLeft -= parseInt(params.offset);
+                          responseObj.status  = errorCodes.SUCCESS;
+                          responseObj.message = "Success";
+                          responseObj.data    = [{"submissionsLeft": ret[0].submissionsLeft}];
+                        } else {
+                          ret[0].submissionsLeft = ((ret[0].submissionsLeft - (parseInt(params.limit) + parseInt(params.offset))) < 0 ) ? 0 : (ret[0].submissionsLeft - (parseInt(params.limit) + parseInt(params.offset)));
+                          submissionData.push(ret[0]);
+                          responseObj.status  = errorCodes.SUCCESS;
+                          responseObj.message = "Success";
+                          responseObj.data    = submissionData;
+                        }
                         response.send(responseObj);
-                    }
+                    }))
+                    .catch(error => {
+                        console.log(error);
+                    });
                 } else {
                     responseObj.status  = errorCodes.DATA_NOT_FOUND;
                     responseObj.message = "No record found";
@@ -741,7 +722,7 @@ function createAggregateCommentArray (match) {
   ]
 };
 
-function createAggregateArray (page, match, orderBy, limit) {
+function createAggregateArray (skip, match, orderBy, limit) {
     let aggregateArr = [
         {
           '$match': match
@@ -807,10 +788,10 @@ function createAggregateArray (page, match, orderBy, limit) {
           '$sort': orderBy
         }
       ];
-    if (page !== "") {
-        aggregateArr.push(page);
+    if (skip !== "") {
+        aggregateArr.push(skip);
     }
-    if (limit !== "") {
+    if (limit !== "" && limit > 0) {
         aggregateArr.push(limit);
     }
     return aggregateArr;

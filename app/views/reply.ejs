@@ -29,12 +29,6 @@
                     <!--Space-->
                     <tr id="space-10px"></tr>
                     <!--Item info-->
-<<<<<<< Updated upstream
-                    <% if (locals.error) { %>
-                        <tr><td><span class="errorMessage"> <b>Something is wrong!</b> <%= error %></span><br><br></td></tr>
-                    <% } %>
-=======
->>>>>>> Stashed changes
                     <tr>
                         <td>
                             <table>
@@ -42,19 +36,11 @@
                                 <tr id="id" class="newInfo">
                                     <td class="voteButton">
                                         <% if (!comment.upvoted) { %>
-<<<<<<< Updated upstream
-                                            <form method="post" action="/users/upvoteComment/<%= comment.id %>?goto=<%=view%>">
-                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
-                                            </form>
-                                        <% } else { %>
-                                            <form method="post" action="/users/downvoteComment/<%= comment.id %>?goto=<%=view%>">
-=======
                                             <form method="post" action="/users/upvoteComment/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
                                             </form>
                                         <% } else { %>
                                             <form method="post" action="/users/downvoteComment/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
->>>>>>> Stashed changes
                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
                                             </form>
                                         <% } %>
