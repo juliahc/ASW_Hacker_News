@@ -147,8 +147,17 @@ exports.page = async (request, response) => {
         delete criteria['$and'];
     }
 
-    let aggregateArr = createAggregateArray(request.query.offset, request.query.limit, criteria, orderBy);
+    if (parseInt(request.query.limit) === 0) {
+        responseObj.status  = errorCodes.SUCCESS;
+        responseObj.message = "Success";
+        responseObj.data    = [];
+        response.send(responseObj);
+        return;
+    }
+
+    let aggregateArr = await createAggregateArray(request.query.offset, request.query.limit, criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
+    console.log("agg array: ", JSON.stringify(aggregateArr));
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
     .then((submissionData) => {
@@ -175,7 +184,7 @@ exports.page = async (request, response) => {
             submissionDatalayer
             .aggregateSubmission(aggregateQuery)
             .then((ret => {
-                ret[0].submissionsLeft -= (request.query.offset + request.query.limit);
+                ret[0].submissionsLeft -= (parseInt(request.query.offset) + parseInt(request.query.limit));
                 submissionData.push(ret[0]);
                 responseObj.status  = errorCodes.SUCCESS;
                 responseObj.message = "Success";
@@ -533,8 +542,8 @@ function createAggregateSubmissionArray (match) {
       ]
 }
 
-function createAggregateArray (offset, limit, match, orderBy) {
-    return [
+async function createAggregateArray (offset, limit, match, orderBy) {
+    let returnStatement =  [
         {
           '$match': match
         }, {
@@ -597,11 +606,17 @@ function createAggregateArray (offset, limit, match, orderBy) {
             }
           }, {
           '$sort': orderBy
-        }, {
-            '$skip': offset
-        },
-        {
-            '$limit': limit
         }
       ];
+    if (offset > 0) { 
+      returnStatement.push({
+        '$skip': parseInt(offset)
+      });
+    }
+    if (limit > 0) { 
+      returnStatement.push({
+        '$limit': parseInt(limit)
+      });
+    }
+    return returnStatement;
 }
