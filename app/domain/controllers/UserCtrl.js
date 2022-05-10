@@ -73,12 +73,12 @@ UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, 
         "googleId": authId
     };
 
-    if (about) postObject.about = about;
-    if (showdead) postObject.showdead = showdead;
-    if (noprocrast) postObject.noprocrast = noprocrast;
-    if (maxvisit) postObject.maxvisit = maxvisit;
-    if (minaway) postObject.minaway = minaway;
-    if (delay) postObject.delay = delay;
+    if (about != undefined) postObject.about = about;
+    if (showdead != undefined) postObject.showdead = showdead;
+    if (noprocrast != undefined) postObject.noprocrast = noprocrast;
+    if (maxvisit != undefined) postObject.maxvisit = maxvisit;
+    if (minaway != undefined) postObject.minaway = minaway;
+    if (delay != undefined) postObject.delay = delay;
 
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }

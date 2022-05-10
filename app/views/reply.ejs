@@ -36,11 +36,11 @@
                                 <tr id="id" class="newInfo">
                                     <td class="voteButton">
                                         <% if (!comment.upvoted) { %>
-                                            <form method="post" action="/users/upvoteComment/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                            <form method="post" action="/users/upvoteComment/<%= comment.submission %>">
                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
                                             </form>
                                         <% } else { %>
-                                            <form method="post" action="/users/downvoteComment/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                            <form method="post" action="/users/downvoteComment/<%= comment.submission %>">
                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
                                             </form>
                                         <% } %>
