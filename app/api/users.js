@@ -25,16 +25,11 @@ router.put("/:id", auth.strict.bind(auth), async (req, res) => {
     }
 
     let {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
-    if (!about || !showdead || !noprocrast || !maxvisit || !minaway || !delay) {
-        res.status(400).json({"error_msg": "Form missing values. Must contain: [about, showdead, noprocrast, maxvisit, minaway, delay]"});
-        return;
-    }
+    
     try {
-        showdead = showdead === "yes";
-        noprocrast = noprocrast === "yes";
-        maxvisit = parseInt(maxvisit);
-        minaway = parseInt(minaway);
-        delay = parseInt(delay);
+        if (maxvisit !== undefined)     maxvisit = parseInt(maxvisit);
+        if (minaway !== undefined)      minaway = parseInt(minaway);
+        if (delay !== undefined)        delay = parseInt(delay);
     } catch (e) {
         res.status(400).json({"error_msg": "Form values are not in correct format"});
         return;

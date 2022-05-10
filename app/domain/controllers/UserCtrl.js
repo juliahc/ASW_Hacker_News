@@ -70,14 +70,16 @@ UserCtrl.prototype.profile = async function(authId, id) {
 
 UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, maxvisit, minaway, delay) {
     let postObject = { 
-        "googleId": authId,
-        "about": about,
-        "showdead": showdead,
-        "noprocrast": noprocrast,
-        "maxvisit": maxvisit,
-        "minaway": minaway,
-        "delay": delay
+        "googleId": authId
     };
+
+    if (about) postObject.about = about;
+    if (showdead) postObject.showdead = showdead;
+    if (noprocrast) postObject.noprocrast = noprocrast;
+    if (maxvisit) postObject.maxvisit = maxvisit;
+    if (minaway) postObject.minaway = minaway;
+    if (delay) postObject.delay = delay;
+
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
     return new User(resp.data);
