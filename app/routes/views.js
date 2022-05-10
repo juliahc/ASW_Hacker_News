@@ -19,7 +19,7 @@ router.get("/", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id,auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p, null, "any","pts",null,auth_id,auth_id);
         let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -37,7 +37,7 @@ router.get("/news", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","pts",null,auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p, 0,"any","pts",null,auth_id);
         let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -55,7 +55,7 @@ router.get("/newest", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",null,auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p, 0,"any","new",null,auth_id);
         let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -72,7 +72,7 @@ router.get("/ask", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"ask","pts",null,auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p, 0,"ask","pts",null,auth_id);
         let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
@@ -94,7 +94,7 @@ router.get("/submitted", auth.passthrough, async (req, res) => {
         let auth_id = req.user_auth !== null ? req.user_auth.id : null;
         let p = 1;
         if (req.query && req.query.p) p = req.query.p;
-        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p,"any","new",req.query.id,auth_id);
+        let sub_page = await sub_ctrl.fetchSubmissionsForParams(p, 0,"any","new",req.query.id,auth_id);
         let submissionsLeft = 0;
         if (sub_page.length) submissionsLeft = sub_page[sub_page.length-1].submissionsLeft;
         let more = submissionsLeft > 0;
