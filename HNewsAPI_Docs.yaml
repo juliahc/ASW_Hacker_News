@@ -368,6 +368,8 @@ paths:
           description: Only the owner of the account can upvote a submission.
         '404':
           description: No such submission.
+        '409':
+          description: Submission was already upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -407,6 +409,8 @@ paths:
           description: Only the owner of the account can downvote a submission.
         '404':
           description: No such submission.
+        '409':
+          description: Submission was already NOT upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -486,6 +490,8 @@ paths:
           description: Only the owner of the account can upvote a comment.
         '404':
           description: No such comment.
+        '409':
+          description: Comment was already upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -525,6 +531,8 @@ paths:
           description: Only the owner of the account can downvote a comment.
         '404':
           description: No such comment.
+        '409':
+          description: Comment was already NOT upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
