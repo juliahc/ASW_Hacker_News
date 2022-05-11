@@ -120,6 +120,7 @@ UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
     let resp = await this.db.postRequest('/updateUser', postObject);
     
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    if (resp.status == this.db.errors.DATA_ALREADY_EXISTS) { throw Error('Already upvoted'); }
 }
 
 UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
@@ -129,6 +130,7 @@ UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
         "type": "upvoteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    if (resp.status == this.db.errors.DATA_ALREADY_EXISTS) { throw Error('Already upvoted'); }
 }
 
 UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
@@ -138,6 +140,7 @@ UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
         "type": "downvoteSubmission" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    if (resp.status == this.db.errors.BAD_REQUEST) { throw Error('The submission was not upvoted!'); }
 }
 
 UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
@@ -146,6 +149,7 @@ UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
         "comment": commentId,
         "type": "downvoteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
+    if (resp.status == this.db.errors.BAD_REQUEST) { throw Error('The comment was not upvoted!'); }
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
 }
 

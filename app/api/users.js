@@ -59,6 +59,7 @@ router.post("/:id/upvoteSubmission/:submission_id", auth.strict.bind(auth), asyn
         res.status(200).json({"success": "The upvote have been submitted successfully"});
     } catch (e) {
         if (e.message === "Resource not found") res.status(404).json({"error_msg": "No such submission"});
+        else if (e.message === "Already upvoted") res.status(409).json({"error_msg": "You have already upvoted this submission"});
         else res.status(500).json({"error_msg": e.message});
     }
     return;
@@ -76,6 +77,7 @@ router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), as
         res.status(200).json({"success": "The downvote have been submitted successfully"});
     } catch (e) {
         if (e.message === "Resource not found") res.status(404).json({"error_msg": "No such submission"});
+        else if (e.message === "The submission was not upvoted!") res.status(409).json({"error_msg": "The submission was not upvoted!"});
         else res.status(500).json({"error_msg": e.message});
     }
 });
@@ -110,9 +112,10 @@ router.post("/:id/upvoteComment/:comment_id", auth.strict.bind(auth), async (req
         await user_ctrl.upvoteComment(authId, commentId);
         res.status(200).json({"success": "The upvote have been submitted successfully"});
     } catch (e) {
-        if (e.message = "Resource not found") {
+        if (e.message == "Resource not found") {
             res.status(404).json({"error_msg": "No such comment"});
-        } else res.status(500).json({"error_msg": e.message});
+        } else if (e.message == "Already upvoted") res.status(409).json({"error_msg": "You have already upvoted this comment"});
+        else res.status(500).json({"error_msg": e.message});
     }
 });
 
@@ -127,9 +130,9 @@ router.post("/:id/downvoteComment/:comment_id", auth.strict.bind(auth), async (r
         await user_ctrl.downvoteComment(authId, commentId);
         res.status(200).json({"success": "The downvote have been submitted successfully"});
     } catch (e) {
-        if (e.message = "Resource not found") {
-            res.status(404).json({"error_msg": "No such comment"});
-        } else res.status(500).json({"error_msg": e.message});
+        if (e.message == "Resource not found") res.status(404).json({"error_msg": "No such comment"});
+        else if (e.message == "The comment was not upvoted!") res.status(409).json({"error_msg": e.message});
+        else res.status(500).json({"error_msg": e.message});
     }
 }); 
 
