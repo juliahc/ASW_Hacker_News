@@ -180,7 +180,6 @@ paths:
     get:
       tags:
         - submission
-        - user
       summary: Finds all user submissions
       operationId: getUserSubmissions
       parameters:
@@ -244,7 +243,6 @@ paths:
     post:
       tags:
         - submission
-        - comment
       summary: >-
         Create a comment as an answer to the submission identified by
         submissionId.
@@ -311,7 +309,6 @@ paths:
   /comments/user/{id}:
     get:
       tags:
-        - user
         - comment
       summary: Get all threads from a user
       parameters:
@@ -337,7 +334,6 @@ paths:
     post:
       tags:
         - user
-        - submission
       summary: >-
         The user identified by userId upvotes a submission identified by
         submissionId.
@@ -378,7 +374,6 @@ paths:
     post:
       tags:
         - user
-        - submission
       summary: >-
         The user identified by userId downvotes a submission identified by
         submissionId.
@@ -461,7 +456,6 @@ paths:
     post:
       tags:
         - user
-        - comment
       summary: The user identified by userId upvotes a comment identified by commentId.
       operationId: upvoteComment
       parameters:
@@ -500,7 +494,6 @@ paths:
     post:
       tags:
         - user
-        - comment
       summary: >-
         The user identified by userId downvotes a comment identified by
         commentId.
