@@ -41,11 +41,11 @@
                                                     <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton">
                                                         <% if (!submission.upvoted) { %>
-                                                            <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%><%= view.includes('?') ? '&' : '?' %>p=<%=p%>">
+                                                            <form method="post" action="/users/upvoteSubmission/<%= submission.id %>?goto=<%=view%><%= view.includes('?') ? '&' : '?' %>p=<%=p%>">
                                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
                                                             </form>
                                                         <% } else { %>
-                                                            <form method="post" action="/users/downvoteSubmisison/<%= submission.id %>?goto=<%=view%><%= view.includes('?') ? '&' : '?' %>p=<%=p%>">
+                                                            <form method="post" action="/users/downvoteSubmission/<%= submission.id %>?goto=<%=view%><%= view.includes('?') ? '&' : '?' %>p=<%=p%>">
                                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
                                                             </form>
                                                         <% } %>
@@ -83,11 +83,11 @@
                                                     <td class="oderNum"><%= pos %>.</td>
                                                     <td class="voteButton">
                                                         <% if (!submission.upvoted) { %>
-                                                            <form method="post" action="/users/upvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                            <form method="post" action="/users/upvoteSubmission/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
                                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
                                                             </form>
                                                         <% } else { %>
-                                                            <form method="post" action="/users/downvoteSubmisison/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
+                                                            <form method="post" action="/users/downvoteSubmission/<%= submission.id %>?goto=<%=view%>?p=<%=p%>">
                                                                 <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
                                                             </form>
                                                         <% } %>

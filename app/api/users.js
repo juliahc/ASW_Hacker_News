@@ -63,7 +63,7 @@ router.post("/:id/upvoteSubmission/:submission_id", auth.strict.bind(auth), asyn
     return;
 });
 
-router.post("/:id/downvoteSubmisison/:submission_id", auth.strict.bind(auth), async (req, res) => {
+router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
     if (req.params.id !== req.user_auth.id) {
         res.status(403).json({"error_msg": "Only the owner of the account can downvote a submission"});
         return;

@@ -62,7 +62,7 @@ router.post("/", auth.strict, async (req, res) => {
 
 });
 
-router.post("/upvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+router.post("/upvoteSubmission/:submission_id", auth.passthrough, async (req, res) => {
     if (req.user_auth === null) {
         res.redirect("/users/login");
         return;
@@ -80,7 +80,7 @@ router.post("/upvoteSubmisison/:submission_id", auth.passthrough, async (req, re
     return;
 });
 
-router.post("/downvoteSubmisison/:submission_id", auth.passthrough, async (req, res) => {
+router.post("/downvoteSubmission/:submission_id", auth.passthrough, async (req, res) => {
     if (req.user_auth === null) {
         res.redirect("/users/login");
         return;
@@ -131,7 +131,7 @@ router.post("/downvoteComment/:comment_id", auth.passthrough, async (req, res) =
     }
 });
 
-router.post("/favoriteSubmisisons/:submission_id", auth.passthrough, async (req, res) => {
+router.post("/favoriteSubmissions/:submission_id", auth.passthrough, async (req, res) => {
     if (req.user_auth === null) {
         res.redirect("/users/login");
         return;
@@ -140,7 +140,7 @@ router.post("/favoriteSubmisisons/:submission_id", auth.passthrough, async (req,
     const submissionId = req.params.submission_id;
     try {
         await user_ctrl.favoriteSubmission(authId, submissionId);
-        res.redirect("/favoriteSubmisisons?id="+auth_id);
+        res.redirect("/favoriteSubmissions?id="+auth_id);
         res.status(200);
         let goto = req.query.goto || "/" ;
         res.redirect(goto);
@@ -149,7 +149,7 @@ router.post("/favoriteSubmisisons/:submission_id", auth.passthrough, async (req,
     }
 });
 
-router.post("/unfavoriteSubmisisons/:submission_id", auth.passthrough, async (req, res) => {
+router.post("/unfavoriteSubmissions/:submission_id", auth.passthrough, async (req, res) => {
     if (req.user_auth === null) {
         res.redirect("/users/login");
         return;
@@ -157,8 +157,8 @@ router.post("/unfavoriteSubmisisons/:submission_id", auth.passthrough, async (re
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
-        await user_ctrl.unfavoriteSubmisisons(authId, submissionId);
-        res.redirect("/favoriteSubmisisons?id="+auth_id);
+        await user_ctrl.unfavoriteSubmissions(authId, submissionId);
+        res.redirect("/favoriteSubmissions?id="+auth_id);
         res.status(200);
         let goto = req.query.goto || "/" ;
         res.redirect(goto);
