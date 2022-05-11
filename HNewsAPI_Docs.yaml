@@ -50,6 +50,8 @@ paths:
           description: API Key is invalid
         '404':
           description: No such user
+      security:
+      - api_key: []
     put:
       tags:
         - user
@@ -96,6 +98,8 @@ paths:
             equal to zero).
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /submissions:
     get:
       tags:
@@ -146,6 +150,8 @@ paths:
           description: Missing parameters or incorrect format.
         '500':
           description: Internal error
+      security:
+      - api_key: []
     post:
       tags:
         - submisison
@@ -169,6 +175,8 @@ paths:
           description: Url is not valid.
         '500':
           description: Internal error.
+      security:
+      - api_key: []
   /submissions/user/{userId}:
     get:
       tags:
@@ -211,6 +219,8 @@ paths:
           description: Missing parameters or incorrect format.
         '500':
           description: External error
+      security:
+      - api_key: []
   /submissions/{submissionId}:
     get:
       tags:
@@ -229,6 +239,8 @@ paths:
       responses:
         '404':
           description: Not such submission
+      security:
+      - api_key: []
   /submissions/{submissionId}/comments:
     post:
       tags:
@@ -262,6 +274,8 @@ paths:
           description: Missing text field or it is empty.
         '404':
           description: No such submission
+      security:
+      - api_key: []
   /comments/{id}/replies:
     post:
       tags:
@@ -293,6 +307,8 @@ paths:
           description: Unauthorized
         '404':
           description: Comment not found
+      security:
+      - api_key: []
   /comments/user/{id}:
     get:
       tags:
@@ -316,6 +332,8 @@ paths:
           description: Missing id
         '404':
           description: User not found
+      security:
+      - api_key: []
   /users/{userId}/upvoteSubmisison/{submissionId}:
     post:
       tags:
@@ -351,6 +369,8 @@ paths:
           description: Only the owner of the account can upvote a submission.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/downvoteSubmisison/{submissionId}:
     post:
       tags:
@@ -386,6 +406,8 @@ paths:
           description: Only the owner of the account can downvote a submission.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/upvotedSubmissions:
     get:
       tags:
@@ -408,6 +430,8 @@ paths:
           description: Parameters missing in query. Must contain [limit, offset]
         '404':
           description: No upvoted submissions or no such user.
+      security:
+      - api_key: []
   /users/{userId}/upvoteComment/{commentId}:
     post:
       tags:
@@ -441,6 +465,8 @@ paths:
           description: Only the owner of the account can upvote a comment.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/downvoteComment/{commentId}:
     post:
       tags:
@@ -476,6 +502,8 @@ paths:
           description: Only the owner of the account can downvote a comment.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/upvotedComments:
     get:
       tags:
@@ -496,6 +524,8 @@ paths:
           description: Upvoted comments returned successfully.
         '404':
           description: No upvoted comments or not user.
+      security:
+      - api_key: []
 components:
   schemas:
     AnyUser:
