@@ -109,7 +109,7 @@ paths:
       parameters:
         - name: type
           in: query
-          description: type of the submissions {"all", "ask", "url"}
+          description: type of the submissions {"any", "ask", "url"}
           required: true
           style: form
           explode: true
