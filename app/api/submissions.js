@@ -19,8 +19,8 @@ router.get("/", auth.strict.bind(auth), async (req, res) => {
         return;
     }
 
-    if (!(type==="all" || type==="ask" || type==="url") || !(order==="pts" || order==="new") || (limit !== undefined && limit<0) || (offset !== undefined && offset<0) ) {
-        res.status(400).json({"error_msg": "Incorrect parameter(s) format. Must be [type={'all','ask','url'}, order={'pts','new'}, limit>=0, offset>=0]"});
+    if (!(type==="any" || type==="ask" || type==="url") || !(order==="pts" || order==="new") || (limit !== undefined && limit<0) || (offset !== undefined && offset<0) ) {
+        res.status(400).json({"error_msg": "Incorrect parameter(s) format. Must be [type={'any','ask','url'}, order={'pts','new'}, limit>=0, offset>=0]"});
         return;
     }
 

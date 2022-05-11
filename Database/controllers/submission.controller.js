@@ -10,6 +10,7 @@ const db = mongoose.connect(process.env.MONGODB_URL, {
 
 const errorCodes = require("../helpers/errorCodes.helper.js");
 
+const userDatalayer = require("../datalayers/user.datalayer.js");
 const submissionDatalayer = require("../datalayers/submission.datalayer");
 const askDatalayer = require("../datalayers/ask.datalayer");
 const urlDatalayer = require("../datalayers/url.datalayer");
@@ -122,6 +123,8 @@ exports.page = async (request, response) => {
         return;
     }
 
+    console.log("params: ", params);
+
     let orderBy = {};
 
     let criteria = {};
@@ -134,13 +137,21 @@ exports.page = async (request, response) => {
         });
     }
     if (request.query.usr !== undefined && request.query.usr !== "") {
-      criteria["$and"].push({
-            googleId: {
-                $eq: params.usr
-            }
-        });
+      let res = await userDatalayer.findUser({"googleId": params.usr}).then();
+      if (res !== null && typeof res !== undefined) {
+        criteria["$and"].push({
+              googleId: {
+                  $eq: params.usr
+              }
+          });
+        } else {
+          responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+          responseObj.message = "User not found";
+          responseObj.data    = {};
+          response.send(responseObj);
+          return;
+      }
     }
-
     switch(request.query.o) {
         case "new":
             orderBy = {

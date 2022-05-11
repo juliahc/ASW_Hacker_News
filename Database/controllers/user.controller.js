@@ -383,6 +383,8 @@ exports.userSubmissions = (request, response) => {
 
     let type = params.type; //up => upvoted submissions / fav=> favourite submissions
 
+    console.log("User id: ", params.googleId);
+
     userDatalayer.findUser({googleId: params.googleId})
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
