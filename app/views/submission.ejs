@@ -44,7 +44,7 @@
                                     <td class="title">
                                         <% if(submission.type === "url") { %>
                                             <a class="newTitle titleText" href="submission.url"><%= submission.title %></a>
-                                            <a class="newLink" href="<%= (new URL(submission.url).hostname) %>"><%= (new URL(submission.url).hostname) %></a>
+                                            <a class="newLink" href="<%= submission.url %>"><%= (new URL(submission.url).hostname) %></a>
                                         <% } else { %>
                                             <a class="newTitle titleText" href="/submission?id=<%=submission.id%>"><%= submission.title %></a>
                                         <% } %>
