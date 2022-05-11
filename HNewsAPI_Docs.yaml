@@ -11,8 +11,7 @@ info:
   version: 1.0.0-oas3
 servers:
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/HNews/HNewsAPI/1.0.0
-  - url: http://ec2-15-237-124-151.eu-west-3.compute.amazonaws.com:3000/api
+    url: http://ec2-15-237-124-151.eu-west-3.compute.amazonaws.com:3000/api
 tags:
   - name: user
     description: A user object that holds the account information.
@@ -39,13 +38,6 @@ paths:
           schema:
             type: string
             format: string
-        - name: api_key
-          in: header
-          required: false
-          style: simple
-          explode: false
-          schema:
-            type: string
       responses:
         '200':
           description: Successfully retrieved user profile.
@@ -57,6 +49,8 @@ paths:
           description: API Key is invalid
         '404':
           description: No such user
+      security:
+      - api_key: []
     put:
       tags:
         - user
@@ -72,13 +66,6 @@ paths:
           schema:
             type: string
             format: string
-        - name: api_key
-          in: header
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
       requestBody:
         description: User object to be updated.
         content:
@@ -110,6 +97,8 @@ paths:
             equal to zero).
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /submissions:
     get:
       tags:
@@ -119,7 +108,7 @@ paths:
       parameters:
         - name: type
           in: query
-          description: type of the submissions {"all", "ask", "url"}
+          description: type of the submissions {"any", "ask", "url"}
           required: true
           style: form
           explode: true
@@ -138,7 +127,7 @@ paths:
         - name: limit
           in: query
           description: number of submissions
-          required: true
+          required: false
           style: form
           explode: true
           schema:
@@ -147,7 +136,7 @@ paths:
         - name: offset
           in: query
           description: offset
-          required: true
+          required: false
           style: form
           explode: true
           schema:
@@ -160,9 +149,11 @@ paths:
           description: Missing parameters or incorrect format.
         '500':
           description: Internal error
+      security:
+      - api_key: []
     post:
       tags:
-        - submisison
+        - submission
       summary: Create a submission.
       operationId: createSubmission
       requestBody:
@@ -173,17 +164,22 @@ paths:
               $ref: '#/components/schemas/PostSubmission'
         required: true
       responses:
+        '200':
+          description: Submission with that url already exists.
         '201':
           description: Submission was created successfully.
         '400':
           description: No 'title' field in body or it is empty.
+        '409':
+          description: Url is not valid.
         '500':
-          description: Internal error
+          description: Internal error.
+      security:
+      - api_key: []
   /submissions/user/{userId}:
     get:
       tags:
         - submission
-        - user
       summary: Finds all user submissions
       operationId: getUserSubmissions
       parameters:
@@ -199,7 +195,7 @@ paths:
         - name: limit
           in: query
           description: number of submissions
-          required: true
+          required: false
           style: form
           explode: true
           schema:
@@ -208,7 +204,7 @@ paths:
         - name: offset
           in: query
           description: offset
-          required: true
+          required: false
           style: form
           explode: true
           schema:
@@ -221,6 +217,8 @@ paths:
           description: Missing parameters or incorrect format.
         '500':
           description: External error
+      security:
+      - api_key: []
   /submissions/{submissionId}:
     get:
       tags:
@@ -239,11 +237,12 @@ paths:
       responses:
         '404':
           description: Not such submission
+      security:
+      - api_key: []
   /submissions/{submissionId}/comments:
     post:
       tags:
         - submission
-        - comment
       summary: >-
         Create a comment as an answer to the submission identified by
         submissionId.
@@ -272,6 +271,8 @@ paths:
           description: Missing text field or it is empty.
         '404':
           description: No such submission
+      security:
+      - api_key: []
   /comments/{id}/replies:
     post:
       tags:
@@ -303,10 +304,11 @@ paths:
           description: Unauthorized
         '404':
           description: Comment not found
+      security:
+      - api_key: []
   /comments/user/{id}:
     get:
       tags:
-        - user
         - comment
       summary: Get all threads from a user
       parameters:
@@ -326,11 +328,12 @@ paths:
           description: Missing id
         '404':
           description: User not found
-  /users/{userId}/upvoteSubmisison/{submissionId}:
+      security:
+      - api_key: []
+  /users/{userId}/upvoteSubmission/{submissionId}:
     post:
       tags:
         - user
-        - submission
       summary: >-
         The user identified by userId upvotes a submission identified by
         submissionId.
@@ -359,13 +362,16 @@ paths:
           description: Submission upvoted successfully.
         '403':
           description: Only the owner of the account can upvote a submission.
+        '409':
+          description: The submission was already upvoted.
         '500':
           description: Something went wrong when interacting with database.
-  /users/{userId}/downvoteSubmisison/{submissionId}:
+      security:
+      - api_key: []
+  /users/{userId}/downvoteSubmission/{submissionId}:
     post:
       tags:
         - user
-        - submission
       summary: >-
         The user identified by userId downvotes a submission identified by
         submissionId.
@@ -394,8 +400,12 @@ paths:
           description: Submission downvoted successfully.
         '403':
           description: Only the owner of the account can downvote a submission.
+        '409':
+          description: The submission was not upvoted.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/upvotedSubmissions:
     get:
       tags:
@@ -411,6 +421,24 @@ paths:
           schema:
             type: string
             format: string
+        - name: limit
+          in: query
+          description: number of submissions
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: Upvoted submissions returned successfully.
@@ -418,11 +446,12 @@ paths:
           description: Parameters missing in query. Must contain [limit, offset]
         '404':
           description: No upvoted submissions or no such user.
+      security:
+      - api_key: []
   /users/{userId}/upvoteComment/{commentId}:
     post:
       tags:
         - user
-        - comment
       summary: The user identified by userId upvotes a comment identified by commentId.
       operationId: upvoteComment
       parameters:
@@ -449,13 +478,16 @@ paths:
           description: Comment upvoted successfully.
         '403':
           description: Only the owner of the account can upvote a comment.
+        '409':
+          description: The comment was already upvoted.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/downvoteComment/{commentId}:
     post:
       tags:
         - user
-        - comment
       summary: >-
         The user identified by userId downvotes a comment identified by
         commentId.
@@ -484,8 +516,12 @@ paths:
           description: Comment downvoted successfully.
         '403':
           description: Only the owner of the account can downvote a comment.
+        '409':
+          description: The comment was not upvoted.
         '500':
           description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
   /users/{userId}/upvotedComments:
     get:
       tags:
@@ -506,6 +542,8 @@ paths:
           description: Upvoted comments returned successfully.
         '404':
           description: No upvoted comments or not user.
+      security:
+      - api_key: []
 components:
   schemas:
     AnyUser:
