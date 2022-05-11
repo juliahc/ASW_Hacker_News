@@ -367,6 +367,8 @@ paths:
           description: Submission upvoted successfully.
         '403':
           description: Only the owner of the account can upvote a submission.
+        '404':
+          description: No such submission.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -404,6 +406,8 @@ paths:
           description: Submission downvoted successfully.
         '403':
           description: Only the owner of the account can downvote a submission.
+        '404':
+          description: No such submission.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -463,6 +467,8 @@ paths:
           description: Comment upvoted successfully.
         '403':
           description: Only the owner of the account can upvote a comment.
+        '404':
+          description: No such comment.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -500,6 +506,8 @@ paths:
           description: Comment downvoted successfully.
         '403':
           description: Only the owner of the account can downvote a comment.
+        '404':
+          description: No such comment.
         '500':
           description: Something went wrong when interacting with database.
       security:
