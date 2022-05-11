@@ -81,9 +81,10 @@ router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), as
 router.get("/:id/upvotedSubmissions", auth.strict.bind(auth), async (req, res) => {
     let {limit, offset} = req.query;
 
-    if (limit === undefined || offset === undefined) {
+    if (limit === undefined) {
         limit = "";
-        offset = ""; 
+    } if (offset === undefined) {
+        offset = "";
     }
 
     try {
