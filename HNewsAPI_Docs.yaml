@@ -154,7 +154,7 @@ paths:
       - api_key: []
     post:
       tags:
-        - submisison
+        - submission
       summary: Create a submission.
       operationId: createSubmission
       requestBody:
@@ -334,7 +334,7 @@ paths:
           description: User not found
       security:
       - api_key: []
-  /users/{userId}/upvoteSubmisison/{submissionId}:
+  /users/{userId}/upvoteSubmission/{submissionId}:
     post:
       tags:
         - user
@@ -371,7 +371,7 @@ paths:
           description: Something went wrong when interacting with database.
       security:
       - api_key: []
-  /users/{userId}/downvoteSubmisison/{submissionId}:
+  /users/{userId}/downvoteSubmission/{submissionId}:
     post:
       tags:
         - user
