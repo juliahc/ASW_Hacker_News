@@ -94,7 +94,7 @@ router.get("/user/:id", auth.strict.bind(auth), async (req, res) => {
     }
 });
 
-router.get("/submission/:id", auth.strict.bind(auth), async (req, res) => {
+router.get("/:id", auth.strict.bind(auth), async (req, res) => {
     if (!req.params || !req.params.id) {
         res.status(400).json({"error_msg": "No 'id' field in query or it is empty"});
         return;

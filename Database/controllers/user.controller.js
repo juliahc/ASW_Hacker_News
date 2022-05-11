@@ -40,7 +40,7 @@ exports.find = async (request, response) => {
                   responseObj.message = "Success";
                   responseObj.data    = result;
                 } else {
-                  responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                  responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                   responseObj.message = "Cannot find the api key";
                   responseObj.data    = {};
                 }
@@ -68,8 +68,30 @@ exports.find = async (request, response) => {
     return;
 };
 
-async function generateRandomKey() {
-  return Math.random().toString(40).substring(13, 33) + Math.random().toString(40).substring(3, 23);
+async function checkSubmission(id) {
+  if (mongodb.ObjectId.isValid(id)) {
+    let res = submissionDatalayer.findSubmission({_id: mongodb.ObjectId(id)}).then()
+    if (res == null || res == undefined) {
+      return false;
+    } else {
+      return true;
+    }
+  } else {
+    return false;
+  }
+};
+
+async function checkComment(id) {
+  if (mongodb.ObjectId.isValid(id)) {
+    let res = commentDatalayer.findComment({_id: mongodb.ObjectId(id)}).then()
+    if (res == null || res == undefined) {
+      return false;
+    } else {
+      return true;
+    }
+  } else {
+    return false;
+  }
 };
 
 exports.create = async (request, response, next) => {
@@ -89,7 +111,7 @@ exports.create = async (request, response, next) => {
         if (userData !== null && typeof userData !== undefined) {
             userinfo = userData;
         } else {
-            responseObj.status  = errorCodes.DATA_NOT_FOUND;
+            responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "No record found";
             responseObj.data    = {};
             response.send(responseObj);
@@ -117,9 +139,9 @@ exports.update = async (request, response, next) => {
         response.send(responseObj);
         return;
     }
-    
+    let valid = true;
     userDatalayer.findUser({googleId: params.googleId})
-    .then((userData) => {
+    .then( async (userData) =>  {
         if (userData !== null && typeof userData !== undefined) {
             let updateType = params.type;
             let updateData = {};
@@ -129,157 +151,230 @@ exports.update = async (request, response, next) => {
             let updateCommentQuery = {};
             switch (updateType) {
                 case "upvoteSubmission":
-                    if (userData.upvotedSubmissions.includes(mongodb.ObjectId(params.submission))) {
-                        responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
-                        responseObj.message = "Data already exists";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
+                    valid = await checkSubmission(params.submissionId);
+                    if (valid) {
+                      if (userData.upvotedSubmissions.includes(mongodb.ObjectId(params.submission))) {
+                          responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
+                          responseObj.message = "Data already exists";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.upvotedSubmissions.push(mongodb.ObjectId(params.submission));
+                      updateData = {
+                          googleId: params.googleId,
+                          upvotedSubmissions: userData.upvotedSubmissions
+                      }
+                      updateSubmission = true;
+                      updateSubmissionQuery = {
+                          $inc: {
+                              points: 1
+                          }
+                      };
+                    } else {
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The submission does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
-                    userData.upvotedSubmissions.push(mongodb.ObjectId(params.submission));
-                    updateData = {
-                        googleId: params.googleId,
-                        upvotedSubmissions: userData.upvotedSubmissions
-                    }
-                    updateSubmission = true;
-                    updateSubmissionQuery = {
-                        $inc: {
-                            points: 1
-                        }
-                    };
                     break;
                 case "downvoteSubmission":
-                    if (!userData.upvotedSubmissions.includes(mongodb.ObjectId(params.submission))) {
-                        responseObj.status  = errorCodes.BAD_REQUEST;
-                        responseObj.message = "Bad request";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
-                    }
+                    valid = await checkSubmission(params.submissionId);
+                    if (valid) {
+                      if (!userData.upvotedSubmissions.includes(mongodb.ObjectId(params.submission))) {
+                          responseObj.status  = errorCodes.BAD_REQUEST;
+                          responseObj.message = "Bad request";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
 
-                    userData.upvotedSubmissions.map(submission => {
-                        if (submission.toString() === params.submission) {
-                            userData.upvotedSubmissions.splice(userData.upvotedSubmissions.indexOf(mongodb.ObjectId(params.submission)), 1);
-                        }
-                    })
+                      userData.upvotedSubmissions.map(submission => {
+                          if (submission.toString() === params.submission) {
+                              userData.upvotedSubmissions.splice(userData.upvotedSubmissions.indexOf(mongodb.ObjectId(params.submission)), 1);
+                          }
+                      })
 
-                    updateData = {
-                        googleId: params.googleId,
-                        upvotedSubmissions: userData.upvotedSubmissions
+                      updateData = {
+                          googleId: params.googleId,
+                          upvotedSubmissions: userData.upvotedSubmissions
+                      }
+                      updateSubmission = true;
+                      updateSubmissionQuery = {
+                          $inc: {
+                              points: -1
+                          }
+                      };
+                    } else {
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The submission does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
-                    updateSubmission = true;
-                    updateSubmissionQuery = {
-                        $inc: {
-                            points: -1
-                        }
-                    };
                     break;
                 case "upvoteComment":
-                    if (userData.upvotedComments.includes(mongodb.ObjectId(params.comment))) {
-                        responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
-                        responseObj.message = "Data already exists";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
+                  valid = await checkComment(params.comment);
+                  if (valid) {
+                      if (userData.upvotedComments.includes(mongodb.ObjectId(params.comment))) {
+                          responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
+                          responseObj.message = "Data already exists";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.upvotedComments.push(mongodb.ObjectId(params.comment));
+                      updateData = {
+                          googleId: params.googleId,
+                          upvotedComments: userData.upvotedComments
+                      }
+                      updateComment = true;
+                      updateCommentQuery = {
+                          $inc: {
+                              points: 1
+                          }
+                      };
+                    } else {
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The comment does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
-                    userData.upvotedComments.push(mongodb.ObjectId(params.comment));
-                    updateData = {
-                        googleId: params.googleId,
-                        upvotedComments: userData.upvotedComments
-                    }
-                    updateComment = true;
-                    updateCommentQuery = {
-                        $inc: {
-                            points: 1
-                        }
-                    };
                     break;
                 case "downvoteComment":
-                    if (!userData.upvotedComments.includes(mongodb.ObjectId(params.comment))) {
-                        responseObj.status  = errorCodes.BAD_REQUEST;
-                        responseObj.message = "Bad request";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
+                    valid = await checkComment(params.comment);
+                    if (valid) {
+                      if (!userData.upvotedComments.includes(mongodb.ObjectId(params.comment))) {
+                          responseObj.status  = errorCodes.BAD_REQUEST;
+                          responseObj.message = "Bad request";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.upvotedComments.map(comment => {
+                          if (comment.toString() === params.comment) {
+                              userData.upvotedComments.splice(userData.upvotedComments.indexOf(mongodb.ObjectId(params.comment)), 1);
+                          }
+                      })
+                      updateData = {
+                          googleId: params.googleId,
+                          upvotedComments: userData.upvotedComments
+                      }
+                      updateComment = true;
+                      updateCommentQuery = {
+                          $inc: {
+                              points: -1
+                          }
+                      };
+                    } else {
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The comment does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
-                    userData.upvotedComments.map(comment => {
-                        if (comment.toString() === params.comment) {
-                            userData.upvotedComments.splice(userData.upvotedComments.indexOf(mongodb.ObjectId(params.comment)), 1);
-                        }
-                    })
-                    updateData = {
-                        googleId: params.googleId,
-                        upvotedComments: userData.upvotedComments
-                    }
-                    updateComment = true;
-                    updateCommentQuery = {
-                        $inc: {
-                            points: -1
-                        }
-                    };
                     break;
                 case "favouriteSubmission":
-                    if (userData.favouriteSubmissions.includes(mongodb.ObjectId(params.submission))) {
-                        responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
-                        responseObj.message = "Data already exists";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
-                    }
-                    userData.favouriteSubmissions.push(mongodb.ObjectId(params.submission));
-                    updateData = {
-                        googleId: params.googleId,
-                        favouriteSubmissions: userData.favouriteSubmissions
+                    valid = await checkSubmission(params.submission);
+                    if (valid) {
+                      if (userData.favouriteSubmissions.includes(mongodb.ObjectId(params.submission))) {
+                          responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
+                          responseObj.message = "Data already exists";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.favouriteSubmissions.push(mongodb.ObjectId(params.submission));
+                      updateData = {
+                          googleId: params.googleId,
+                          favouriteSubmissions: userData.favouriteSubmissions
+                      }
+                    } else {  
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The submission does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
                     break;
                 case "favouriteComment":
-                    if (userData.favouriteComments.includes(mongodb.ObjectId(params.comment))) {
-                        responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
-                        responseObj.message = "Data already exists";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
-                    }
-                    userData.favouriteComments.push(mongodb.ObjectId(params.comment));
-                    updateData = {
-                        googleId: params.googleId,
-                        favouriteComments: userData.favouriteComments
+                    valid = await checkComment(params.comment);
+                    if (valid) {
+                      if (userData.favouriteComments.includes(mongodb.ObjectId(params.comment))) {
+                          responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
+                          responseObj.message = "Data already exists";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.favouriteComments.push(mongodb.ObjectId(params.comment));
+                      updateData = {
+                          googleId: params.googleId,
+                          favouriteComments: userData.favouriteComments
+                      }
+                    } else {
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The comment does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
                     break;
                 case "unfavouriteSubmission":
-                    if (!userData.favouriteSubmissions.includes(mongodb.ObjectId(params.submission))) {
-                        responseObj.status  = errorCodes.BAD_REQUEST;
-                        responseObj.message = "Bad request";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
-                    }
-                    userData.favouriteSubmissions.map(submission => {
-                        if (submission.toString() === params.submission) {
-                            userData.favouriteSubmissions.splice(userData.favouriteSubmissions.indexOf(mongodb.ObjectId(params.submission)), 1);
-                        }
-                    })
-                    updateData = {
-                        googleId: params.googleId,
-                        favouriteSubmissions: userData.favouriteSubmissions
+                    valid = await checkSubmission(params.submission);
+                    if (valid) {
+                      if (!userData.favouriteSubmissions.includes(mongodb.ObjectId(params.submission))) {
+                          responseObj.status  = errorCodes.BAD_REQUEST;
+                          responseObj.message = "Bad request";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.favouriteSubmissions.map(submission => {
+                          if (submission.toString() === params.submission) {
+                              userData.favouriteSubmissions.splice(userData.favouriteSubmissions.indexOf(mongodb.ObjectId(params.submission)), 1);
+                          }
+                      })
+                      updateData = {
+                          googleId: params.googleId,
+                          favouriteSubmissions: userData.favouriteSubmissions
+                      }
+                    } else { 
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The submission does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
                     break;
                 case "unfavouriteComment":
-                    if (!userData.favouriteComments.includes(mongodb.ObjectId(params.comment))) {
-                        responseObj.status  = errorCodes.BAD_REQUEST;
-                        responseObj.message = "Bad request";
-                        responseObj.data    = {};
-                        response.send(responseObj);
-                        return;
+                    valid = await checkComment(params.comment);
+                    if (valid) {
+                      if (!userData.favouriteComments.includes(mongodb.ObjectId(params.comment))) {
+                          responseObj.status  = errorCodes.BAD_REQUEST;
+                          responseObj.message = "Bad request";
+                          responseObj.data    = {};
+                          response.send(responseObj);
+                          return;
+                      }
+                      userData.favouriteComments.map(comment => {
+                          if (comment.toString() === params.comment) {
+                              userData.favouriteComments.splice(userData.favouriteComments.indexOf(mongodb.ObjectId(params.comment)), 1);
+                          }
+                      })
+                      updateData = {
+                          googleId: params.googleId,
+                          favouriteComments: userData.favouriteComments
+                      }
                     }
-                    userData.favouriteComments.map(comment => {
-                        if (comment.toString() === params.comment) {
-                            userData.favouriteComments.splice(userData.favouriteComments.indexOf(mongodb.ObjectId(params.comment)), 1);
-                        }
-                    })
-                    updateData = {
-                        googleId: params.googleId,
-                        favouriteComments: userData.favouriteComments
+                    else {
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+                      responseObj.message = "The comment does not exist";
+                      responseObj.data    = {};
+                      response.send(responseObj);
+                      return;
                     }
                     break;
                 default:
@@ -300,7 +395,7 @@ exports.update = async (request, response, next) => {
                                 responseObj.data    = userData;
                                 response.send(responseObj);
                             } else {
-                                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                                responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                                 responseObj.message = "No record found";
                                 responseObj.data    = {};
                                 response.send(responseObj);
@@ -321,7 +416,7 @@ exports.update = async (request, response, next) => {
                                 responseObj.data    = userData;
                                 response.send(responseObj);
                             } else {
-                                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                                responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                                 responseObj.message = "No record found";
                                 responseObj.data    = {};
                                 response.send(responseObj);
@@ -341,7 +436,7 @@ exports.update = async (request, response, next) => {
                         response.send(responseObj);
                     }
                 } else {
-                    responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                    responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                     responseObj.message = "No record found";
                     responseObj.data    = {};
                     response.send(responseObj);
@@ -447,7 +542,7 @@ exports.userSubmissions = (request, response) => {
                         console.log(error);
                     });
                 } else {
-                    responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                    responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                     responseObj.message = "No record found";
                     responseObj.data    = {};
                     response.send(responseObj);
@@ -514,7 +609,7 @@ exports.comments = async (request, response) => {
                     responseObj.message = "Success";
                     responseObj.data    = commentData;
                 } else {
-                    responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                    responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                     responseObj.message = "No record found";
                     responseObj.data    = {};
                 }
@@ -527,7 +622,7 @@ exports.comments = async (request, response) => {
                 response.send(responseObj);
             });
         } else {
-            responseObj.status  = errorCodes.DATA_NOT_FOUND;
+            responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
             responseObj.message = "No record found";
             responseObj.data    = {};
             response.send(responseObj);
@@ -571,7 +666,7 @@ exports.likedComments = async (request, response) => {
                 responseObj.message = "Success";
                 responseObj.data    = commentData;
             } else {
-                responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                 responseObj.message = "No record found";
                 responseObj.data    = {};
             }
@@ -584,7 +679,7 @@ exports.likedComments = async (request, response) => {
             response.send(responseObj);
         });
       } else {
-        responseObj.status  = errorCodes.DATA_NOT_FOUND;
+        responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
         responseObj.message = "No record found";
         responseObj.data    = {};
         response.send(responseObj);

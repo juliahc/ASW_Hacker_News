@@ -58,7 +58,8 @@ router.post("/:id/upvoteSubmission/:submission_id", auth.strict.bind(auth), asyn
         await user_ctrl.upvoteSubmission(req.user_auth.id, submissionId);
         res.status(200).json({"success": "The upvote have been submitted successfully"});
     } catch (e) {
-        res.status(500).json({"error_msg": e.message});
+        if (e.message === "Resource not found") res.status(404).json({"error_msg": "No such submission"});
+        else res.status(500).json({"error_msg": e.message});
     }
     return;
 });
@@ -74,7 +75,8 @@ router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), as
         await user_ctrl.downvoteSubmission(authId, submissionId);
         res.status(200).json({"success": "The downvote have been submitted successfully"});
     } catch (e) {
-        res.status(500).json({"error_msg": e.message});
+        if (e.message === "Resource not found") res.status(404).json({"error_msg": "No such submission"});
+        else res.status(500).json({"error_msg": e.message});
     }
 });
 
@@ -108,7 +110,9 @@ router.post("/:id/upvoteComment/:comment_id", auth.strict.bind(auth), async (req
         await user_ctrl.upvoteComment(authId, commentId);
         res.status(200).json({"success": "The upvote have been submitted successfully"});
     } catch (e) {
-        res.status(500).json({"error_msg": e.message});
+        if (e.message = "Resource not found") {
+            res.status(404).json({"error_msg": "No such comment"});
+        } else res.status(500).json({"error_msg": e.message});
     }
 });
 
@@ -123,9 +127,11 @@ router.post("/:id/downvoteComment/:comment_id", auth.strict.bind(auth), async (r
         await user_ctrl.downvoteComment(authId, commentId);
         res.status(200).json({"success": "The downvote have been submitted successfully"});
     } catch (e) {
-        res.status(500).json({"error_msg": e.message});
+        if (e.message = "Resource not found") {
+            res.status(404).json({"error_msg": "No such comment"});
+        } else res.status(500).json({"error_msg": e.message});
     }
-});
+}); 
 
 router.get("/:id/upvotedComments", auth.strict.bind(auth), async (req, res) => {
     try {
