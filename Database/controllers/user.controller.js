@@ -383,8 +383,6 @@ exports.userSubmissions = (request, response) => {
 
     let type = params.type; //up => upvoted submissions / fav=> favourite submissions
 
-    console.log("User id: ", params.googleId);
-
     userDatalayer.findUser({googleId: params.googleId})
     .then((userData) => {
         if (userData !== null && typeof userData !== undefined) {
@@ -406,10 +404,11 @@ exports.userSubmissions = (request, response) => {
             let orderBy = {
                 "createdAt": -1
             };
-            let limit = (params.hasOwnProperty("limit")) ? { "$limit": parseInt(params.limit) } : "";
+            let limit = (params.hasOwnProperty("limit") && params.limit !== "")  ? { "$limit": parseInt(params.limit) } : "";
             //search submissions by aggregation
-            let skip = (params.hasOwnProperty("offset")) ? { "$skip": parseInt(params.offset) } : "";
+            let skip = (params.hasOwnProperty("offset") && params.offset !== "") ? { "$skip": parseInt(params.offset) } : "";
             let aggregateArr = createAggregateArray(skip, criteria, orderBy, limit);
+            console.log("Aggregate array: ", aggregateArr);
             submissionDatalayer
             .aggregateSubmission(aggregateArr)
             .then((submissionData) => {
@@ -430,7 +429,7 @@ exports.userSubmissions = (request, response) => {
                     submissionDatalayer
                     .aggregateSubmission(aggregateQuery)
                     .then((ret => {
-                        if (params.limit == 0) {
+                        if (params.limit !== '' && params.limit == 0) {
                           ret[0].submissionsLeft -= parseInt(params.offset);
                           responseObj.status  = errorCodes.SUCCESS;
                           responseObj.message = "Success";
@@ -791,10 +790,10 @@ function createAggregateArray (skip, match, orderBy, limit) {
           '$sort': orderBy
         }
       ];
-    if (skip !== "") {
+    if (skip !== "" && skip.$skip > 0) {
         aggregateArr.push(skip);
     }
-    if (limit !== "" && limit > 0) {
+    if (limit !== "" && limit.$limit > 0) {
         aggregateArr.push(limit);
     }
     return aggregateArr;

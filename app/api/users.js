@@ -79,12 +79,13 @@ router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), as
 });
 
 router.get("/:id/upvotedSubmissions", auth.strict.bind(auth), async (req, res) => {
-    const {limit, offset} = req.query;
+    let {limit, offset} = req.query;
 
-    if(!limit || !offset) {
-        res.status(400).json({"error_msg": "Parameters missing in query. Must contain [limit, offset]"});
-        return;
+    if (limit === undefined || offset === undefined) {
+        limit = "";
+        offset = ""; 
     }
+
     try {
         let sub_page = await user_ctrl.getUpvotedSubmissions(limit, offset, req.user_auth.id);
         sub_page.pop();
