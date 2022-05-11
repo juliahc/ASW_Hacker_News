@@ -151,7 +151,7 @@ exports.update = async (request, response, next) => {
             let updateCommentQuery = {};
             switch (updateType) {
                 case "upvoteSubmission":
-                    valid = await checkSubmission(params.submissionId);
+                    valid = await checkSubmission(params.submission);
                     if (valid) {
                       if (userData.upvotedSubmissions.includes(mongodb.ObjectId(params.submission))) {
                           responseObj.status  = errorCodes.DATA_ALREADY_EXISTS;
@@ -180,7 +180,7 @@ exports.update = async (request, response, next) => {
                     }
                     break;
                 case "downvoteSubmission":
-                    valid = await checkSubmission(params.submissionId);
+                    valid = await checkSubmission(params.submission);
                     if (valid) {
                       if (!userData.upvotedSubmissions.includes(mongodb.ObjectId(params.submission))) {
                           responseObj.status  = errorCodes.BAD_REQUEST;
