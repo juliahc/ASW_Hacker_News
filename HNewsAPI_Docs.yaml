@@ -11,8 +11,7 @@ info:
   version: 1.0.0-oas3
 servers:
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/HNews/HNewsAPI/1.0.0
-  - url: http://ec2-15-237-124-151.eu-west-3.compute.amazonaws.com:3000/api
+    url: http://ec2-15-237-124-151.eu-west-3.compute.amazonaws.com:3000/api
 tags:
   - name: user
     description: A user object that holds the account information.
@@ -109,7 +108,7 @@ paths:
       parameters:
         - name: type
           in: query
-          description: type of the submissions {"all", "ask", "url"}
+          description: type of the submissions {"any", "ask", "url"}
           required: true
           style: form
           explode: true
@@ -427,6 +426,24 @@ paths:
           schema:
             type: string
             format: string
+        - name: limit
+          in: query
+          description: number of submissions
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: Upvoted submissions returned successfully.
