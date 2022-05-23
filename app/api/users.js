@@ -94,7 +94,6 @@ router.get("/:id/upvotedSubmissions", auth.strict.bind(auth), async (req, res) =
     try {
         let sub_page = await user_ctrl.getUpvotedSubmissions(limit, offset, req.user_auth.id);
         sub_page.pop();
-        sub_page.forEach(submission => submission.formatCreatedAtAsTimeAgo());
         res.status(200).json({sub_page});
     } catch {
         res.status(404).json({"error_msg": "No upvoted submissions or not user"});
@@ -141,7 +140,6 @@ router.get("/:id/upvotedComments", auth.strict.bind(auth), async (req, res) => {
         let comment_list = await user_ctrl.getUpvotedComments(req.user_auth.id);
         comment_list.forEach(comment => {
             comment.addNavigationalIdentifiers(null, 0);
-            comment.formatCreatedAtAsTimeAgo();
         });
         res.status(200).json({comment_list});
     } catch {

@@ -102,7 +102,6 @@ router.get("/:id", auth.strict.bind(auth), async (req, res) => {
     // Get one submission
     try {
         let submission = await sub_ctrl.fetchSubmission(req.params.id, req.user_auth.id);
-        submission.formatCreatedAtAsTimeAgo();
         res.status(200).json(submission);
     } catch (e) {
         res.status(404).json({"error_msg": e.message});
