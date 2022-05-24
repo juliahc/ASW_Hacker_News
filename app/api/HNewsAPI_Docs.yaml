@@ -330,7 +330,7 @@ paths:
           description: User not found
       security:
       - api_key: []
-  /users/{userId}/upvoteSubmission/{submissionId}:
+  /users/upvoteSubmission/{submissionId}:
     post:
       tags:
         - user
@@ -360,15 +360,13 @@ paths:
       responses:
         '200':
           description: Submission upvoted successfully.
-        '403':
-          description: Only the owner of the account can upvote a submission.
         '409':
           description: The submission was already upvoted.
         '500':
           description: Something went wrong when interacting with database.
       security:
       - api_key: []
-  /users/{userId}/downvoteSubmission/{submissionId}:
+  /users/downvoteSubmission/{submissionId}:
     post:
       tags:
         - user
@@ -398,15 +396,13 @@ paths:
       responses:
         '200':
           description: Submission downvoted successfully.
-        '403':
-          description: Only the owner of the account can downvote a submission.
         '409':
           description: The submission was not upvoted.
         '500':
           description: Something went wrong when interacting with database.
       security:
       - api_key: []
-  /users/{userId}/upvotedSubmissions:
+  /users/upvotedSubmissions:
     get:
       tags:
         - user
@@ -448,7 +444,7 @@ paths:
           description: No upvoted submissions or no such user.
       security:
       - api_key: []
-  /users/{userId}/upvoteComment/{commentId}:
+  /users/upvoteComment/{commentId}:
     post:
       tags:
         - user
@@ -476,15 +472,13 @@ paths:
       responses:
         '200':
           description: Comment upvoted successfully.
-        '403':
-          description: Only the owner of the account can upvote a comment.
         '409':
           description: The comment was already upvoted.
         '500':
           description: Something went wrong when interacting with database.
       security:
       - api_key: []
-  /users/{userId}/downvoteComment/{commentId}:
+  /users/downvoteComment/{commentId}:
     post:
       tags:
         - user
@@ -514,15 +508,13 @@ paths:
       responses:
         '200':
           description: Comment downvoted successfully.
-        '403':
-          description: Only the owner of the account can downvote a comment.
         '409':
           description: The comment was not upvoted.
         '500':
           description: Something went wrong when interacting with database.
       security:
       - api_key: []
-  /users/{userId}/upvotedComments:
+  /users/upvotedComments:
     get:
       tags:
         - user

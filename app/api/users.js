@@ -1,7 +1,6 @@
 const express = require("express");
 const UserCtrl = require("../domain/controllers/UserCtrl");
 const AuthMiddleware = require("./api_auth_middleware");
-const url = require('url');
 
 const router = express.Router();
 module.exports = router;
@@ -48,11 +47,7 @@ router.put("/:id", auth.strict.bind(auth), async (req, res) => {
     }
 });
 
-router.post("/:id/upvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
-    if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can upvote a submission"});
-        return;
-    }
+router.post("/upvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
     const submissionId = req.params.submission_id;
     try {
         await user_ctrl.upvoteSubmission(req.user_auth.id, submissionId);
@@ -65,11 +60,7 @@ router.post("/:id/upvoteSubmission/:submission_id", auth.strict.bind(auth), asyn
     return;
 });
 
-router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
-    if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can downvote a submission"});
-        return;
-    }
+router.post("/downvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
     const authId = req.user_auth.id;
     const submissionId = req.params.submission_id;
     try {
@@ -82,7 +73,7 @@ router.post("/:id/downvoteSubmission/:submission_id", auth.strict.bind(auth), as
     }
 });
 
-router.get("/:id/upvotedSubmissions", auth.strict.bind(auth), async (req, res) => {
+router.get("/upvotedSubmissions", auth.strict.bind(auth), async (req, res) => {
     let {limit, offset} = req.query;
 
     if (limit === undefined) {
@@ -100,11 +91,7 @@ router.get("/:id/upvotedSubmissions", auth.strict.bind(auth), async (req, res) =
     }
 });
 
-router.post("/:id/upvoteComment/:comment_id", auth.strict.bind(auth), async (req, res) => {
-    if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can upvote a comment"});
-        return;
-    }
+router.post("/upvoteComment/:comment_id", auth.strict.bind(auth), async (req, res) => {
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -118,11 +105,7 @@ router.post("/:id/upvoteComment/:comment_id", auth.strict.bind(auth), async (req
     }
 });
 
-router.post("/:id/downvoteComment/:comment_id", auth.strict.bind(auth), async (req, res) => {
-    if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can downvote a comment"});
-        return;
-    }
+router.post("/downvoteComment/:comment_id", auth.strict.bind(auth), async (req, res) => {
     const authId = req.user_auth.id;
     const commentId = req.params.comment_id;
     try {
@@ -135,12 +118,9 @@ router.post("/:id/downvoteComment/:comment_id", auth.strict.bind(auth), async (r
     }
 }); 
 
-router.get("/:id/upvotedComments", auth.strict.bind(auth), async (req, res) => {
+router.get("/upvotedComments", auth.strict.bind(auth), async (req, res) => {
     try {
         let comment_list = await user_ctrl.getUpvotedComments(req.user_auth.id);
-        comment_list.forEach(comment => {
-            comment.addNavigationalIdentifiers(null, 0);
-        });
         res.status(200).json({comment_list});
     } catch {
         res.status(404).json({"error_msg": "No upvoted comments or not user"});
