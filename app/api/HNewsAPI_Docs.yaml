@@ -339,15 +339,6 @@ paths:
         submissionId.
       operationId: upvoteSubmission
       parameters:
-        - name: userId
-          in: path
-          description: ID of the user who upvotes the submission
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-            format: string
         - name: submissionId
           in: path
           description: ID of the submission wanted to upvote
@@ -377,15 +368,6 @@ paths:
         submissionId.
       operationId: downvoteSubmission
       parameters:
-        - name: userId
-          in: path
-          description: ID of the user who downvotes the submission
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-            format: string
         - name: submissionId
           in: path
           description: ID of the submission wanted to downvote
@@ -412,15 +394,6 @@ paths:
         - user
       summary: Finds the upvoted submissions by the user identified by userId
       parameters:
-        - name: userId
-          in: path
-          description: ID of the user
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-            format: string
         - name: limit
           in: query
           description: number of submissions
@@ -455,15 +428,6 @@ paths:
       summary: The user identified by userId upvotes a comment identified by commentId.
       operationId: upvoteComment
       parameters:
-        - name: userId
-          in: path
-          description: ID of the user who upvotes the comment
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-            format: string
         - name: commentId
           in: path
           description: ID of the comment wanted to upvote
@@ -493,15 +457,6 @@ paths:
         commentId.
       operationId: downvoteComment
       parameters:
-        - name: userId
-          in: path
-          description: ID of the user who downvotes the comment
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-            format: string
         - name: commentId
           in: path
           description: ID of the comment wanted to downvote
@@ -527,16 +482,6 @@ paths:
       tags:
         - user
       summary: Finds the upvoted comments by the user identified by userId
-      parameters:
-        - name: userId
-          in: path
-          description: ID of the user
-          required: true
-          style: simple
-          explode: false
-          schema:
-            type: string
-            format: string
       responses:
         '200':
           description: Upvoted comments returned successfully.
