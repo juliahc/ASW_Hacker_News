@@ -8,45 +8,6 @@ module.exports = router;
 const user_ctrl = new UserCtrl();
 const auth = new AuthMiddleware();
 
-router.get("/:id", auth.strict.bind(auth), async (req, res) => {
-    try {
-        let user = await user_ctrl.profile(req.user_auth.id, req.params.id);
-        res.status(200).json(user);
-    } catch {
-        res.status(404).json({"error_msg": "No such user"});
-    }
-});
-
-router.put("/:id", auth.strict.bind(auth), async (req, res) => {
-    if (req.params.id !== req.user_auth.id) {
-        res.status(403).json({"error_msg": "Only the owner of the account can update its profile"});
-        return;
-    }
-
-    let {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
-    
-    try {
-        if (maxvisit !== undefined)     maxvisit = parseInt(maxvisit);
-        if (minaway !== undefined)      minaway = parseInt(minaway);
-        if (delay !== undefined)        delay = parseInt(delay);
-    } catch (e) {
-        res.status(400).json({"error_msg": "Form values are not in correct format"});
-        return;
-    }
-
-    if (maxvisit < 0 || minaway < 0 || delay < 0) {
-        res.status(409).json({"error_msg": "Form integers must be greater or equal than zero"});
-        return;
-    }
-
-    try {
-        let user = await user_ctrl.update(req.params.id, about, showdead, noprocrast, maxvisit, minaway, delay);
-        res.status(200).json(user);
-    } catch (e) {
-        res.status(500).json({"error_msg": e.message});
-    }
-});
-
 router.post("/upvoteSubmission/:submission_id", auth.strict.bind(auth), async (req, res) => {
     const submissionId = req.params.submission_id;
     try {
@@ -124,5 +85,44 @@ router.get("/upvotedComments", auth.strict.bind(auth), async (req, res) => {
         res.status(200).json({comment_list});
     } catch {
         res.status(404).json({"error_msg": "No upvoted comments or not user"});
+    }
+});
+
+router.get("/:id", auth.strict.bind(auth), async (req, res) => {
+    try {
+        let user = await user_ctrl.profile(req.user_auth.id, req.params.id);
+        res.status(200).json(user);
+    } catch {
+        res.status(404).json({"error_msg": "No such user"});
+    }
+});
+
+router.put("/:id", auth.strict.bind(auth), async (req, res) => {
+    if (req.params.id !== req.user_auth.id) {
+        res.status(403).json({"error_msg": "Only the owner of the account can update its profile"});
+        return;
+    }
+
+    let {about, showdead, noprocrast, maxvisit, minaway, delay} = req.body;
+    
+    try {
+        if (maxvisit !== undefined)     maxvisit = parseInt(maxvisit);
+        if (minaway !== undefined)      minaway = parseInt(minaway);
+        if (delay !== undefined)        delay = parseInt(delay);
+    } catch (e) {
+        res.status(400).json({"error_msg": "Form values are not in correct format"});
+        return;
+    }
+
+    if (maxvisit < 0 || minaway < 0 || delay < 0) {
+        res.status(409).json({"error_msg": "Form integers must be greater or equal than zero"});
+        return;
+    }
+
+    try {
+        let user = await user_ctrl.update(req.params.id, about, showdead, noprocrast, maxvisit, minaway, delay);
+        res.status(200).json(user);
+    } catch (e) {
+        res.status(500).json({"error_msg": e.message});
     }
 });
