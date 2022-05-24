@@ -360,8 +360,10 @@ paths:
       responses:
         '200':
           description: Submission upvoted successfully.
+        '404':
+          description: No such submission.
         '409':
-          description: The submission was already upvoted.
+          description: Submission was already upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -396,8 +398,10 @@ paths:
       responses:
         '200':
           description: Submission downvoted successfully.
+        '404':
+          description: No such submission.
         '409':
-          description: The submission was not upvoted.
+          description: Submission was already NOT upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -472,8 +476,10 @@ paths:
       responses:
         '200':
           description: Comment upvoted successfully.
+        '404':
+          description: No such comment.
         '409':
-          description: The comment was already upvoted.
+          description: Comment was already upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
@@ -508,8 +514,10 @@ paths:
       responses:
         '200':
           description: Comment downvoted successfully.
+        '404':
+          description: No such comment.
         '409':
-          description: The comment was not upvoted.
+          description: Comment was already NOT upvoted by user.
         '500':
           description: Something went wrong when interacting with database.
       security:
