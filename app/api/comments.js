@@ -7,14 +7,10 @@ module.exports = router;
 const comm_ctrl = new CommentCtrl();
 const auth = new AuthMiddleware();
 
-router.post("/comments/:id/replies", auth.passthrough, async (req, res) => {
-    if (req.user_auth === null) {
-        res.status(401).json( { "error_msg": "Not logged in" } );
-        return;
-    }
+router.post("/:id/replies", auth.strict.bind(auth), async (req, res) => {
     const {text} = req.body;
 
-    if (text === "") { 
+    if (!text || text === "") { 
         res.status(400).json( { "error_msg": "No text" } );
         return;
     }
@@ -27,19 +23,9 @@ router.post("/comments/:id/replies", auth.passthrough, async (req, res) => {
     }
 });
 
-router.get("/threads", auth.passthrough, async (req, res) => {
-    if (!req.query || !req.query.id) {
-        if (req.user_auth !== null) res.redirect("/threads?id=" + req.user_auth.id);
-        else res.status(400).json( { "error_msg": "Missing id" } );
-        return;
-    }
+router.get("/user/:id", auth.strict.bind(auth), async (req, res) => {
     try {
-        let auth_id = req.user_auth !== null ? req.user_auth.id : null;
-        let comment_list = await comm_ctrl.fetchCommentsOfUser(req.query.id, auth_id);
-        comment_list.forEach(comment => {
-            comment.addNavigationalIdentifiers(null, 0);
-            comment.formatCreatedAtAsTimeAgo();
-        });
+        let comment_list = await comm_ctrl.fetchCommentsOfUser(req.params.id, req.user_auth.id);
         res.status(200).json(comment_list);
     } catch {
         res.status(404).json( { "error_msg": "No such user" } );

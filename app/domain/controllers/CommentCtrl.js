@@ -19,7 +19,8 @@ CommentCtrl.prototype.postComment = async function(submission, text, googleId, u
     let comment = new Comment({submission: submission, text: text, googleId: googleId, username: username, parent: null});
     delete comment.parent;
     let resp = await this.db.postRequest("/newComment", comment);
-    return new Comment(resp.data);
+    if (resp.status && resp.status === 200) return new Comment(resp.data);
+    else throw Error(resp.status);
 }
 
 CommentCtrl.prototype.postReply = async function(parent, text, googleId, username) {

@@ -20,3 +20,7 @@ Node JS & Express & MongoDB
 ## Hosted app
 
 [App - Hacker News](http://ec2-15-237-124-151.eu-west-3.compute.amazonaws.com:3000/)
+
+## API Folder
+
+[app/api](https://github.com/juliahc/ASW_Hacker_News/tree/main/app/api)

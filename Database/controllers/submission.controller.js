@@ -10,6 +10,7 @@ const db = mongoose.connect(process.env.MONGODB_URL, {
 
 const errorCodes = require("../helpers/errorCodes.helper.js");
 
+const userDatalayer = require("../datalayers/user.datalayer.js");
 const submissionDatalayer = require("../datalayers/submission.datalayer");
 const askDatalayer = require("../datalayers/ask.datalayer");
 const urlDatalayer = require("../datalayers/url.datalayer");
@@ -26,7 +27,7 @@ exports.find = async (request, response) => {
       response.send(responseObj);
       return;
   }
-  if (mongodb.ObjectId.isValid(mongodb.ObjectId(id))) {
+  if (mongodb.ObjectId.isValid(id)) {
     const criteria = {};
     criteria["$and"] = [];
     criteria["$and"].push({
@@ -37,7 +38,17 @@ exports.find = async (request, response) => {
     let aggregateArr = createAggregateSubmissionArray(criteria);
     submissionDatalayer.aggregateSubmission(aggregateArr)
     .then((submissionData) => {
+      console.log("THEN, submissionData: ", submissionData);
           if (submissionData !== null && typeof submissionData !== undefined) {
+            if (submissionData[0].comments == 0) {
+              let submission = JSON.parse(JSON.stringify(submissionData[0]));
+              submission.comments = [];
+              responseObj.status  = errorCodes.SUCCESS;
+              responseObj.message = "Success";
+              responseObj.data    = submission;
+              response.send(responseObj);
+              return;
+            } else {
               //The submission exists on the database. Now we need to get the comments
               const criteria = {};
               criteria["$and"] = [];
@@ -63,33 +74,36 @@ exports.find = async (request, response) => {
                     responseObj.message = "Success";
                     responseObj.data    = submission;
                   } else {
-                      responseObj.status  = errorCodes.DATA_NOT_FOUND;
+                      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
                       responseObj.message = "No record found";
                       responseObj.data    = {};
                   }
                   response.send(responseObj);
               })
               .catch(error => {
-                  responseObj.status  = errorCodes.SYNTAX_ERROR;
+                  responseObj.status  = errorCodes.SUCCESS;
                   responseObj.message = error;
-                  responseObj.data    = {};
+                  responseObj.data    = submissionData;
                   response.send(responseObj);
               });
+            }
+              
           } else {
-              responseObj.status  = errorCodes.DATA_NOT_FOUND;
+              responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
               responseObj.message = "No record found";
               responseObj.data    = {};
               response.send(responseObj);
           }
       })
       .catch(error => {
+        console.log("CATCH");
           responseObj.status  = errorCodes.SYNTAX_ERROR;
           responseObj.message = error;
           responseObj.data    = {};
           response.send(responseObj);
       });
   } else {
-      responseObj.status  = errorCodes.SYNTAX_ERROR;
+      responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
       responseObj.message = "Invalid id";
       responseObj.data    = {};
       response.send(responseObj);
@@ -99,7 +113,7 @@ exports.find = async (request, response) => {
 
 exports.page = async (request, response) => {
     let params = {}
-    if (request.query.hasOwnProperty("p") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
+    if (request.query.hasOwnProperty("offset") && request.query.hasOwnProperty("limit") && request.query.hasOwnProperty("t") && request.query.hasOwnProperty("o")) {
         params = request.query;
     } else {
         responseObj.status  = errorCodes.REQUIRED_PARAMETER_MISSING;
@@ -108,6 +122,8 @@ exports.page = async (request, response) => {
         response.send(responseObj);
         return;
     }
+
+    console.log("params: ", params);
 
     let orderBy = {};
 
@@ -121,13 +137,21 @@ exports.page = async (request, response) => {
         });
     }
     if (request.query.usr !== undefined && request.query.usr !== "") {
-      criteria["$and"].push({
-            googleId: {
-                $eq: params.usr
-            }
-        });
+      let res = await userDatalayer.findUser({"googleId": params.usr}).then();
+      if (res !== null && typeof res !== undefined) {
+        criteria["$and"].push({
+              googleId: {
+                  $eq: params.usr
+              }
+          });
+        } else {
+          responseObj.status  = errorCodes.RESOURCE_NOT_FOUND;
+          responseObj.message = "User not found";
+          responseObj.data    = {};
+          response.send(responseObj);
+          return;
+      }
     }
-
     switch(request.query.o) {
         case "new":
             orderBy = {
@@ -147,7 +171,7 @@ exports.page = async (request, response) => {
         delete criteria['$and'];
     }
 
-    let aggregateArr = createAggregateArray(((request.query.p - 1) * 10), criteria, orderBy);
+    let aggregateArr = await createAggregateArray(params.offset, params.limit, criteria, orderBy);
     //Search submissions by aggregation -> match: any, url or ask. orderBy: points, createdAt (desc), skipping fitst (page-1)*10 elements documents, (as we only print 10 elements)
     submissionDatalayer
     .aggregateSubmission(aggregateArr)
@@ -175,11 +199,18 @@ exports.page = async (request, response) => {
             submissionDatalayer
             .aggregateSubmission(aggregateQuery)
             .then((ret => {
-                ret[0].submissionsLeft -= (request.query.p * 10);
-                submissionData.push(ret[0]);
-                responseObj.status  = errorCodes.SUCCESS;
-                responseObj.message = "Success";
-                responseObj.data    = submissionData;
+                if (parseInt(request.query.limit) === 0) {
+                    ret[0].submissionsLeft -= parseInt(params.offset);
+                    responseObj.status  = errorCodes.SUCCESS;
+                    responseObj.message = "Success";
+                    responseObj.data    = [{"submissionsLeft": ret[0].submissionsLeft}];
+                } else {
+                  ret[0].submissionsLeft -= (parseInt(request.query.offset) + parseInt(request.query.limit));
+                  submissionData.push(ret[0]);
+                  responseObj.status  = errorCodes.SUCCESS;
+                  responseObj.message = "Success";
+                  responseObj.data    = submissionData;
+                }
                 response.send(responseObj);
             }))
             .catch((err) => {
@@ -533,8 +564,8 @@ function createAggregateSubmissionArray (match) {
       ]
 }
 
-function createAggregateArray (page, match, orderBy) {
-    return [
+async function createAggregateArray (offset, limit, match, orderBy) {
+    let returnStatement =  [
         {
           '$match': match
         }, {
@@ -597,11 +628,17 @@ function createAggregateArray (page, match, orderBy) {
             }
           }, {
           '$sort': orderBy
-        }, {
-            '$skip': page
-        },
-        {
-            '$limit': 10
         }
       ];
+    if (offset > 0) { 
+      returnStatement.push({
+        '$skip': parseInt(offset)
+      });
+    }
+    if (limit > 0) { 
+      returnStatement.push({
+        '$limit': parseInt(limit)
+      });
+    }
+    return returnStatement;
 }

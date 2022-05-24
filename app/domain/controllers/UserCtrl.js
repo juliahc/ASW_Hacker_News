@@ -70,20 +70,23 @@ UserCtrl.prototype.profile = async function(authId, id) {
 
 UserCtrl.prototype.update = async function(authId, about, showdead, noprocrast, maxvisit, minaway, delay) {
     let postObject = { 
-        "googleId": authId,
-        "about": about,
-        "showdead": showdead,
-        "noprocrast": noprocrast,
-        "maxvisit": maxvisit,
-        "minaway": minaway,
-        "delay": delay
+        "googleId": authId
     };
+
+    if (about != undefined) postObject.about = about;
+    if (showdead != undefined) postObject.showdead = showdead;
+    if (noprocrast != undefined) postObject.noprocrast = noprocrast;
+    if (maxvisit != undefined) postObject.maxvisit = maxvisit;
+    if (minaway != undefined) postObject.minaway = minaway;
+    if (delay != undefined) postObject.delay = delay;
+
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    return new User(resp.data);
 }
 
-UserCtrl.prototype.getUpvotedSubmissions = async function(page, authId) {
-    let resp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up", "p": page});
+UserCtrl.prototype.getUpvotedSubmissions = async function(limit, offset, authId) {
+    let resp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up", "limit": limit, "offset": offset});
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];
@@ -117,6 +120,7 @@ UserCtrl.prototype.upvoteSubmission = async function(authId, submissionId) {
     let resp = await this.db.postRequest('/updateUser', postObject);
     
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    if (resp.status == this.db.errors.DATA_ALREADY_EXISTS) { throw Error('Already upvoted'); }
 }
 
 UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
@@ -126,6 +130,7 @@ UserCtrl.prototype.upvoteComment = async function(authId, commentId) {
         "type": "upvoteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    if (resp.status == this.db.errors.DATA_ALREADY_EXISTS) { throw Error('Already upvoted'); }
 }
 
 UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
@@ -135,6 +140,7 @@ UserCtrl.prototype.downvoteSubmission = async function(authId, submissionId) {
         "type": "downvoteSubmission" };
     let resp = await this.db.postRequest('/updateUser', postObject);
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
+    if (resp.status == this.db.errors.BAD_REQUEST) { throw Error('The submission was not upvoted!'); }
 }
 
 UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
@@ -143,11 +149,12 @@ UserCtrl.prototype.downvoteComment = async function(authId, commentId) {
         "comment": commentId,
         "type": "downvoteComment" };
     let resp = await this.db.postRequest('/updateUser', postObject);
+    if (resp.status == this.db.errors.BAD_REQUEST) { throw Error('The comment was not upvoted!'); }
     if (resp.status == this.db.errors.RESOURCE_NOT_FOUND) { throw Error('Resource not found'); }
 }
 
-UserCtrl.prototype.getFavoriteSubmissions = async function(page, id) {
-    let resp = await this.db.getRequest("/userSubmissions", {"googleId": id, "type": "fav", "p": page});
+UserCtrl.prototype.getFavoriteSubmissions = async function(limit, offset, id) {
+    let resp = await this.db.getRequest("/userSubmissions", {"googleId": id, "type": "fav", "limit": limit, "offset": offset});
     if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
     let data = resp.data;
     let result = [];

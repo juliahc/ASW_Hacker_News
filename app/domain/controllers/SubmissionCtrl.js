@@ -1,6 +1,7 @@
 const AskSubmission = require("../AskSubmission");
 const UrlSubmission = require("../UrlSubmission");
 const DatabaseCtrl = require("./DatabaseCtrl");
+const CommentCtrl = require("./CommentCtrl");
 const axios = require("axios"); 
 
 let SubmissionCtrl;
@@ -26,7 +27,8 @@ let SubmissionCtrl;
                 delete submission.ask;
                 return new AskSubmission(submission);
             }
-        }
+        };
+        this.comm_ctrl = new CommentCtrl();
     };
 }());
 
@@ -83,24 +85,24 @@ SubmissionCtrl.prototype.fetchSubmission = async function(id, authId) {
     return submission;
 }
 
-SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(page, type, order, googleId, authId) {
+SubmissionCtrl.prototype.fetchSubmissionsForParams = async function(limit, offset, type, order, googleId, authId) {
     if (!this.types.includes(type)) throw TypeError("Type of submissions is not supported.");
     if (!this.orders.includes(order)) throw TypeError("Order of submissions is not supported.");
-    if (page <= 0) throw TypeError("Page must be greater than zero.");
+    if (limit < 0 || offset < 0) throw TypeError("Limit and Offset must be >= than zero.");
     // Get logged user upvoted submissions
     let upvSubIds = [];
     if (authId !== null) {
         let usrUpvRsp = await this.db.getRequest("/userSubmissions", {"googleId": authId, "type": "up"});
-        if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+        if (usrUpvRsp.hasOwnProperty("status") && usrUpvRsp.status !== this.db.errors.SUCCESS) throw Error(usrUpvRsp.message);
         usrUpvRsp.data.forEach(submission => {
             upvSubIds.push(submission._id);
         });
     }
     // Get submissions list
-    let params = {p: page, t: type, o: order};
+    let params = {limit: (limit !== undefined) ? limit : "", offset: (offset !== undefined) ? offset : "", t: type, o: order};
     if (googleId !== null) params["usr"] = googleId;
     let resp = await this.db.getRequest("/submission_page", params);
-    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error("Something went wrong in the database");
+    if (resp.hasOwnProperty("status") && resp.status !== this.db.errors.SUCCESS) throw Error(resp.message);
     let data = resp.data;
     let result = [];
     for (let i = 0; i < data.length-1; i++) {
