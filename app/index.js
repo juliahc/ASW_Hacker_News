@@ -29,8 +29,8 @@ app.use('/api/comments', require("./api/comments"));
 app.use('/api/users', require("./api/users"));
 
 function listen() {
-    app.listen(3000);
-    console.log("Express app started on port " + 3000);
+    app.listen(443);
+    console.log("Express app started on port " + 443);
 }
 
 listen();
