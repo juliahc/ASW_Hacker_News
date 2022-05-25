@@ -1,62 +1,49 @@
 const { google } = require('googleapis');
+require("dotenv").config();
 
-const googleConfig = {
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirect: process.env.GOOGLE_REDIRECT_URL,
+const queryString = require("query-string");
+const axios = require("axios");
+
+const stringifiedParams = queryString.stringify({
+  client_id: process.env.GOOGLE_CLIENT_ID,
+  redirect_uri: process.env.GOOGLE_REDIRECT_URL,
+  scope: [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ].join(' '), // space seperated string
+  response_type: 'code',
+  access_type: 'offline',
+  prompt: 'consent',
+});
+
+const googleLoginUrl = `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`;
+
+async function getAccessTokenFromCode(code) {
+  const { data } = await axios({
+    url: `https://oauth2.googleapis.com/token`,
+    method: 'post',
+    data: {
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URL,
+      grant_type: 'authorization_code',
+      code,
+    },
+  });
+  return data.access_token;
 };
 
-const defaultScope = [
-  'https://www.googleapis.com/auth/plus.me',
-  'https://www.googleapis.com/auth/userinfo.email',
-];
-
-function createConnection() {
-  return new google.auth.OAuth2(
-    googleConfig.clientId,
-    googleConfig.clientSecret,
-    googleConfig.redirect
-  );
-}
-
-function getConnectionUrl(auth) {
-  return auth.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
-    scope: defaultScope
+async function getGoogleUserInfo(access_token) {
+  const { data } = await axios({
+    url: 'https://www.googleapis.com/oauth2/v2/userinfo',
+    method: 'get',
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+    },
   });
-}
+  return data;
+};
 
-function getGooglePlusApi(auth) {
-  return google.plus({ version: 'v1', auth });
-}
-
-/**
- * Part 1: Create a Google URL and send to the client to log in the user.
- */
-function urlGoogle() {
-  const auth = createConnection();
-  const url = getConnectionUrl(auth);
-  return url;
-}
-
-/**
- * Part 2: Take the "code" parameter which Google gives us once when the user logs in, then get the user's email and id.
- */
-async function getGoogleAccountFromCode(code) {
-  const data = await auth.getToken(code);
-  const tokens = data.tokens;
-  const auth = createConnection();
-  auth.setCredentials(tokens);
-  const plus = getGooglePlusApi(auth);
-  const me = await plus.people.get({ userId: 'me' });
-  const userGoogleId = me.data.id;
-  const userGoogleName = me.data.displayName;
-  const userGoogleEmail = me.data.emails && me.data.emails.length && me.data.emails[0].value;
-  return {
-    id: userGoogleId,
-    username: userGoogleName,
-    email: userGoogleEmail,
-    tokens: tokens
-  };
-}
+module.exports.googleLoginUrl = googleLoginUrl;
+module.exports.getAccessTokenFromCode = getAccessTokenFromCode;
+module.exports.getGoogleUserInfo = getGoogleUserInfo;

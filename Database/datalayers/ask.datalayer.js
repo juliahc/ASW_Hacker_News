@@ -1,7 +1,6 @@
 const AskModel = require('../models/ask.model')
 
 exports.createAsk= async (params) => {
-    console.log(params);
     return new Promise((resolve, reject) => {
         AskModel
         .create(params)

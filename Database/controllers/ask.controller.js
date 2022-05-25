@@ -6,7 +6,6 @@ const errorCodes = require("../helpers/errorCodes.helper.js");
 const askDatalayer = require("../datalayers/ask.datalayer");
 
 exports.find = async (request, response) => {
-    console.log(request);
     let id;
     if (request.query._id) {
         id = request.query._id;
@@ -61,7 +60,6 @@ exports.create = async (request, response, next) => {
     }
     askDatalayer.createAsk(params)
     .then((askData) => {
-        console.log(askData);
         if (askData !== null && typeof askData !== undefined) {
             responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Success";

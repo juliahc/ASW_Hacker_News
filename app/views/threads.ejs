@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Hacker News</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="stylesheets/application.css">
+        <script src="https://kit.fontawesome.com/733e866dde.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="javascript/news.js"></script>
+    </head>
+    <body>
+        <main>
+            <table id="content" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <!--Menu-->
+                    <tr>
+                        <td>
+                            <%- include("./nav.ejs") %>
+                        </td>
+                    </tr>
+                    <!--Space-->
+                    <tr id="space-10px"></tr>
+                    <!--Comments-->
+                    <tr>
+                        <td>
+                            <% if (locals.comments) {
+                                comments.forEach((c) => { %>
+                                    <%- include("./comment.ejs", {comment: c, pos: 0}) %>
+                            <% }) } %>
+                        </td>
+                    </tr>
+                    <!--Line-->
+                    <tr>
+                        <td><br><div class="line"></div></td>
+                    </tr>
+                    <!--Footer-->
+                    <tr>
+                        <td>
+                            <div id="footerData">
+                                <br>
+                                <a class="titleText" href="#">Applications are open for YC Summer 2022</a>
+                                <br><br>
+                                <span id="footerLinks">
+                                    <a href="#">Guidelines</a>
+                                    |
+                                    <a href="#">FAQ</a>
+                                    |
+                                    <a href="#">Lists</a>
+                                    |
+                                    <a href="#">API</a>
+                                    |
+                                    <a href="#">Security</a>
+                                    |
+                                    <a href="#">Legal</a>
+                                    |
+                                    <a href="#">Apply to YC</a>
+                                    |
+                                    <a href="#">Contact</a>
+                                </span>
+                                <br><br>
+                                <form method="get" action="#">
+                                    <span class="titleText">Search:</span>
+                                    <input type="text" name="searchQuery" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="none" autocomplete="false">
+                                </form>
+                                <br><br>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </body>
+</html>

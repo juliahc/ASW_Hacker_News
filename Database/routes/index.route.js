@@ -11,6 +11,7 @@ const UserController = require("../controllers/user.controller");
 const SubmissionController = require("../controllers/submission.controller");
 const UrlController = require("../controllers/url.controller");
 const AskController = require("../controllers/ask.controller");
+const CommentController = require("../controllers/comment.controller");
 
 /*  User */
 router.get(
@@ -24,6 +25,28 @@ router.post(
     validateMiddleware.validate,
     AuthController.validate("registerUser"),
     AuthController.register
+);
+
+router.post(
+    "/updateUser",
+    validateMiddleware.validate,
+    UserController.update
+);
+
+router.get(
+    "/userSubmissions",
+    validateMiddleware.validate,
+    UserController.userSubmissions
+);
+router.get(
+    "/userComments",
+    validateMiddleware.validate,
+    UserController.comments
+);
+router.get(
+    "/likedComments",
+    validateMiddleware.validate,
+    UserController.likedComments
 );
 /* /User */
 
@@ -68,5 +91,31 @@ router.post(
     "/newAsk",
     validateMiddleware.validate,
     AskController.create
-)
+);
 /*  /ask  */
+
+/*  comment    */
+
+router.get(
+    "/comment",
+    validateMiddleware.validate,
+    CommentController.find
+);
+
+router.post(
+    "/newComment",
+    validateMiddleware.validate,
+    CommentController.create
+);
+
+/*  /comment    */
+
+/* API KEYS */
+
+router.get(
+    "/apiKey",
+    validateMiddleware.validate,
+    AuthController.userKey
+);
+
+/* /API KEYS */

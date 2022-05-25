@@ -1,5 +1,6 @@
 const axios = require("axios");
 const errCodes = require("../../utils/errorCodes.js");
+require("dotenv").config();
 
 let DatabaseCtrl;
 (function() {
@@ -9,7 +10,7 @@ let DatabaseCtrl;
         instance = this;
 
         // initialize any properties of the singleton
-        this.DB_URI = "http://localhost:2000/v1";
+        this.DB_URI = process.env.DB_URI;
         this.errors = errCodes;
     };
 }());
@@ -35,7 +36,6 @@ DatabaseCtrl.prototype.postRequest = async function (endpoint, params) {
       })
     return res;
 }
-//getRequest("/submission_page", {p: page, t: type, o: order});
 DatabaseCtrl.prototype.getRequest = async function (endpoint, query) {
     let res = {};
     await axios({

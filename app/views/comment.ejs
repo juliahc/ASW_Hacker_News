@@ -1,0 +1,49 @@
+<div class="comment" id="<%= comment.id %>">
+    <div class="commentData">
+
+        <div>
+            <% if (!comment.upvoted) { %>
+                <form method="post" action="/users/upvoteComment/<%= comment.id %>?goto=<%=view%>">
+                    <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                </form>
+            <% } else { %>
+                <form method="post" action="/users/downvoteComment/<%= comment.id %>?goto=<%=view%>">
+                    <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
+                </form>
+            <% } %>
+        </div>
+        <div>
+            <div class="newActions">
+                <a href="/user?id=<%=comment.googleId%>"><%= comment.username %></a>
+                <%= comment.createdAt %>
+                <% if (locals.comment.root) { %>
+                    |
+                    <a href="#<%= comment.root %>">root</a>
+                <% } %>
+                <% if (locals.comment.parent) { %>
+                    |
+                    <a href="#<%= comment.parent %>">parent</a>
+                <% } %>
+                <% if (locals.comment.prev) { %>
+                    |
+                    <a href="#<%= comment.prev %>">root</a>
+                <% } %>
+                <% if (locals.comment.next) { %>
+                    |
+                    <a href="#<%= comment.next %>">root</a>
+                <% } %>
+                <button class="buttonNoStyle" type="button">[-]</button>
+            </div>
+            <div>
+                <p>
+                    <%= comment.text %>
+                </p>
+                <a class="reply" href="/reply?id=<%=comment.id%>">reply</a>
+            </div>
+        </div>
+    </div>   
+    <% comment.replies.map(r => { %>
+        <%- include("./comment.ejs", {comment: r}) %>
+    <%}) %>
+
+</div>

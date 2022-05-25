@@ -1,7 +1,7 @@
 class User {
     
     constructor(params) {
-        if (!'createdAt' in params) { return constructDefault(params.googleId, params.username, params.email) }
+        if (!params.hasOwnProperty('createdAt')) { return this.constructDefault(params.googleId, params.username, params.email) }
         this.googleId = params.googleId;
         this.username = params.username;
         this.createdAt = params.createdAt;
@@ -13,6 +13,7 @@ class User {
         this.maxvisit = params.maxvisit;
         this.minaway = params.minaway;
         this.delay = params.delay;
+        this.apiKey = params.apiKey;
     }
 
     constructDefault(googleId, username, email) {
@@ -27,6 +28,7 @@ class User {
         this.maxvisit = 20;
         this.minaway = 180;
         this.delay = 0;
+        this.apiKey = "";
     }
     
 }

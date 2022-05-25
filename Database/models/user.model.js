@@ -18,10 +18,9 @@ const UsersSchema = new global.Schema({
     },
     email: {
         type: String,
-        /* required: true */
         default: null
     },
-    showDead: {
+    showdead: {
         type: Boolean,
         default: false
     },
@@ -40,7 +39,27 @@ const UsersSchema = new global.Schema({
     delay: {
         type: Number,
         default: 0
-    }
+    },
+    upvotedSubmissions: [{
+        ref: "Submission",
+        type: Schema.Types.ObjectId,
+        default: []
+    }],
+    upvotedComments: [{
+        ref: "Comment",
+        type: Schema.Types.ObjectId,
+        default: []
+    }],
+    favouriteSubmissions: [{
+        ref: "Submission",
+        type: Schema.Types.ObjectId,
+        default: []
+    }],
+    favouriteComments: [{
+        ref: "Comment",
+        type: Schema.Types.ObjectId,
+        default: []
+    }],
 }, {
     timestamps: true
 });

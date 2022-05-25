@@ -1,0 +1,47 @@
+<table id="nav" cellspacing="0" cellpadding="0">
+    <tr>
+        <td id="logo">
+            <a href="/">
+                <span class="hnTitle">
+                    Y
+                </span>
+            </a>
+        </td>
+        <td id="menu">
+            <b><a href="/news">Hacker News</a></b>
+            |
+            <a href="#">welcome</a>
+            |
+            <a href="/newest">new</a>
+            |
+            <% if(user_auth !== null) { %>
+                <a href="/threads">threads</a>
+                |
+            <% } %>
+            
+            <a href="#">past</a>
+            |
+            <a href="#">comments</a>
+            |
+            <a href="/ask">ask</a>
+            |
+            <a href="#">show</a>
+            |
+            <a href="#">jobs</a>
+            |
+            <a href="/submit">submit</a>
+        </td>
+        <% if(user_auth == null) { %>
+            <td id="sessionNoLogged">
+                <a href="/users/login">login</a>
+            </td>
+        <% } else { %>
+            <td id="sessionLogged">
+                <div><a href="/user"><%= user_auth.username %></a></div>
+                <div><span>&nbsp (<%= user_auth.karma %>) &nbsp</span></div>
+                <div>|&nbsp<a href="/users/logout">logout</a></div>
+            </td>
+        <% } %>
+        </td>
+    </tr>
+</table>

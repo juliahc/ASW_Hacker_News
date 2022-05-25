@@ -6,7 +6,6 @@ const errorCodes = require("../helpers/errorCodes.helper.js");
 const urlDatalayer = require("../datalayers/url.datalayer");
 
 exports.find = async (request, response) => {
-    console.log(request);
     let id;
     if (request.query._id) {
         id = request.query._id;
@@ -61,7 +60,6 @@ exports.create = async (request, response, next) => {
     }
     urlDatalayer.createUrl(params)
     .then((urlData) => {
-        console.log(urlData);
         if (urlData !== null && typeof urlData !== undefined) {
             responseObj.status  = errorCodes.SUCCESS;
             responseObj.message = "Success";

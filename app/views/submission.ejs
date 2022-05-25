@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Hacker News</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="stylesheets/application.css">
+        <script src="https://kit.fontawesome.com/733e866dde.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="javascript/news.js"></script>
+    </head>
+    <body>
+        <main>
+            <table id="content" cellspacing="0" cellpadding="0">
+                <tbody>
+                    <!--Menu-->
+                    <tr>
+                        <td>
+                            <%- include("./nav.ejs") %>
+                        </td>
+                    </tr>
+                    <!--Space-->
+                    <tr id="space-10px"></tr>
+                    <% if (locals.error) { %>
+                        <tr><td><span class="errorMessage"> <b>Something is wrong!</b> <%= error %></span><br><br></td></tr>
+                    <% } %>
+                    <!--Item info-->
+                    <tr>
+                        <td>
+                            <table>
+                                <!--Title-->
+                                <tr id="id" class="newInfo">          
+                                    <td class="voteButton">
+                                        <% if (!submission.upvoted) { %>
+                                            <form method="post" action="/users/upvoteSubmission/<%= submission.id %>?goto=<%=view%>">
+                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart"></i></button>
+                                            </form>
+                                        <% } else { %>
+                                            <form method="post" action="/users/downvoteSubmission/<%= submission.id %>?goto=<%=view%>">
+                                                <button type="submit" class="buttonNoStyle"><i class="fas fa-heart filledHeart"></i></button>
+                                            </form>
+                                        <% } %>
+                                    </td>
+                                    <td class="title">
+                                        <% if(submission.type === "url") { %>
+                                            <a class="newTitle titleText" href="submission.url"><%= submission.title %></a>
+                                            <a class="newLink" href="<%= submission.url %>"><%= (new URL(submission.url).hostname) %></a>
+                                        <% } else { %>
+                                            <a class="newTitle titleText" href="/submission?id=<%=submission.id%>"><%= submission.title %></a>
+                                        <% } %>
+                                    </td> 
+                                </tr>
+                                <!--Actions-->
+                                <tr class="newActions">
+                                    <td colspan="1"></td>
+                                    <td>
+                                        <%= submission.points %> points
+                                        &nbsp
+                                        by
+                                        <a href="/user?id=<%=submission.googleId%>"><%= submission.username %></a>
+                                        &nbsp
+                                        <%= submission.createdAt %>
+                                        |
+                                        <a href="#">past</a>
+                                        |
+                                        <a href="#">hide</a>
+                                        |
+                                        <a href="#">favorite</a>
+                                        |
+                                        <a href="#"><%= submission.comments.lenght %> comments</a>
+                                    </td>
+                                </tr>
+                                <% if (submission.type === "ask") { %>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <p>
+                                            <%= submission.text %>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <% } %>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <form method="post" action="/submissions/<%=submission.id%>/comments">
+                                            <textarea name="text" rows="6" cols="100" value=""></textarea>
+                                            <br><br>
+                                            <input type="submit" value="add comment" class="button">
+                                        </form>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!--Space-->
+                    <tr id="space-10px"></tr>
+                    <!--Comments-->
+                    <tr>
+                        <td>
+                            <% submission.comments.forEach((c) => { %>
+                                    <%- include("./comment.ejs", {comment: c, view: view}) %>
+                            <% }) %>
+                        </td>
+                    </tr>
+                    <!--Line-->
+                    <tr>
+                        <td><br><div class="line"></div></td>
+                    </tr>
+                    <!--Footer-->
+                    <tr>
+                        <td>
+                            <div id="footerData">
+                                <br>
+                                <a class="titleText" href="#">Applications are open for YC Summer 2022</a>
+                                <br><br>
+                                <span id="footerLinks">
+                                    <a href="#">Guidelines</a>
+                                    |
+                                    <a href="#">FAQ</a>
+                                    |
+                                    <a href="#">Lists</a>
+                                    |
+                                    <a href="#">API</a>
+                                    |
+                                    <a href="#">Security</a>
+                                    |
+                                    <a href="#">Legal</a>
+                                    |
+                                    <a href="#">Apply to YC</a>
+                                    |
+                                    <a href="#">Contact</a>
+                                </span>
+                                <br><br>
+                                <form method="get" action="#">
+                                    <span class="titleText">Search:</span>
+                                    <input type="text" name="searchQuery" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="none" autocomplete="false">
+                                </form>
+                                <br><br>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </body>
+</html>

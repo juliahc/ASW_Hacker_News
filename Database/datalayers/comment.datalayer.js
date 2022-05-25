@@ -1,8 +1,8 @@
-const SubmissionModel = require('../models/submission.model')
+const CommentModel = require('../models/comment.model')
 
-exports.createSubmission = async (params) => {
+exports.createComment= async (params) => {
     return new Promise((resolve, reject) => {
-        SubmissionModel
+        CommentModel
         .create(params)
         .then((data) => { 
             resolve(data) })
@@ -10,11 +10,10 @@ exports.createSubmission = async (params) => {
     })
 }
 
-
-exports.findSubmission = async (where = {}) => {
+exports.findComment = async (where = {}) => {
     return new Promise((resolve, reject) => {
-        SubmissionModel
-        .findOne(where)
+        CommentModel
+        .find(where)
         .then((data) => {
             resolve(data)
         })
@@ -24,9 +23,9 @@ exports.findSubmission = async (where = {}) => {
     })
 }
 
-exports.updateSubmission = async (where = {}, updateParams) => {
+exports.updateComment = async (where = {}, updateParams) => {
     return new Promise((resolve, reject) => {
-        SubmissionModel.
+        CommentModel.
         updateMany(where, updateParams)
         .then((data) => {
             resolve(data);
@@ -34,14 +33,18 @@ exports.updateSubmission = async (where = {}, updateParams) => {
         .catch((error) => {
             reject(error);
         });
-    });
+      });
 }
 
-exports.aggregateSubmission = async (aggregateArr) => {
+exports.aggregateComment = async (aggregateArr) => {
     return new Promise((resolve, reject) => {
-        SubmissionModel
+        CommentModel
         .aggregate(aggregateArr)
-        .then((data) => resolve(data))
-        .catch((error) => reject(error))
+        .then((data) => {
+            resolve(data);
+        })
+        .catch((error) => {
+            reject(error);
+        });
     });
 }

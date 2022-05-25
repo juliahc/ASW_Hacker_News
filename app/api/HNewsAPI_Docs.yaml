@@ -1,0 +1,608 @@
+openapi: 3.0.1
+info:
+  title: HNewsAPI
+  description: |
+    Hacker News API to access the Hacker News webapp.
+  contact:
+    email: julia.herrera.caba@estudiantat.upc.edu
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0-oas3
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: http://ec2-54-89-16-250.compute-1.amazonaws.com:3000/api
+tags:
+  - name: user
+    description: A user object that holds the account information.
+  - name: submission
+    description: A submission made by a user that can be of type url or ask.
+  - name: comment
+    description: A comment to a submission or a reply to a comment.
+paths:
+  /users/{userId}:
+    get:
+      tags:
+        - user
+      summary: >-
+        Obtain information from an account. If userId does not corresponds to
+        the authenticated user, private information is omited.
+      operationId: getProfile
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user profile to update
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: Successfully retrieved user profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnyUser'
+        '401':
+          description: API Key is invalid
+        '404':
+          description: No such user
+      security:
+      - api_key: []
+    put:
+      tags:
+        - user
+      summary: Update a user profile.
+      operationId: updateProfile
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user profile to update
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      requestBody:
+        description: User object to be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUser'
+        required: true
+      responses:
+        '200':
+          description: User profile successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUser'
+        '400':
+          description: Body is missing values or those values are in incorrect format.
+        '401':
+          description: API Key is invalid.
+        '403':
+          description: >-
+            Forbidden. userId is not the same as the id of the user
+            authenticated by api_key. Only the owner of an account can update
+            its information.
+        '404':
+          description: No such user.
+        '409':
+          description: >-
+            Body values are not following restrictions (integers greater or
+            equal to zero).
+        '500':
+          description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
+  /submissions:
+    get:
+      tags:
+        - submission
+      summary: Finds submissions
+      operationId: getSubmissions
+      parameters:
+        - name: type
+          in: query
+          description: type of the submissions {"any", "ask", "url"}
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            format: string
+        - name: order
+          in: query
+          description: order of the submissions {"pts", "new"}
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            format: string
+        - name: limit
+          in: query
+          description: number of submissions
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Ok.
+        '400':
+          description: Missing parameters or incorrect format.
+        '500':
+          description: Internal error
+      security:
+      - api_key: []
+    post:
+      tags:
+        - submission
+      summary: Create a submission.
+      operationId: createSubmission
+      requestBody:
+        description: Comment object to be posted.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSubmission'
+        required: true
+      responses:
+        '200':
+          description: Submission with that url already exists.
+        '201':
+          description: Submission was created successfully.
+        '400':
+          description: No 'title' field in body or it is empty.
+        '409':
+          description: Url is not valid.
+        '500':
+          description: Internal error.
+      security:
+      - api_key: []
+  /submissions/user/{userId}:
+    get:
+      tags:
+        - submission
+      summary: Finds all user submissions
+      operationId: getUserSubmissions
+      parameters:
+        - name: userId
+          in: path
+          description: user id
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+        - name: limit
+          in: query
+          description: number of submissions
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Ok.
+        '400':
+          description: Missing parameters or incorrect format.
+        '500':
+          description: External error
+      security:
+      - api_key: []
+  /submissions/{submissionId}:
+    get:
+      tags:
+        - submission
+      summary: Finds a submission by the id
+      parameters:
+        - name: submissionId
+          in: path
+          description: ID of submission to return
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '404':
+          description: Not such submission
+      security:
+      - api_key: []
+  /submissions/{submissionId}/comments:
+    post:
+      tags:
+        - submission
+      summary: >-
+        Create a comment as an answer to the submission identified by
+        submissionId.
+      operationId: createComment
+      parameters:
+        - name: submissionId
+          in: path
+          description: ID of submission where to post the comment response.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      requestBody:
+        description: Comment object to be posted.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostComment'
+        required: true
+      responses:
+        '201':
+          description: Comment was created successfully.
+        '400':
+          description: Missing text field or it is empty.
+        '404':
+          description: No such submission
+      security:
+      - api_key: []
+  /comments/{id}/replies:
+    post:
+      tags:
+        - comment
+      summary: Create a reply to a comment
+      parameters:
+        - name: id
+          in: path
+          description: The comment id to reply to
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      requestBody:
+        description: The text of the reply
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCommentReply'
+        required: true
+      responses:
+        '200':
+          description: Reply created successfully
+        '400':
+          description: Missing text.
+        '401':
+          description: Unauthorized
+        '404':
+          description: Comment not found
+      security:
+      - api_key: []
+  /comments/user/{id}:
+    get:
+      tags:
+        - comment
+      summary: Get all threads from a user
+      parameters:
+        - name: id
+          in: path
+          description: The user's id to get threads for
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: The user's threads were successfully retrieved
+        '400':
+          description: Missing id
+        '404':
+          description: User not found
+      security:
+      - api_key: []
+  /users/upvoteSubmission/{submissionId}:
+    post:
+      tags:
+        - user
+      summary: >-
+        The user identified by userId upvotes a submission identified by
+        submissionId.
+      operationId: upvoteSubmission
+      parameters:
+        - name: submissionId
+          in: path
+          description: ID of the submission wanted to upvote
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: Submission upvoted successfully.
+        '404':
+          description: No such submission.
+        '409':
+          description: Submission was already upvoted by user.
+        '500':
+          description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
+  /users/downvoteSubmission/{submissionId}:
+    post:
+      tags:
+        - user
+      summary: >-
+        The user identified by userId downvotes a submission identified by
+        submissionId.
+      operationId: downvoteSubmission
+      parameters:
+        - name: submissionId
+          in: path
+          description: ID of the submission wanted to downvote
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: Submission downvoted successfully.
+        '404':
+          description: No such submission.
+        '409':
+          description: Submission was already NOT upvoted by user.
+        '500':
+          description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
+  /users/upvotedSubmissions:
+    get:
+      tags:
+        - user
+      summary: Finds the upvoted submissions by the user identified by userId
+      parameters:
+        - name: limit
+          in: query
+          description: number of submissions
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          description: offset
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Upvoted submissions returned successfully.
+        '400':
+          description: Parameters missing in query. Must contain [limit, offset]
+        '404':
+          description: No upvoted submissions or no such user.
+      security:
+      - api_key: []
+  /users/upvoteComment/{commentId}:
+    post:
+      tags:
+        - user
+      summary: The user identified by userId upvotes a comment identified by commentId.
+      operationId: upvoteComment
+      parameters:
+        - name: commentId
+          in: path
+          description: ID of the comment wanted to upvote
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: Comment upvoted successfully.
+        '404':
+          description: No such comment.
+        '409':
+          description: Comment was already upvoted by user.
+        '500':
+          description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
+  /users/downvoteComment/{commentId}:
+    post:
+      tags:
+        - user
+      summary: >-
+        The user identified by userId downvotes a comment identified by
+        commentId.
+      operationId: downvoteComment
+      parameters:
+        - name: commentId
+          in: path
+          description: ID of the comment wanted to downvote
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: string
+      responses:
+        '200':
+          description: Comment downvoted successfully.
+        '404':
+          description: No such comment.
+        '409':
+          description: Comment was already NOT upvoted by user.
+        '500':
+          description: Something went wrong when interacting with database.
+      security:
+      - api_key: []
+  /users/upvotedComments:
+    get:
+      tags:
+        - user
+      summary: Finds the upvoted comments by the user identified by userId
+      responses:
+        '200':
+          description: Upvoted comments returned successfully.
+        '404':
+          description: No upvoted comments or not user.
+      security:
+      - api_key: []
+components:
+  schemas:
+    AnyUser:
+      oneOf:
+      - $ref: '#/components/schemas/AuthUser'
+      - $ref: '#/components/schemas/OtherUser'
+    AuthUser:
+      type: object
+      properties:
+        googleId:
+          type: string
+        username:
+          type: string
+        karma:
+          type: integer
+          format: int32
+        about:
+          type: string
+        email:
+          type: string
+        showdead:
+          type: boolean
+        noprocrast:
+          type: boolean
+        maxvisit:
+          type: integer
+          format: int32
+        minaway:
+          type: integer
+          format: int32
+        delay:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+        apiKey:
+          type: string
+    OtherUser:
+      type: object
+      properties:
+        googleId:
+          type: string
+        username:
+          type: string
+        karma:
+          type: integer
+          format: int32
+        about:
+          type: string
+        createdAt:
+          type: string
+    PutUser:
+      type: object
+      properties:
+        about:
+          type: string
+        showdead:
+          type: boolean
+        noprocrast:
+          type: boolean
+        maxvisit:
+          type: integer
+          format: int32
+        minaway:
+          type: integer
+          format: int32
+        delay:
+          type: integer
+          format: int32
+    PostSubmission:
+      type: object
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        text:
+          type: string
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        googleId:
+          type: string
+        username:
+          type: string
+        text:
+          type: string
+        points:
+          type: integer
+          format: int32
+        submission:
+          type: string
+        parent:
+          type: string
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        createdAt:
+          type: string
+    PostComment:
+      type: object
+      properties:
+        text:
+          type: string
+    PostCommentReply:
+      type: object
+      properties:
+        text:
+          type: string
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

@@ -7,7 +7,6 @@
         <link rel="stylesheet" type="text/css" href="stylesheets/application.css">
         <script src="https://kit.fontawesome.com/733e866dde.js" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-        <!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">-->
         <script type="text/javascript" src="javascript/news.js"></script>
     </head>
     <body>
@@ -17,35 +16,7 @@
                     <!--Menu-->
                     <tr>
                         <td>
-                            <table id="nav" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td id="logo">Y</td>
-                                    <td id="menu">
-                                        <b><a href="/news">Hacker News</a></b>
-                                        |
-                                        <a href="#">welcome</a>
-                                        |
-                                        <a href="/newest">new</a>
-                                        |
-                                        <a href="#">threads</a>
-                                        |
-                                        <a href="#">past</a>
-                                        |
-                                        <a href="#">comments</a>
-                                        |
-                                        <a href="#">ask</a>
-                                        |
-                                        <a href="#">show</a>
-                                        |
-                                        <a href="#">jobs</a>
-                                        |
-                                        <a href="/submit">submit</a>
-                                    </td>
-                                    <td id="session">
-                                        <a href="#">login</a>
-                                    </td>
-                                </tr>
-                            </table>
+                            <%- include("./nav.ejs") %>
                         </td>
                     </tr>
                     <!--Space-->
@@ -55,68 +26,124 @@
                         <td>
                             <table id="user">
                                 <tbody>
-                                    <tr>
-                                        <td>user:</td>
-                                        <td>username</td>
-                                    </tr>
-                                    <tr>
-                                        <td>created:</td>
-                                        <td>24 days ago</td>
-                                    </tr>                 
-                                    <tr>
-                                        <td>karma:</td>
-                                        <td>5</td>
-                                    </tr>
+                                    <% if (locals.user) { %> 
+                                        <tr>
+                                            <td>user:</td>
+                                            <td><%= user.username %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>created:</td>
+                                            <td><%= user.createdAt %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>karma:</td>
+                                            <td><%= user.karma %></td>
+                                        </tr>
 
-                                    <!--remove--><tr><td>--Logged user--</td></tr>
-                                    <tr>
-                                        <td>
-                                            email:
-                                        </td>
-                                        <td>
-                                            paquito.chocolatero@estudiantat.upc.edu
-                                        </td>
-                                    </tr>
-                                    <!--form-->
-                                    <%- include("./userForm.ejs") %>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">submissions</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">comments</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">hidden</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">upvoted submissions</a>/ <a href="#">comments</a> <u>(private)</u></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">favorite submissions</a>/ <a href="#">comments</a> <u>(public)</u></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="submit" value="update" class="button"></td>
-                                    </tr>
+                                            <% if(loggedProfile) { %>
+                                            <tr>
+                                                <td>
+                                                    email:
+                                                </td>
+                                                <td>
+                                                    <%= user.email %>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    token:
+                                                </td>
+                                                <td>
+                                                    <%= user.apiKey %>
+                                                </td>
+                                            </tr>
+                                            <!--form-->
+                                            <form method="post" action="/users">
+                                                <tr>
+                                                    <td>about:</td>
+                                                    <td><textarea name="about" rows="4" cols="50"><%= user.about %></textarea></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>showdead:</td>
+                                                    <td>
+                                                        <select name="showdead">
+                                                            <% if (user.showdead) { %>
+                                                                <option value="no" >no</option>
+                                                                <option value="yes" selected>yes</option>
+                                                            <% } else { %>
+                                                                <option value="no" selected>no</option>
+                                                                <option value="yes">yes</option>
+                                                            <% } %>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>noprocrast:</td>
+                                                    <td>
+                                                        <select name="noprocrast">
+                                                            <% if (user.noprocrast) { %>
+                                                                <option value="no" >no</option>
+                                                                <option value="yes" selected>yes</option>
+                                                            <% } else { %>
+                                                                <option value="no" selected>no</option>
+                                                                <option value="yes">yes</option>
+                                                            <% } %>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>maxvisit:</td>
+                                                    <td><input type="text" name="maxvisit" value="<%= user.maxvisit %>" size="20"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>minaway:</td>
+                                                    <td><input type="text" name="minaway" value="<%= user.minaway %>" size="20"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>delay:</td>
+                                                    <td><input type="text" name="delay" value="<%= user.delay %>" size="20"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="/submitted?id=<%= user.googleId %>">submissions</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="/threads?id=<%= user.googleId %>">comments</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">hidden</a></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="/upvotedSubmissions">upvoted submissions</a>/ <a href="/upvotedComments">comments</a> <u>(private)</u></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td><a href="#">favorite submissions</a>/ <a href="#">comments</a> <u>(public)</u></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><input type="submit" value="update" class="button"></td>
+                                                </tr>
+                                            </form>
+                                        <% } else { %>
 
-                                    <!--remove--><tr><td>--Another user--</td></tr>
-                                    
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">submissions</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">comments</a></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td><a href="#">favorites</a></td>
-                                    </tr>
+                                            
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="/submitted?id=<%=user.googleId%>">submissions</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="/threads?id=<%= user.googleId %>">comments</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="#">favorites</a></td>
+                                            </tr>
+                                        <% } 
+                                    } %>
                                 </tbody>
                             </table>
                         </td>
